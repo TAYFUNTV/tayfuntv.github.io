@@ -67,16 +67,13 @@ margin-right:8px;
 }
 
 @media screen and (orientation:landscape){
-
 #video{
 height:70vh;
 max-height:600px;
 }
-
 }
 
 </style>
-
 </head>
 
 <body>
@@ -119,21 +116,26 @@ BEIN SPORT 5
 <button onclick="toggle('belgesel')">BELGESEL</button>
 
 <div id="belgesel" class="kanallar">
-
-<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
-DISCOVERY
-</button>
-
-<button onclick="oynat('https://saran-live.ercdn.net/natgeowild/index.m3u8')">
-NAT GEO WILD
-</button>
-
+<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">DISCOVERY</button>
+<button onclick="oynat('https://saran-live.ercdn.net/natgeowild/index.m3u8')">NAT GEO WILD</button>
 </div>
 
 <button onclick="toggle('ulusal')">ULUSAL</button>
 
 <div id="ulusal" class="kanallar">
 <button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">TRT 1</button>
+</div>
+
+<button onclick="toggle('yerel')">YEREL</button>
+
+<div id="yerel" class="kanallar">
+<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">YEREL TV</button>
+</div>
+
+<button onclick="toggle('sinema')">SİNEMA</button>
+
+<div id="sinema" class="kanallar">
+<button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">SİNEMA TV</button>
 </div>
 
 </div>
