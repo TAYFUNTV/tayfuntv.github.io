@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAYFUN TV</title>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
 <style>
 
@@ -17,18 +17,22 @@ font-family:Arial;
 text-align:center;
 }
 
-/* KATEGORİLER YATAY */
+#video{
+width:100%;
+aspect-ratio:16/9;
+max-width:900px;
+background:black;
+margin:auto;
+display:block;
+}
 
 .kategori{
 margin-top:10px;
-display:flex;
-overflow-x:auto;
-justify-content:center;
-flex-wrap:nowrap;
 }
 
 .kategori button{
-min-width:120px;
+width:90%;
+max-width:500px;
 background:#333;
 color:white;
 border:none;
@@ -37,20 +41,6 @@ margin:5px;
 font-size:15px;
 border-radius:6px;
 }
-
-/* PLAYER */
-
-#video{
-width:100%;
-max-width:900px;
-height:45vh;
-max-height:500px;
-background:black;
-margin:15px auto;
-display:block;
-}
-
-/* KANALLAR */
 
 .kanallar{
 display:none;
@@ -75,29 +65,16 @@ vertical-align:middle;
 margin-right:8px;
 }
 
-@media screen and (orientation:landscape){
-#video{
-height:70vh;
-max-height:600px;
-}
-}
-
 </style>
 </head>
 
 <body>
 
+<video id="video" controls playsinline></video>
+
 <div class="kategori">
 
 <button onclick="toggle('spor')">SPOR</button>
-<button onclick="toggle('belgesel')">BELGESEL</button>
-<button onclick="toggle('ulusal')">ULUSAL</button>
-<button onclick="toggle('yerel')">YEREL</button>
-<button onclick="toggle('sinema')">SİNEMA</button>
-
-</div>
-
-<video id="video" controls playsinline></video>
 
 <div id="spor" class="kanallar">
 
@@ -128,6 +105,8 @@ BEIN SPORT 5
 
 </div>
 
+<button onclick="toggle('belgesel')">BELGESEL</button>
+
 <div id="belgesel" class="kanallar">
 
 <button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
@@ -142,21 +121,29 @@ NAT GEO WILD
 
 <button onclick="oynat('https://saran-live.ercdn.net/natgeohd/index.m3u8')">
 <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/National_Geographic_logo.svg/512px-National_Geographic_logo.svg.png">
-NAT GEO HD
+NAT GEO
 </button>
 
 </div>
+
+<button onclick="toggle('ulusal')">ULUSAL</button>
 
 <div id="ulusal" class="kanallar">
 <button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">TRT 1</button>
 </div>
 
+<button onclick="toggle('yerel')">YEREL</button>
+
 <div id="yerel" class="kanallar">
 <button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">YEREL TV</button>
 </div>
 
+<button onclick="toggle('sinema')">SİNEMA</button>
+
 <div id="sinema" class="kanallar">
 <button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">SİNEMA TV</button>
+</div>
+
 </div>
 
 <script>
