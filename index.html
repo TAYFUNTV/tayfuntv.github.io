@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PLAYER</title>
+<title>TAYFUN TV</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
@@ -12,16 +12,55 @@
 body{
 margin:0;
 background:black;
+color:white;
+font-family:Arial;
 }
 
+/* YATAY KATEGORİ MENÜ */
+
+.kategori-bar{
+display:flex;
+overflow-x:auto;
+white-space:nowrap;
+background:#111;
+padding:8px;
+}
+
+.kategori-bar button{
+flex:0 0 auto;
+background:#333;
+color:white;
+border:none;
+padding:10px 15px;
+margin-right:8px;
+border-radius:6px;
+font-size:14px;
+}
+
+/* PLAYER */
+
 #video{
-position:fixed;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
-object-fit:contain;
+width:100%;
+aspect-ratio:16/9;
 background:black;
+}
+
+/* KANAL LİSTESİ */
+
+.kanallar{
+display:none;
+padding:10px;
+}
+
+.kanallar button{
+display:block;
+width:95%;
+margin:6px auto;
+background:#222;
+color:white;
+border:none;
+padding:10px;
+border-radius:6px;
 }
 
 </style>
@@ -29,17 +68,59 @@ background:black;
 
 <body>
 
+<!-- YATAY KATEGORİ -->
+
+<div class="kategori-bar">
+
+<button onclick="toggle('spor')">SPOR</button>
+<button onclick="toggle('belgesel')">BELGESEL</button>
+<button onclick="toggle('ulusal')">ULUSAL</button>
+<button onclick="toggle('yerel')">YEREL</button>
+<button onclick="toggle('sinema')">SİNEMA</button>
+
+</div>
+
+<!-- PLAYER -->
+
 <video id="video" controls autoplay></video>
+
+<!-- KANALLAR -->
+
+<div id="spor" class="kanallar">
+<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">SPORT TEST</button>
+</div>
+
+<div id="belgesel" class="kanallar">
+<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">DISCOVERY</button>
+</div>
+
+<div id="ulusal" class="kanallar">
+<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">TRT 1</button>
+</div>
+
+<div id="yerel" class="kanallar">
+<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">YEREL TV</button>
+</div>
+
+<div id="sinema" class="kanallar">
+<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">SİNEMA TV</button>
+</div>
 
 <script>
 
 var video = document.getElementById("video");
-var src = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+var hls;
 
-if (Hls.isSupported()) {
+function oynat(url){
 
-var hls = new Hls();
-hls.loadSource(src);
+if(hls){
+hls.destroy();
+}
+
+if(Hls.isSupported()){
+
+hls = new Hls();
+hls.loadSource(url);
 hls.attachMedia(video);
 
 hls.on(Hls.Events.MANIFEST_PARSED,function(){
@@ -48,10 +129,19 @@ video.play();
 
 }
 
-else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+}
 
-video.src = src;
-video.play();
+/* KATEGORİ AÇ / KAPAT */
+
+function toggle(id){
+
+var list = document.getElementsByClassName("kanallar");
+
+for(var i=0;i<list.length;i++){
+list[i].style.display="none";
+}
+
+document.getElementById(id).style.display="block";
 
 }
 
