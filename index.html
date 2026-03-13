@@ -92,6 +92,8 @@ display:none;
 
 <video id="video" controls autoplay playsinline></video>
 
+<!-- SPOR -->
+
 <div id="spor" class="kanallar">
 
 <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://biraz.6781237.xyz/checklist/androstreamlivebiraz1.m3u8')">
@@ -120,11 +122,13 @@ BEIN SPORT 5
 </button>
 
 <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8')">
-<img class="logo" src="https://tayfuntv.github.io/logo/tivibuspor1.png">
+<img class="logo" src="https://raw.githubusercontent.com/KILBERBER/kilberber/refs/heads/main/0.justin-tv.png">
 TIVIBUSPOR 1
 </button>
 
 </div>
+
+<!-- BELGESEL -->
 
 <div id="belgesel" class="kanallar">
 
@@ -138,27 +142,39 @@ NAT GEO
 
 </div>
 
+<!-- ULUSAL -->
+
 <div id="ulusal" class="kanallar">
+
 <button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">
 TRT 1
 </button>
+
 </div>
 
+<!-- YEREL -->
+
 <div id="yerel" class="kanallar">
+
 <button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
 YEREL TV
 </button>
+
 </div>
 
+<!-- SİNEMA -->
+
 <div id="sinema" class="kanallar">
+
 <button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">
 SİNEMA TV
 </button>
+
 </div>
 
 <script>
 
-var video = document.getElementById("video");
+var video=document.getElementById("video");
 var hls;
 
 function oynat(url){
@@ -168,13 +184,15 @@ hls.destroy();
 }
 
 if(Hls.isSupported()){
-hls = new Hls();
+
+hls=new Hls();
 hls.loadSource(url);
 hls.attachMedia(video);
 
 hls.on(Hls.Events.MANIFEST_PARSED,function(){
 video.play();
 });
+
 }
 
 }
