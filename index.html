@@ -16,8 +16,6 @@ color:white;
 font-family:Arial;
 }
 
-/* YATAY KATEGORİ */
-
 .kategori-bar{
 display:flex;
 overflow-x:auto;
@@ -36,15 +34,11 @@ border-radius:6px;
 font-size:14px;
 }
 
-/* PLAYER */
-
 #video{
 width:100%;
 height:55vh;
 background:black;
 }
-
-/* KANALLAR */
 
 .kanallar{
 display:none;
@@ -69,8 +63,6 @@ vertical-align:middle;
 margin-right:8px;
 }
 
-/* YATAY EKRAN */
-
 @media screen and (orientation:landscape){
 
 #video{
@@ -88,8 +80,6 @@ display:none;
 
 <body>
 
-<!-- KATEGORİLER -->
-
 <div class="kategori-bar">
 
 <button onclick="toggle('spor')">SPOR</button>
@@ -100,11 +90,7 @@ display:none;
 
 </div>
 
-<!-- PLAYER -->
-
 <video id="video" controls autoplay playsinline></video>
-
-<!-- SPOR -->
 
 <div id="spor" class="kanallar">
 
@@ -134,13 +120,11 @@ BEIN SPORT 5
 </button>
 
 <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8')">
-<img class="logo" src="https://raw.githubusercontent.com/KILBERBER/kilberber/refs/heads/main/0.justin-tv.png">
+<img class="logo" src="https://tayfuntv.github.io/logo/tivibuspor1.png">
 TIVIBUSPOR 1
 </button>
 
 </div>
-
-<!-- BELGESEL -->
 
 <div id="belgesel" class="kanallar">
 
@@ -154,34 +138,22 @@ NAT GEO
 
 </div>
 
-<!-- ULUSAL -->
-
 <div id="ulusal" class="kanallar">
-
 <button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">
 TRT 1
 </button>
-
 </div>
 
-<!-- YEREL -->
-
 <div id="yerel" class="kanallar">
-
 <button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
 YEREL TV
 </button>
-
 </div>
 
-<!-- SİNEMA -->
-
 <div id="sinema" class="kanallar">
-
 <button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">
 SİNEMA TV
 </button>
-
 </div>
 
 <script>
@@ -196,7 +168,6 @@ hls.destroy();
 }
 
 if(Hls.isSupported()){
-
 hls = new Hls();
 hls.loadSource(url);
 hls.attachMedia(video);
@@ -204,14 +175,13 @@ hls.attachMedia(video);
 hls.on(Hls.Events.MANIFEST_PARSED,function(){
 video.play();
 });
-
 }
 
 }
 
 function toggle(id){
 
-var list = document.getElementsByClassName("kanallar");
+var list=document.getElementsByClassName("kanallar");
 
 for(var i=0;i<list.length;i++){
 list[i].style.display="none";
