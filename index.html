@@ -12,57 +12,17 @@
 body{
 margin:0;
 background:black;
-color:white;
-font-family:Arial;
-text-align:center;
-}
-
-.kategori{
-margin-top:10px;
-}
-
-.kategori button{
-width:90%;
-max-width:500px;
-background:#333;
-color:white;
-border:none;
-padding:10px;
-margin:5px;
-font-size:15px;
-border-radius:6px;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
 #video{
 width:100%;
-aspect-ratio:16/9;
 max-width:900px;
+aspect-ratio:16/9;
 background:black;
-margin:10px auto;
-display:block;
-}
-
-.kanallar{
-display:none;
-margin-bottom:10px;
-}
-
-.kanallar button{
-display:block;
-width:80%;
-max-width:450px;
-margin:5px auto;
-background:#222;
-color:white;
-border:none;
-padding:8px;
-border-radius:6px;
-}
-
-.logo{
-height:35px;
-vertical-align:middle;
-margin-right:8px;
 }
 
 </style>
@@ -70,113 +30,22 @@ margin-right:8px;
 
 <body>
 
-<div class="kategori">
-
-<button onclick="toggle('spor')">SPOR</button>
-
-<div id="spor" class="kanallar">
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://biraz.6781237.xyz/checklist/androstreamlivebiraz1.m3u8')">
-<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD1-1.png">
-BEIN SPORT 1
-</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs2.m3u8')">
-<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD2-1.png">
-BEIN SPORT 2
-</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs3.m3u8')">
-<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD3-1.png">
-BEIN SPORT 3
-</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8')">
-<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD4-1.png">
-BEIN SPORT 4
-</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8')">
-<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD5-1.png">
-BEIN SPORT 5
-</button>
-
-</div>
-
-<button onclick="toggle('belgesel')">BELGESEL</button>
-
-<div id="belgesel" class="kanallar">
-
-<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
-<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Discovery_Channel_logo.svg/512px-Discovery_Channel_logo.svg.png">
-DISCOVERY
-</button>
-
-<button onclick="oynat('https://saran-live.ercdn.net/natgeowild/index.m3u8')">
-<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Nat_Geo_Wild_logo.svg/512px-Nat_Geo_Wild_logo.svg.png">
-NAT GEO WILD
-</button>
-
-<button onclick="oynat('https://saran-live.ercdn.net/natgeohd/index.m3u8')">
-<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/National_Geographic_logo.svg/512px-National_Geographic_logo.svg.png">
-NAT GEO
-</button>
-
-</div>
-
-<button onclick="toggle('ulusal')">ULUSAL</button>
-
-<div id="ulusal" class="kanallar">
-<button onclick="oynat('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">TRT 1</button>
-</div>
-
-<button onclick="toggle('yerel')">YEREL</button>
-
-<div id="yerel" class="kanallar">
-<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">YEREL TV</button>
-</div>
-
-<button onclick="toggle('sinema')">SİNEMA</button>
-
-<div id="sinema" class="kanallar">
-<button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">SİNEMA TV</button>
-</div>
-
-</div>
-
-<video id="video" controls playsinline></video>
+<video id="video" controls autoplay playsinline></video>
 
 <script>
 
 var video = document.getElementById("video");
-var hls;
+var videoSrc = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
-function oynat(url){
+if (Hls.isSupported()) {
 
-if(hls){
-hls.destroy();
-}
-
-if(Hls.isSupported()){
-hls = new Hls();
-hls.loadSource(url);
+var hls = new Hls();
+hls.loadSource(videoSrc);
 hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,function(){
+
+hls.on(Hls.Events.MANIFEST_PARSED,function() {
 video.play();
 });
-}
-
-}
-
-function toggle(id){
-
-var el = document.getElementById(id);
-
-if(el.style.display=="block"){
-el.style.display="none";
-}else{
-el.style.display="block";
-}
 
 }
 
