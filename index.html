@@ -19,8 +19,9 @@ text-align:center;
 
 #video{
 width:100%;
-max-width:700px;
-height:40vh;
+max-width:900px;
+height:50vh;
+max-height:500px;
 background:black;
 margin:auto;
 display:block;
@@ -66,24 +67,18 @@ margin-right:8px;
 }
 
 @media screen and (orientation:landscape){
-
 #video{
-height:80vh;
+height:70vh;
+max-height:600px;
 }
-
-.kategori{
-display:none;
-}
-
 }
 
 </style>
-
 </head>
 
 <body>
 
-<video id="video" controls autoplay playsinline></video>
+<video id="video" controls playsinline></video>
 
 <div class="kategori">
 
@@ -121,8 +116,22 @@ BEIN SPORT 5
 <button onclick="toggle('belgesel')">BELGESEL</button>
 
 <div id="belgesel" class="kanallar">
-<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">DISCOVERY</button>
-<button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">NAT GEO</button>
+
+<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
+<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Discovery_Channel_logo.svg/512px-Discovery_Channel_logo.svg.png">
+DISCOVERY
+</button>
+
+<button onclick="oynat('https://saran-live.ercdn.net/natgeowild/index.m3u8')">
+<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Nat_Geo_Wild_logo.svg/512px-Nat_Geo_Wild_logo.svg.png">
+NAT GEO WILD
+</button>
+
+<button onclick="oynat('https://saran-live.ercdn.net/natgeohd/index.m3u8')">
+<img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/National_Geographic_logo.svg/512px-National_Geographic_logo.svg.png">
+NAT GEO HD
+</button>
+
 </div>
 
 <button onclick="toggle('ulusal')">ULUSAL</button>
