@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAYFUN TV</title>
 
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <style>
 
 body{
@@ -29,6 +31,7 @@ border:none;
 padding:10px 15px;
 margin-right:8px;
 border-radius:6px;
+font-size:14px;
 }
 
 #video{
@@ -79,56 +82,115 @@ display:none;
 
 <div class="kategori-bar">
 
-<button onclick="toggle('ulusal')">ULUSAL</button>
 <button onclick="toggle('spor')">SPOR</button>
+<button onclick="toggle('belgesel')">BELGESEL</button>
+<button onclick="toggle('ulusal')">ULUSAL</button>
+<button onclick="toggle('yerel')">YEREL</button>
+<button onclick="toggle('sinema')">SİNEMA</button>
 
 </div>
 
 <video id="video" controls autoplay playsinline></video>
 
-<!-- ULUSAL -->
-
-<div id="ulusal" class="kanallar">
-
-<button onclick="oynat('http://129.151.196.133/Tivizon.php?ID=kanald')">
-KANAL D
-</button>
-
-<button onclick="oynat('http://129.151.196.133/Tivizon.php?ID=atv')">
-ATV
-</button>
-
-<button onclick="oynat('http://129.151.196.133/Tivizon.php?ID=nowtv')">
-NOW
-</button>
-
-<button onclick="oynat('http://129.151.196.133/Tivizon.php?ID=foxtv')">
-FOX
-</button>
-
-<button onclick="oynat('http://129.151.196.133/Tivizon.php?ID=startv')">
-STAR TV
-</button>
-
-</div>
-
 <!-- SPOR -->
 
 <div id="spor" class="kanallar">
 
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://biraz.6781237.xyz/checklist/androstreamlivebiraz1.m3u8')">
+<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD1-1.png">
+BEIN SPORT 1
+</button>
+
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs2.m3u8')">
+<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD2-1.png">
+BEIN SPORT 2
+</button>
+
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs3.m3u8')">
+<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD3-1.png">
+BEIN SPORT 3
+</button>
+
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8')">
+<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD4-1.png">
+BEIN SPORT 4
+</button>
+
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8')">
+<img class="logo" src="https://cdn.bein.com/mena/wp-content/uploads/sites/3/2020/06/HD5-1.png">
+BEIN SPORT 5
+</button>
+
+<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8')">
+TIVIBUSPOR 1
+</button>
+
+</div>
+
+<!-- BELGESEL -->
+
+<div id="belgesel" class="kanallar">
+
+<button onclick="oynat('https://saran-live.ercdn.net/natgeowild/index.m3u8')">
+NAT GEO WILD
+</button>
+
 <button onclick="oynat('https://saran-live.ercdn.net/natgeohd/index.m3u8')">
-TEST KANAL
+NAT GEO
+</button>
+
+<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
+DISCOVERY
+</button>
+
+</div>
+
+<!-- ULUSAL (KANALLAR SİLİNDİ) -->
+
+<div id="ulusal" class="kanallar">
+</div>
+
+<!-- YEREL -->
+
+<div id="yerel" class="kanallar">
+
+<button onclick="oynat('https://moiptvhls-i.akamaihd.net/hls/live/652316/secure/master.m3u8')">
+YEREL TV
+</button>
+
+</div>
+
+<!-- SİNEMA -->
+
+<div id="sinema" class="kanallar">
+
+<button onclick="oynat('https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">
+SİNEMA TV
 </button>
 
 </div>
 
 <script>
 
-var video = document.getElementById("video");
+var video=document.getElementById("video");
+var hls;
 
 function oynat(url){
-video.src = url;
+
+if(hls){
+hls.destroy();
+}
+
+if(Hls.isSupported()){
+hls=new Hls();
+hls.loadSource(url);
+hls.attachMedia(video);
+
+hls.on(Hls.Events.MANIFEST_PARSED,function(){
 video.play();
+});
+}
+
 }
 
 function toggle(id){
