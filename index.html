@@ -8,7 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 
 <style>
-
 body{
 margin:0;
 background:black;
@@ -18,35 +17,35 @@ align-items:center;
 height:100vh;
 }
 
-#video{
+video{
 width:100%;
 max-width:900px;
 aspect-ratio:16/9;
 background:black;
 }
-
 </style>
 </head>
 
 <body>
 
-<video id="video" controls autoplay playsinline></video>
+<video id="video" controls playsinline></video>
 
 <script>
 
 var video = document.getElementById("video");
-var videoSrc = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+var src = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
-if (Hls.isSupported()) {
-
-var hls = new Hls();
-hls.loadSource(videoSrc);
-hls.attachMedia(video);
-
-hls.on(Hls.Events.MANIFEST_PARSED,function() {
-video.play();
-});
-
+if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = src;
+    video.play();
+} 
+else if (Hls.isSupported()) {
+    var hls = new Hls();
+    hls.loadSource(src);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,function(){
+        video.play();
+    });
 }
 
 </script>
