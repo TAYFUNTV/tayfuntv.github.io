@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
@@ -9,19 +8,59 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-body{margin:0;background:black;color:white;font-family:Arial;}
-.kategori-bar{display:flex;overflow-x:auto;background:#111;padding:10px;}
-.kategori-bar button{background:#333;color:white;border:none;padding:10px 15px;margin-right:8px;border-radius:6px;font-size:14px;}
-#video{width:100%;height:55vh;background:black;}
-.kanallar{display:none;padding:10px;}
-.kanallar button{display:block;width:95%;margin:6px auto;background:#222;color:white;border:none;padding:12px;border-radius:6px;text-align:left;font-size:15px;}
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial;
+}
+
+.kategori-bar{
+display:flex;
+overflow-x:auto;
+background:#111;
+padding:10px;
+}
+
+.kategori-bar button{
+background:#333;
+color:white;
+border:none;
+padding:10px 15px;
+margin-right:8px;
+border-radius:6px;
+font-size:14px;
+}
+
+#video{
+width:100%;
+height:55vh;
+background:black;
+}
+
+.kanallar{
+display:none;
+padding:10px;
+}
+
+.kanallar button{
+display:block;
+width:95%;
+margin:6px auto;
+background:#222;
+color:white;
+border:none;
+padding:12px;
+border-radius:6px;
+text-align:left;
+font-size:15px;
+}
 
 @media screen and (orientation:landscape){
 #video{height:100vh;}
 .kategori-bar{display:none;}
 }
 </style>
-
 </head>
 
 <body>
@@ -31,61 +70,75 @@ body{margin:0;background:black;color:white;font-family:Arial;}
 <button onclick="toggle('belgesel')">BELGESEL</button>
 <button onclick="toggle('ulusal')">ULUSAL</button>
 <button onclick="toggle('yerel')">YEREL</button>
-<button onclick="toggle('sinema')">SİNEMA</button>
+<button onclick="toggle('sinema')">SINEMA</button>
 </div>
 
 <video id="video" controls autoplay playsinline></video>
 
+<!-- SPOR -->
 <div id="spor" class="kanallar">
 
-<button onclick="oynat('https://tv-trtspor1.medya.trt.com.tr/master.m3u8')">TRT SPOR</button> <button onclick="oynat('https://tv-trtspor2.medya.trt.com.tr/master.m3u8')">TRT SPOR YILDIZ</button> <button onclick="oynat('https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8')">A SPOR</button> <button onclick="oynat('https://ciner-live.ercdn.net/htspor/htspor.m3u8')">HT SPOR</button> <button onclick="oynat('https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8')">EKOL SPORTS</button> <button onclick="oynat('https://live.sportstv.com.tr/hls/low/sportstv_hd/index.m3u8')">SPORTSTV</button> <button onclick="oynat('https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8')">FB TV HD</button>
-
-<button onclick="oynat('https://beert7sqimrk0bfdupfgn6qew.medya.trt.com.tr/master.m3u8')">TABİ SPOR</button> <button onclick="oynat('https://iaqzu4szhtzeqd0edpsayinle.medya.trt.com.tr/master.m3u8')">TABİ SPOR 1</button> <button onclick="oynat('https://klublsslubcgyiz7zqt5bz8il.medya.trt.com.tr/master.m3u8')">TABİ SPOR 2</button> <button onclick="oynat('https://ujnf69op16x2fiiywxcnx41q8.medya.trt.com.tr/master.m3u8')">TABİ SPOR 3</button> <button onclick="oynat('https://bfxy3jgeydpbphtk8qfqwm3hr.medya.trt.com.tr/master.m3u8')">TABİ SPOR 4</button> <button onclick="oynat('https://z3mmimwz148csv0vaxtphqspf.medya.trt.com.tr/master.m3u8')">TABİ SPOR 5</button> <button onclick="oynat('https://vbtob9hyq58eiophct5qctxr2.medya.trt.com.tr/master.m3u8')">TABİ SPOR 6</button> <button onclick="oynat('https://rxnE77JupTdEYKE3TytvGQWYh.medya.trt.com.tr/master.m3u8')">TABİ SPOR 7</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivecbcs.m3u8')">CBC SPORT</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivenba.m3u8')">NBA TV</button>
-
-<button onclick="oynat('http://tjktv.ercdn.net/tjktv.m3u8')">TJK TV 1</button> <button onclick="oynat('https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8')">TJK TV 2</button>
-
-<button onclick="oynat('http://45.74.244.181:3800/izle/cosmosports.m3u8')">COSMO SPORTS</button> <button onclick="oynat('https://aym-cbtv.otteravision.com/aym/cbtv/cbtv_1080p.m3u8')">CONBA TV</button>
-
-<button onclick="oynat('https://dazn-combat-rakuten.amagi.tv/hls/amagi_hls_data_rakutenAA-dazn-combat-rakuten/CDN/master.m3u8')">DAZN COMBAT</button>
-
-<button onclick="oynat('https://amg00966-amg00966c10-amgplt0201.playout.now3.amagi.tv/playlist/amg00966-amg00966c10-amgplt0201/playlist.m3u8')">FIGHT NETWORK</button>
-
-<button onclick="oynat('https://6f972d29.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0dsb3J5S2lja2JveGluZ19ITFM/playlist.m3u8')">GLORY KICKBOXING</button>
-
-<button onclick="oynat('https://6f972d29.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0dsb3J5S2lja2JveGluZ19ITFM/playlist.m3u8')">FIGHTBOX</button>
-
-<button onclick="oynat('https://9a81dd4ee3884d0dbcacafaf0d81327a.mediatailor.us-east-1.amazonaws.com/v1/master/04fd913bb278d8775298c26fdca9d9841f37601f/RakutenTV-eu_BilliardsTV/playlist.m3u8')">BILLIARDS WORLD TV</button>
-
-<button onclick="oynat('https://9a81dd4ee3884d0dbcacafaf0d81327a.mediatailor.us-east-1.amazonaws.com/v1/master/04fd913bb278d8775298c26fdca9d9841f37601f/RakutenTV-eu_BilliardsTV/playlist.m3u8')">KOZOOM</button>
-
-<button onclick="oynat('https://9a81dd4ee3884d0dbcacafaf0d81327a.mediatailor.us-east-1.amazonaws.com/v1/master/04fd913bb278d8775298c26fdca9d9841f37601f/RakutenTV-eu_BilliardsTV/playlist.m3u8')">CANAL MOTOR</button>
-
-<button onclick="oynat('https://9a81dd4ee3884d0dbcacafaf0d81327a.mediatailor.us-east-1.amazonaws.com/v1/master/04fd913bb278d8775298c26fdca9d9841f37601f/RakutenTV-eu_BilliardsTV/playlist.m3u8')">RPM MOTORSPORT</button>
-
-<button onclick="oynat('https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8')">MTRSPT1</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs1.m3u8')">BEIN SPORT 1</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs2.m3u8')">BEIN SPORT 2</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs3.m3u8')">BEIN SPORT 3</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8')">BEIN SPORT 4</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8')">BEIN SPORT 5</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8')">TIVIBUSPOR 1</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets2.m3u8')">TIVIBUSPOR 2</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets3.m3u8')">TIVIBUSPOR 3</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets4.m3u8')">TIVIBUSPOR 4</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivess1.m3u8')">S SPORT 1</button> <button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivess2.m3u8')">S SPORT 2</button>
-
-<button onclick="oynat('https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivesm1.m3u8')">SPORSMART 1</button> <button onclick="oynat('http://65.108.239.207/smart2/index.m3u8')">SPORSMART 2</button>
+<button onclick="oynat('https://tv-trtspor1.medya.trt.com.tr/master.m3u8')">TRT SPOR</button>
+<button onclick="oynat('https://tv-trtspor2.medya.trt.com.tr/master.m3u8')">TRT SPOR YILDIZ</button>
+<button onclick="oynat('https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8')">A SPOR</button>
+<button onclick="oynat('https://ciner-live.ercdn.net/htspor/htspor.m3u8')">HT SPOR</button>
+<button onclick="oynat('https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8')">EKOL SPORTS</button>
+<button onclick="oynat('https://live.sportstv.com.tr/hls/low/sportstv_hd/index.m3u8')">SPORTSTV</button>
+<button onclick="oynat('https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8')">FB TV</button>
+<button onclick="oynat('http://tjktv.ercdn.net/tjktv.m3u8')">TJK TV</button>
 
 </div>
 
+<!-- BELGESEL -->
 <div id="belgesel" class="kanallar"></div>
 
+<!-- ULUSAL -->
 <div id="ulusal" class="kanallar">
+
 <button onclick="oynat('https://tv-trt1.medya.trt.com.tr/master_720.m3u8')">TRT 1</button>
-<button onclick="oynat('https://halktv-live.daioncdn.net/halktv/halktv_1080p.m3u8')">HALK TV</button>
-<button onclick="oynat('https://dogus.daioncdn.net/startv/startv.m3u8?ce=3&app=1740db13-3ee9-4858-8d2c-b1a9cfaa3718')">STAR TV</button>
-<button onclick="oynat('http://89.187.191.41/ATV-HD-TR/video.m3u8')">ATV</button>
+<button onclick="oynat('https://tv-trt2.medya.trt.com.tr/master_720.m3u8')">TRT 2</button>
+<button onclick="oynat('https://tv-trtturk.medya.trt.com.tr/master_720.m3u8')">TRT TURK</button>
+<button onclick="oynat('https://tv-trtavaz.medya.trt.com.tr/master.m3u8')">TRT AVAZ</button>
+<button onclick="oynat('https://tv-e-okul01.medya.trt.com.tr/master.m3u8')">TRT EBA</button>
+
+<button onclick="oynat('https://dogus.daioncdn.net/startv/startv.m3u8')">STAR TV</button>
+<button onclick="oynat('https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv_1080p.m3u8')">SHOW TV</button>
+<button onclick="oynat('https://rkhubpaomb.turknet.ercdn.net/fwjkgpasof/tv8/tv8_1080p.m3u8')">TV8</button>
+
+<button onclick="oynat('https://beyaztv-live.daioncdn.net/beyaztv/beyaztv.m3u8')">BEYAZ TV</button>
+<button onclick="oynat('https://canli.tgrthaber.com/tgrt.m3u8')">TGRT HABER</button>
+<button onclick="oynat('https://dogus.daioncdn.net/ntv/ntv_720p.m3u8')">NTV</button>
+
+<button onclick="oynat('https://turkmedya-live.ercdn.net/tv360/tv360_720p.m3u8')">TV360</button>
+<button onclick="oynat('https://turkmedya-live.ercdn.net/tv4/tv4_720p.m3u8')">TV4</button>
+
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_lifetv/lifetv/playlist.m3u8')">LIFE TV</button>
+<button onclick="oynat('https://akittv-live.ercdn.net/akittv/akittv.m3u8')">AKIT TV</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanalz/kanalz/playlist.m3u8')">KANAL Z</button>
+
 </div>
 
-<div id="yerel" class="kanallar"></div>
+<!-- YEREL -->
+<div id="yerel" class="kanallar">
+
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanal3/kanal3/playlist.m3u8')">KANAL 3</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanal12/kanal12/playlist.m3u8')">KANAL 12</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanal15/kanal15/playlist.m3u8')">KANAL 15</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanal23/kanal23/playlist.m3u8')">KANAL 23</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_kanal26/kanal26/playlist.m3u8')">KANAL 26</button>
+<button onclick="oynat('https://edge1.socialsmart.tv/kanal33/bant1/playlist.m3u8')">KANAL 33</button>
+<button onclick="oynat('https://live.euromediacenter.com/kanal34/tracks-v1a1/mono.m3u8')">KANAL 34</button>
+
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_mavikaradeniz/mavikaradeniz/playlist.m3u8')">MAVI KARADENIZ TV</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_mercantv/mercantv/chunks.m3u8')">MERCAN TV</button>
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_tempotv/tempotv/playlist.m3u8')">TEMPO TV</button>
+
+<button onclick="oynat('https://live.artidijitalmedya.com/artidijital_vuslattv/vuslattv/playlist.m3u8')">VUSLAT TV</button>
+<button onclick="oynat('https://cdn1-vangolutv.yayin.com.tr/vangolutv/amlst:vangolutv/playlist.m3u8')">VAN GOLU TV</button>
+
+</div>
+
+<!-- SINEMA -->
 <div id="sinema" class="kanallar"></div>
 
 <script>
@@ -98,13 +151,17 @@ if(Hls.isSupported()){
 hls=new Hls();
 hls.loadSource(url);
 hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play();});
+hls.on(Hls.Events.MANIFEST_PARSED,function(){
+video.play();
+});
 }
 }
 
 function toggle(id){
 var list=document.getElementsByClassName("kanallar");
-for(var i=0;i<list.length;i++){list[i].style.display="none";}
+for(var i=0;i<list.length;i++){
+list[i].style.display="none";
+}
 document.getElementById(id).style.display="block";
 }
 </script>
