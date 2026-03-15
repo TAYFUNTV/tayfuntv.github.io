@@ -237,24 +237,75 @@ SABAN TV
 </div>
 
 <script>
-var video=document.getElementById("video");
+
+var video = document.getElementById("video");
 var hls;
 
 function oynat(url){
-if(hls){hls.destroy();}
+
+if(hls){
+hls.destroy();
+}
+
 if(Hls.isSupported()){
-hls=new Hls();
+
+hls = new Hls({
+liveDurationInfinity:true,
+maxBufferLength:60,
+maxMaxBufferLength:120,
+startLevel:-1,
+enableWorker:true,
+lowLatencyMode:true
+});
+
 hls.loadSource(url);
 hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,function(){video.play();});
+
+hls.on(Hls.Events.MANIFEST_PARSED,function(){
+video.play();
+});
+
+hls.on(Hls.Events.ERROR,function(event,data){
+
+if(data.fatal){
+
+switch(data.type){
+
+case Hls.ErrorTypes.NETWORK_ERROR:
+hls.startLoad();
+break;
+
+case Hls.ErrorTypes.MEDIA_ERROR:
+hls.recoverMediaError();
+break;
+
+default:
+hls.destroy();
+break;
+
 }
+
+}
+
+});
+
+}
+
+else if(video.canPlayType('application/vnd.apple.mpegurl')){
+video.src = url;
+video.play();
+}
+
 }
 
 function toggle(id){
 var list=document.getElementsByClassName("kanallar");
-for(var i=0;i<list.length;i++){list[i].style.display="none";}
+for(var i=0;i<list.length;i++){
+list[i].style.display="none";
+}
 document.getElementById(id).style.display="block";
 }
+
 </script>
 
 </body>
