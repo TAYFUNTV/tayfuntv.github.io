@@ -2539,7 +2539,7 @@ document.addEventListener('click', e=>{
 });
 
 /* M3U */
-const M3U_URL = 'https://m3u.ch/pl/9147152ccd34d0beef4687960bdc5fb1_76068c9956f2687c48e06e79b7ba486e.m3u';
+const M3U_URL = 'https://saran-live.ercdn.net/natgeowild/index.m3u8';
 let hls;
 let favorites   = JSON.parse(localStorage.getItem('cltv_favs') || '[]');
 let allChannels = [];
@@ -3264,11 +3264,11 @@ function closeAdminBackToSite(){
     <div class="admin-login-sub">Yetkisiz erişim yasaktır. Kimlik bilgilerinizi girin.</div>
     <div id="adminLoginErr" class="login-err"></div>
     <div class="field">
-      <label>KULLANICI ADI</label>
+      <label>Admin</label>
       <input type="text" id="adminUser" placeholder="admin" onkeydown="if(event.key==='Enter')adminLogin()">
     </div>
     <div class="field">
-      <label>SIFRE</label>
+      <label>123123tT</label>
       <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()">
     </div>
     <button class="admin-login-btn" onclick="adminLogin()">GİRİŞ YAP</button>
@@ -3704,7 +3704,7 @@ function closeAdminBackToSite(){
               </div>
               <div class="form-field form-full">
                 <label>M3U URL</label>
-                <input type="text" id="siteM3U" value="https://m3u.ch/pl/9147152ccd34d0beef4687960bdc5fb1_76068c9956f2687c48e06e79b7ba486e.m3u">
+                <input type="text" id="siteM3U" value="https://saran-live.ercdn.net/natgeowild/index.m3u8">
               </div>
               <div class="form-field">
                 <label>DEFAULT DİL</label>
