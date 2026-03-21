@@ -1644,6 +1644,12 @@ header {
   #btab_info      { display: none !important; }
   #mobileCatsArea { display: flex !important; }
   .sidebar-tabs   { display: none !important; }
+  .channel-list   { display: none !important; }
+  .sidebar-sort   { display: none !important; }
+@keyframes slideUpList {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
   .cat-bar        { display: none !important; }
 }
 
@@ -3223,10 +3229,15 @@ function filterMobileCat(cat, el){
 function renderMobileCats(cat){
   const list = document.getElementById('channelListBottom');
   if(!list) return;
+  list.style.animation = 'none';
   list.innerHTML = allChannels.filter(c=>c.group===cat && !hiddenChannels.includes(c.url)).slice(0,40).map(ch=>{
     const idx = allChannels.indexOf(ch);
     return `<div onclick="play(${idx})" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex:1;min-width:130px;max-width:calc(50% - 3px);"><div style="width:28px;height:28px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ch.logo?`<img src="${ch.logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='📺'">`:'📺'}</div><span style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ch.name}</span></div>`;
   }).join('');
+  // Alttan yukarı kayma animasyonu
+  requestAnimationFrame(()=>{
+    list.style.animation = 'slideUpList .3s ease';
+  });
 }
 function filterCat(cat, el){
   currentCat = cat;
