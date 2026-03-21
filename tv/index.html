@@ -892,6 +892,25 @@ header {
 }
 
 /* BOTTOM AREA */
+/* MOBİL ALT NAV */
+#mobileBottomNav {
+  display: none;
+  background: var(--bg2); border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.mob-nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 6px 4px; background: none; border: none;
+  color: var(--muted); font-size: 9px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+}
+.mob-nav-btn span:first-child { font-size: 16px; }
+.mob-nav-btn.active { color: var(--accent); }
+.mob-nav-btn.active span:first-child { filter: drop-shadow(0 0 4px var(--accent)); }
+.mobile-panel { display: none; max-height: 160px; overflow-y: auto; }
+.mobile-panel.active { display: block; }
+.cat-bar-mobile { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; }
+
 .bottom-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
 .bottom-area-wrap { grid-column: 1; grid-row: 2; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
 
@@ -1623,9 +1642,14 @@ header {
   .epg-ticker { display: none !important; }
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
 
-  /* Mobilde cat-bar gizle, önerilen kanallar göster */
-  .cat-bar { display: none !important; }
-  #mobileRelated { display: block !important; }
+
+  /* Cat-bar mobilde göster */
+  .cat-bar { display: flex !important; flex-wrap: wrap; }
+
+  /* Mobil alt navigasyon */
+  #mobileBottomNav { display: flex !important; }
+  .mobile-panel { display: none; }
+  .mobile-panel.active { display: block; }
 
   /* Radyo bar mobil */
   #radioBar { padding: 0 8px; gap: 6px; height: 30px; }
@@ -2517,6 +2541,31 @@ tr:last-child td{border:none;}
         </div>
         </div><!-- /bottom-area-wrap -->
 
+        <!-- MOBİL ALT NAVİGASYON (sadece mobilde görünür) -->
+        <div id="mobileBottomNav" style="display:none;">
+          <button class="mob-nav-btn active" onclick="switchMobileTab('cats',this)">
+            <span>📺</span><span>Kategoriler</span>
+          </button>
+          <button class="mob-nav-btn" onclick="switchMobileTab('related',this)">
+            <span>⭐</span><span>Önerilen</span>
+          </button>
+          <button class="mob-nav-btn" onclick="switchMobileTab('info',this)">
+            <span>ℹ️</span><span>Kanal Bilgisi</span>
+          </button>
+        </div>
+
+        <!-- MOBİL PANEL İÇERİKLERİ -->
+        <div id="mobilePanelCats" class="mobile-panel active">
+          <div class="cat-bar-mobile" id="catBarMobile"></div>
+        </div>
+        <div id="mobilePanelRelated" class="mobile-panel">
+          <div class="sec-title" style="padding:8px 12px 4px;">ÖNERİLEN KANALLAR</div>
+          <div class="rel-grid" id="relGridMobile2" style="padding:0 8px 8px;"></div>
+        </div>
+        <div id="mobilePanelInfo" class="mobile-panel">
+          <div id="chInfoMobile" style="padding:8px;"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
+        </div>
+
         <!-- CHAT SIDEBAR -->
         <div class="epg-sidebar">
           <div class="epg-sidebar-title" style="display:flex;align-items:center;justify-content:space-between;">
@@ -3059,14 +3108,14 @@ function addSmsToTicker(name, msg){
 }
 
 function showAgeWarning(){
-  if(sessionStorage.getItem('age_accepted')) return;
+  // Her açılışta göster — session/localStorage kullanma
   document.getElementById('ageWarning').style.display = 'flex';
 }
 function hideAgeWarning(){
   document.getElementById('ageWarning').style.display = 'none';
 }
 function acceptAge(){
-  sessionStorage.setItem('age_accepted','1');
+  // kabul edildi — bir dahaki açılışta tekrar soracak
   document.getElementById('ageWarning').style.display = 'none';
 }
 function rejectAge(){
@@ -4300,6 +4349,38 @@ function switchBtab(tab, btn){
   btn.classList.add('active');
   document.getElementById('btab_'+tab).classList.add('active');
   if(tab==='chat') setTimeout(renderChat, 50);
+}
+
+function switchMobileTab(tab, btn){
+  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mobilePanelCats'  .replace('cats',tab).replace('related',tab).replace('info',tab));
+  const panels = {cats:'mobilePanelCats', related:'mobilePanelRelated', info:'mobilePanelInfo'};
+  const panel = document.getElementById(panels[tab]);
+  if(panel) panel.classList.add('active');
+  // Önerilen paneli güncelle
+  if(tab==='related'){
+    const src = currentCh ? allChannels.filter(c=>c.group===currentCh.group&&c.url!==currentCh.url) : allChannels;
+    const pick = [...src].sort(()=>Math.random()-.5).slice(0,8);
+    const grid = document.getElementById('relGridMobile2');
+    if(grid) grid.innerHTML = pick.map(ch=>{
+      const idx = allChannels.indexOf(ch);
+      return `<div class="rel-card" onclick="play(${idx})"><div class="rc-icon">${ch.logo?`<img src="${ch.logo}" onerror="this.outerHTML='📺'">`:'📺'}</div><div class="rc-name">${ch.name}</div></div>`;
+    }).join('');
+  }
+  // Kanal bilgisi panelini güncelle
+  if(tab==='info' && currentCh){
+    const mob = document.getElementById('chInfoMobile');
+    const desktop = document.getElementById('chInfoContent');
+    if(mob && desktop) mob.innerHTML = desktop.innerHTML;
+  }
+  // Kategori bar'ını mobil panele kopyala
+  if(tab==='cats'){
+    const mobBar = document.getElementById('catBarMobile');
+    const mainBar = document.getElementById('catBar');
+    if(mobBar && mainBar) mobBar.innerHTML = mainBar.innerHTML;
+  }
 }
 
 /* SLEEP TIMER */
