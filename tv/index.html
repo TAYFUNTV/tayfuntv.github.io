@@ -318,6 +318,77 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 #app.visible { display: flex; }
 
 /* HEADER */
+/* ── RADYO BAR ── */
+#radioBar {
+  display: flex; align-items: center; gap: 12px;
+  height: 36px; padding: 0 16px;
+  background: linear-gradient(90deg, #0a0c10 0%, #0f1520 30%, #111827 70%, #0a0c10 100%);
+  border-bottom: 1px solid rgba(232,55,61,.3);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+#radioBar::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(232,55,61,.07) 50%, transparent 100%);
+  animation: radioShimmer 5s linear infinite;
+}
+@keyframes radioShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.radio-left { display:flex; align-items:center; gap:8px; flex-shrink:0; z-index:1; }
+.radio-play-btn {
+  width:24px; height:24px; border-radius:50%;
+  background:var(--accent); border:none; color:#fff;
+  font-size:9px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s; flex-shrink:0; box-shadow:0 0 8px rgba(232,55,61,.4);
+}
+.radio-play-btn:hover { transform:scale(1.15); }
+.radio-play-btn.playing { background:#2ecc71; box-shadow:0 0 8px rgba(46,204,113,.4); }
+.radio-live-dot {
+  width:6px; height:6px; border-radius:50%; background:#666; flex-shrink:0;
+  transition: background .3s;
+}
+.radio-live-dot.on { background:#2ecc71; animation: livePulse 1.2s ease-in-out infinite; }
+@keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.radio-right { display:flex; align-items:center; gap:6px; flex-shrink:0; z-index:1; }
+.radio-vol {
+  width:60px; height:3px; accent-color:var(--accent); cursor:pointer;
+  -webkit-appearance:none; background:rgba(255,255,255,.15); border-radius:2px; outline:none;
+}
+/* SMS KAYAN YAZI */
+.sms-ticker-wrap {
+  flex: 1; display:flex; align-items:center; gap:0;
+  overflow:hidden; border-left:1px solid rgba(232,55,61,.2);
+  border-right:1px solid rgba(232,55,61,.2);
+  margin: 0 4px; height:100%;
+}
+.sms-ticker-label {
+  background: linear-gradient(135deg, rgba(232,55,61,.3), rgba(232,55,61,.15));
+  color: #ff6b6b; font-size:9px; font-weight:800;
+  letter-spacing:.8px; padding:0 10px; height:100%;
+  display:flex; align-items:center; flex-shrink:0;
+  border-right:1px solid rgba(232,55,61,.2);
+  white-space:nowrap;
+}
+.sms-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
+.sms-ticker-track {
+  display:flex; align-items:center; white-space:nowrap;
+  animation: smsTicker 35s linear infinite;
+}
+.sms-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
+.sms-msg {
+  font-size:10px; color:rgba(255,255,255,.75);
+  padding:0 20px; flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.sms-msg b { font-weight:700; }
+.sms-male   { color:#74c0fc; }
+.sms-female { color:#ff9ff3; }
+.sms-admin  { color:#ff6b6b; }
+@keyframes smsTicker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.radio-vol::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--accent); cursor:pointer; }
+
 header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 24px;
@@ -611,6 +682,12 @@ header {
   background: var(--bg2); border-left: 1px solid var(--border);
   display: flex; flex-direction: column; overflow: hidden;
 }
+.react-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 8px; font-size: 14px;
+  cursor: pointer; transition: all .15s;
+}
+.react-btn:hover { background: var(--bg4); transform: scale(1.15); }
 .epg-sidebar-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 15px; letter-spacing: 3px; color: var(--text);
@@ -1450,6 +1527,14 @@ header {
   .epg-ticker   { grid-column: 1 !important; }
   .bottom-area-wrap { grid-column: 1 !important; grid-row: 2 !important; }
   .epg-sidebar  { grid-column: 1 !important; grid-row: 3 !important; max-height: 200px; border-left: none; border-top: 1px solid var(--border); }
+
+  /* Dizi bölüm kartları mobil */
+  .movies-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important; }
+  .movie-thumb { height: 120px !important; }
+
+  /* Radyo bar 768px */
+  .sms-msg { font-size: 10px; padding: 0 12px; }
+  .radio-vol { width: 50px; }
   .sidebar {
     order: 2;
     flex: 1;
@@ -1537,6 +1622,22 @@ header {
   .epg-sidebar { display: none !important; }
   .epg-ticker { display: none !important; }
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
+
+  /* Radyo bar mobil */
+  #radioBar { padding: 0 8px; gap: 6px; height: 30px; }
+  .radio-left { gap: 5px; }
+  .radio-play-btn { width: 20px; height: 20px; font-size: 8px; }
+  .radio-live-dot { display: none; }
+  #radioName { font-size: 9px; }
+  .sms-ticker-wrap { flex: 1; }
+  .sms-ticker-label { padding: 0 6px; font-size: 8px; }
+  .sms-msg { font-size: 9px; padding: 0 10px; }
+  .radio-right { display: none; }
+
+  /* Filmler grid mobil */
+  .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
+  .movie-thumb { height: 100px !important; }
+  .movie-title { font-size: 9px !important; }
 }
 
 
@@ -2044,6 +2145,39 @@ tr:last-child td{border:none;}
 </div>
 
 <!-- LOGIN SCREEN -->
+
+<!-- 18+ UYARI MODAL -->
+<div id="ageWarning" style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg2);border:1px solid rgba(232,55,61,.4);border-radius:20px;max-width:420px;width:100%;padding:32px 28px;text-align:center;animation:popIn .3s ease;">
+    <div style="font-size:52px;margin-bottom:16px;">🔞</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--accent);margin-bottom:10px;">18+ UYARISI</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:24px;">
+      Bu site <strong style="color:var(--text);">18 yaş ve üzeri</strong> kullanıcılara yönelik içerikler barındırmaktadır.<br>
+      Devam ederek <strong style="color:var(--text);">18 yaşından büyük</strong> olduğunuzu ve kullanım şartlarını kabul ettiğinizi onaylıyorsunuz.
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="rejectAge()" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">❌ 18 Yaşından Küçüğüm</button>
+      <button onclick="acceptAge()" style="flex:1;background:var(--accent);border:none;color:#fff;border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">✅ 18 Yaşından Büyüğüm</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT KURAL UYARISI -->
+<div id="chatWarning" style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:380px;width:100%;padding:28px 24px;text-align:center;animation:popIn .3s ease;">
+    <div style="font-size:40px;margin-bottom:12px;">💬</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--text);margin-bottom:12px;">CHAT KURALLARI</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:20px;text-align:left;">
+      ⛔ Hakaret ve küfür yasaktır<br>
+      ⛔ Spam ve reklam paylaşılamaz<br>
+      ⛔ Kişisel bilgi paylaşmayın<br>
+      ✅ Saygılı ve nazik olun<br>
+      ✅ Mesajlar kayıt altına alınmaktadır
+    </div>
+    <button onclick="acceptChat()" style="width:100%;background:var(--accent);border:none;color:#fff;border-radius:10px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">✅ Anladım, Kabul Ediyorum</button>
+  </div>
+</div>
+
 <div id="loginScreen">
   <div class="login-bg"></div>
   <div class="login-box">
@@ -2110,6 +2244,50 @@ tr:last-child td{border:none;}
 
 <!-- MAIN APP -->
 <div id="app">
+
+  <!-- RADYO PLAYER ŞERİDİ -->
+  <div id="radioBar">
+    <audio id="radioAudio" preload="none"></audio>
+    <div class="radio-left">
+      <button id="radioPlayBtn" class="radio-play-btn" onclick="toggleRadio()">▶</button>
+      <span class="radio-live-dot" id="radioLiveDot"></span>
+      <span id="radioName" style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;margin-right:6px;">📻 CANLI RADYO</span>
+      <span style="font-size:9px;color:rgba(255,255,255,.3);margin-right:6px;">|</span>
+      <span style="font-size:9px;font-weight:700;color:#ff6b6b;margin-right:6px;letter-spacing:.5px;">💬 SMS</span>
+    </div>
+    <!-- SMS KAYAN YAZI -->
+    <div class="sms-ticker-wrap">
+      <div class="sms-ticker-scroll">
+        <div class="sms-ticker-track" id="smsTicker">
+          <span class="sms-msg">🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!</span>
+          <span class="sms-msg">❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!</span>
+          <span class="sms-msg">🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!</span>
+          <span class="sms-msg">👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!</span>
+          <span class="sms-msg">💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!</span>
+          <span class="sms-msg">🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?</span>
+          <span class="sms-msg">📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!</span>
+          <span class="sms-msg">💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!</span>
+          <span class="sms-msg">🌸 <b class="sms-female">Selin:</b> Harika bir platform!</span>
+          <span class="sms-msg">🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?</span>
+          <span class="sms-msg">🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!</span>
+          <span class="sms-msg">❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!</span>
+          <span class="sms-msg">🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!</span>
+          <span class="sms-msg">👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!</span>
+          <span class="sms-msg">💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!</span>
+          <span class="sms-msg">🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?</span>
+          <span class="sms-msg">📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!</span>
+          <span class="sms-msg">💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!</span>
+          <span class="sms-msg">🌸 <b class="sms-female">Selin:</b> Harika bir platform!</span>
+          <span class="sms-msg">🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?</span>
+        </div>
+      </div>
+    </div>
+    <div class="radio-right">
+      <span style="font-size:10px;opacity:.5;flex-shrink:0;">🔊</span>
+      <input type="range" id="radioVol" min="0" max="100" value="70" oninput="setRadioVol(this.value)" class="radio-vol">
+    </div>
+  </div>
+
 
   <!-- HEADER -->
   <header>
@@ -2332,16 +2510,38 @@ tr:last-child td{border:none;}
 
         <!-- CHAT SIDEBAR -->
         <div class="epg-sidebar">
-          <div class="epg-sidebar-title">💬 CANLI SOHBET</div>
-          <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;">
-            <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:8px;">
+          <div class="epg-sidebar-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>💬 CANLI SOHBET</span>
+            <button id="clearChatBtn" style="background:rgba(232,55,61,.15);border:1px solid rgba(232,55,61,.3);color:#ff6b6b;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:700;">🗑 Temizle</button>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
+            <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
             </div>
-            <div style="display:flex;gap:6px;flex-shrink:0;">
+
+            <!-- Emoji Paneli -->
+            <div id="emojiPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1e2530;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.6);">
+              <div style="display:flex;gap:6px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px;">
+                <button onclick="setEmojiCat(0,this)" class="ecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">😀</button>
+                <button onclick="setEmojiCat(1,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">👍</button>
+                <button onclick="setEmojiCat(2,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">🔥</button>
+              </div>
+              <div id="emojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:130px;overflow-y:auto;"></div>
+            </div>
+
+            <!-- GIF Paneli -->
+            <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;z-index:100;">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Popüler GIF'ler</div>
+              <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:120px;overflow-y:auto;"></div>
+            </div>
+
+            <div style="display:flex;gap:4px;flex-shrink:0;">
+              <button onclick="toggleEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;" title="Emoji">😊</button>
+              <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
-                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:11px;outline:none;min-width:0;"
+                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:11px;outline:none;min-width:0;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
-              <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+              <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
           </div>
         </div>
@@ -2759,6 +2959,96 @@ function doRegister(){
 }
 function guestLogin(){ loginSuccess({username:'Misafir', email:'guest@tayfuntv.com', avatar:'📺', guest:true}); }
 function quickDemo(){ loginSuccess({username:'Demo User', email:'demo@canlitv.com', avatar:'🎬', demo:true}); }
+let chatWarningShown = false;
+
+/* ─── RADYO PLAYER ─── */
+let radioPlaying = false;
+const RADIO_URL = 'http://46.20.7.125/listen.pls';
+
+function initRadioBar(){
+  document.getElementById('radioBar').style.display = 'flex';
+  setRadioVol(70);
+}
+
+function toggleRadio(){
+  if(radioPlaying) stopRadio(); else startRadio();
+}
+
+function startRadio(){
+  const audio = document.getElementById('radioAudio');
+  const btn   = document.getElementById('radioPlayBtn');
+  const eq    = document.getElementById('eqBars');
+  const dot   = document.getElementById('radioLiveDot');
+  // .pls dosyasını doğrudan stream olarak çal
+  audio.src = RADIO_URL;
+  audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
+  audio.play().then(() => {
+    radioPlaying = true;
+    btn.textContent = '⏹';
+    btn.classList.add('playing');
+    eq.classList.add('playing');
+    dot.classList.add('on');
+    document.getElementById('radioName').textContent = '📻 CANLI RADYO';
+  }).catch(err => {
+    console.log('Radio error:', err);
+    showToast('📻 Radyo bağlanamadı — URL kontrol edin', 'warning');
+  });
+}
+
+function stopRadio(){
+  const audio = document.getElementById('radioAudio');
+  const btn   = document.getElementById('radioPlayBtn');
+  const eq    = document.getElementById('eqBars');
+  const dot   = document.getElementById('radioLiveDot');
+  audio.pause();
+  audio.src = '';
+  radioPlaying = false;
+  btn.textContent = '▶';
+  btn.classList.remove('playing');
+  eq.classList.remove('playing');
+  dot.classList.remove('on');
+}
+
+function setRadioVol(val){
+  const audio = document.getElementById('radioAudio');
+  if(audio) audio.volume = val / 100;
+}
+
+// SMS Ticker'a yeni mesaj ekle (admin panelinden veya chat'ten çağrılabilir)
+function addSmsToTicker(name, msg){
+  const track = document.getElementById('smsTicker');
+  if(!track) return;
+  const emojis = ['🌟','❤️','🔥','💬','🎬','👑','💯','⭐','🎉','😊'];
+  const emoji = emojis[Math.floor(Math.random()*emojis.length)];
+  const item = `<span class="sms-msg">${emoji} <b>${name}:</b> ${msg}</span>`;
+  // İki kopyaya da ekle (sonsuz döngü için)
+  const items = track.querySelectorAll('.sms-msg');
+  const half = Math.floor(items.length / 2);
+  items[half-1]?.insertAdjacentHTML('afterend', item);
+  items[track.querySelectorAll('.sms-msg').length-1]?.insertAdjacentHTML('afterend', item);
+}
+
+function showAgeWarning(){
+  if(sessionStorage.getItem('age_accepted')) return;
+  document.getElementById('ageWarning').style.display = 'flex';
+}
+function hideAgeWarning(){
+  document.getElementById('ageWarning').style.display = 'none';
+}
+function acceptAge(){
+  sessionStorage.setItem('age_accepted','1');
+  document.getElementById('ageWarning').style.display = 'none';
+}
+function rejectAge(){
+  document.getElementById('ageWarning').innerHTML = '<div style="color:#fff;font-size:18px;text-align:center;padding:40px;">Bu siteye erişim izniniz bulunmamaktadır.</div>';
+  setTimeout(()=>{ try{ window.location.href='about:blank'; }catch(e){} },2000);
+}
+function acceptChat(){
+  localStorage.setItem('chat_accepted','1');
+  document.getElementById('chatWarning').style.display = 'none';
+  chatWarningShown = true;
+}
+
 function showGuestLock() {
   const tvLayout = document.querySelector('#guestBlurWrap .tv-layout');
   const overlay  = document.getElementById('guestLockOverlay');
@@ -2791,6 +3081,7 @@ function loginSuccess(user){
   document.getElementById('pdEmail').textContent      = user.email;
   document.getElementById('settingsName').textContent = user.username;
   document.getElementById('settingsEmail').textContent= user.email;
+  initRadioBar();
   loadM3U();
   renderMovies();
   renderNotifs();
@@ -2803,7 +3094,18 @@ function loginSuccess(user){
     hideGuestLock();
     if(moviesTab){ moviesTab.innerHTML = '🎬 FİLMLER'; moviesTab.style.color = ''; }
   }
-  setTimeout(()=>showNotifPopup('📺 Hoş Geldiniz!', user.username + ' olarak giriş yapıldı.'), 1500);
+  setTimeout(()=>{
+    showNotifPopup('📺 Hoş Geldiniz!', user.username + ' olarak giriş yapıldı.');
+    // Admin girişini chat'e yaz
+    if(user.role === 'admin' || user.username === 'TAYFUN GULLU'){
+      const now = new Date();
+      const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      chatMessages.push({u:'🔴 SİSTEM', m:`👑 Admin "${user.username}" giriş yaptı.`, t:t2});
+      renderChat();
+    }
+    // Yaş uyarısı kabul edildiyse gizle
+    hideAgeWarning();
+  }, 1500);
 }
 function doLogout(){
   currentUser = null;
@@ -3321,7 +3623,32 @@ function renderChInfo(ch){
 }
 
 /* CHAT */
-const chatMessages = [];
+let chatMessages = [];
+function clearChat(){
+  chatMessages.length = 0;
+  const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
+  const b1 = document.getElementById('chatBox');
+  const b2 = document.getElementById('chatBoxSide');
+  if(b1) b1.innerHTML = empty;
+  if(b2) b2.innerHTML = empty;
+  showToast('🗑 Sohbet temizlendi', 'info');
+}
+// Temizle butonunu addEventListener ile bağla
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('clearChatBtn');
+  if(btn) btn.addEventListener('click', clearChat);
+});
+
+function getChatUserColor(username){
+  if(!username) return 'var(--blue)';
+  if(username === 'TAYFUN GULLU' || username === '🔴 SİSTEM') return '#ff6b6b';
+  // Türk kadın isimleri
+  const femaleNames = ['ayşe','fatma','zeynep','selin','elif','merve','esra','büşra','gül','sevgi','hatice','hanım','nur','derya','pınar','melek','bahar','ceren','yıldız','şule'];
+  const lower = username.toLowerCase();
+  if(femaleNames.some(n => lower.includes(n))) return '#ff9ff3';
+  return '#74c0fc';
+}
+
 function renderChat(){
   const boxes = [document.getElementById('chatBox'), document.getElementById('chatBoxSide')];
   const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
@@ -3330,14 +3657,131 @@ function renderChat(){
     if(!chatMessages.length){ box.innerHTML = empty; return; }
     box.innerHTML = chatMessages.map(msg=>`
       <div style="display:flex;gap:6px;align-items:flex-start;">
-        <span style="font-size:11px;font-weight:700;color:var(--blue);flex-shrink:0;">${msg.u}</span>
-        <span style="font-size:11px;color:var(--text2);flex:1;">${msg.m}</span>
+        <span style="font-size:11px;font-weight:700;flex-shrink:0;color:${getChatUserColor(msg.u)}">${msg.u}</span>
+        <span style="font-size:11px;color:var(--text2);flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
       </div>`).join('');
     box.scrollTop = box.scrollHeight;
   });
 }
+/* ─── GIF & TEPKİ ─── */
+const GIF_LIST = [
+  {url:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif', label:'Yavaş alkış'},
+  {url:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif', label:'Harika!'},
+  {url:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif', label:'Gülüyor'},
+  {url:'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif', label:'Şaşkın'},
+  {url:'https://media.giphy.com/media/xT9IgG50Lg7russom8/giphy.gif', label:'Hayır hayır'},
+  {url:'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif', label:'Evet evet!'},
+];
+
+function toggleGifPanel(){
+  const gp = document.getElementById('gifPanel');
+  const ep = document.getElementById('emojiPanel');
+  ep.style.display = 'none';
+  if(gp.style.display === 'none'){
+    const grid = document.getElementById('gifGrid');
+    grid.innerHTML = GIF_LIST.map(g =>
+      `<img src="${g.url}" title="${g.label}" onclick="sendGif('${g.url}','${g.label}')"
+        style="width:100%;border-radius:6px;cursor:pointer;object-fit:cover;height:60px;" loading="lazy">`
+    ).join('');
+    gp.style.display = 'block';
+  } else {
+    gp.style.display = 'none';
+  }
+}
+
+function sendGif(url, label){
+  const now = new Date();
+  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  chatMessages.push({u: currentUser?.username||'Sen', m:`🎞️ GIF: ${label} <img src="${url}" style="max-width:120px;border-radius:6px;display:block;margin-top:4px;">`, t:t2, isHtml:true});
+  document.getElementById('gifPanel').style.display = 'none';
+  renderChat();
+}
+
+function sendReaction(emoji){
+  const now = new Date();
+  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  chatMessages.push({u: currentUser?.username||'Sen', m: emoji + ' tepki verdi', t:t2});
+  renderChat();
+  // Animasyon
+  const btn = event.target;
+  btn.style.transform = 'scale(1.4)';
+  setTimeout(() => btn.style.transform = 'scale(1)', 300);
+}
+
+
+const EMOJIS = [
+  // Yüzler
+  '😀','😃','😄','😁','🤣','😂','🥰','😍','🤩','😘','😎','🤓','😏','😒','😔',
+  '😭','😤','🤬','😱','🤯','🥺','😳','🥵','🥶','😶','🤐','😬','🤫','🫠','🥹',
+  // Eller & Kalpler
+  '👍','👎','👏','🙌','🤝','✊','💪','🙏','🫶','❤️','🧡','💛','💚','💙','💜',
+  '🖤','🤍','💔','❣️','💕','💞','💓','💗','💖','💘','💝','🫀','♥️','💟','☮️',
+  // Semboller & Objeler  
+  '🔥','⭐','🌟','💥','✨','🎉','🎊','🏆','👑','💎','🚀','🌈','💯','⚡','🎯',
+  '🎬','📺','🍿','🎮','🎭','🎵','🎶','💬','👀','🤖','🐉','🦁','🦊','🐺','🌙',
+];
+
+const EMOJI_CATS = [
+  EMOJIS.slice(0,30),   // Yüzler
+  EMOJIS.slice(30,60),  // Eller & Kalpler
+  EMOJIS.slice(60,90),  // Semboller
+];
+let currentEmojiCat = 0;
+
+function setEmojiCat(idx, btn){
+  currentEmojiCat = idx;
+  document.querySelectorAll('.ecatbtn').forEach(b => { b.style.background='var(--bg3)'; });
+  btn.style.background = 'var(--accent)';
+  renderEmojiGrid();
+}
+function renderEmojiGrid(){
+  const grid = document.getElementById('emojiGrid');
+  if(!grid) return;
+  const list = EMOJI_CATS[currentEmojiCat] || EMOJIS.slice(0,30);
+  grid.innerHTML = list.map(e =>
+    `<button onclick="insertEmoji('${e}')" style="background:rgba(255,255,255,.05);border:none;font-size:22px;cursor:pointer;padding:5px;border-radius:8px;line-height:1;transition:all .1s;font-family:Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif;" onmouseover="this.style.background='rgba(255,255,255,.15)';this.style.transform='scale(1.2)'" onmouseout="this.style.background='rgba(255,255,255,.05)';this.style.transform='scale(1)'">${e}</button>`
+  ).join('');
+}
+function initEmojiPanel(){
+  renderEmojiGrid();
+}
+function toggleEmojiPanel(){
+  const panel = document.getElementById('emojiPanel');
+  if(!panel) return;
+  if(panel.style.display === 'none'){
+    initEmojiPanel();
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+function insertEmoji(emoji){
+  const input = document.getElementById('chatInputSide');
+  if(!input) return;
+  const pos = input.selectionStart || input.value.length;
+  input.value = input.value.slice(0, pos) + emoji + input.value.slice(pos);
+  input.focus();
+  input.selectionStart = input.selectionEnd = pos + emoji.length;
+  document.getElementById('emojiPanel').style.display = 'none';
+}
+// Panel dışına tıklayınca kapat
+document.addEventListener('click', e => {
+  const ep = document.getElementById('emojiPanel');
+  const gp = document.getElementById('gifPanel');
+  if(ep && !ep.contains(e.target) && !e.target.closest('[onclick="toggleEmojiPanel()"]')) ep.style.display = 'none';
+  if(gp && !gp.contains(e.target) && !e.target.closest('[onclick="toggleGifPanel()"]')) gp.style.display = 'none';
+});
+
 function sendChatSide(){
+  // İlk kez yazmadan önce kural uyarısı göster
+  // Admine ve misafire chat uyarısı gösterme
+  if(currentUser && (currentUser.role==='admin' || currentUser.guest)){
+    // geç
+  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+    document.getElementById('chatWarning').style.display = 'flex';
+    return;
+  }
   const input = document.getElementById('chatInputSide');
   const val = input.value.trim();
   if(!val) return;
@@ -4950,7 +5394,7 @@ function saveUsers(u){ localStorage.setItem('cltv_users',JSON.stringify(u)); }
 let allUsers = [];
 function renderUsers(){
   allUsers = getUsers();
-  const admins = [{username:'Tayfun',email:'admin@canlitv.com',avatar:'👑',role:'admin',plan:'pro',status:'active'},...allUsers];
+  const admins = [{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...allUsers];
   document.getElementById('stat_users').textContent = admins.length;
   document.getElementById('userBadge').textContent  = admins.length;
   renderUserTable(admins);
@@ -4996,10 +5440,10 @@ function approveUser(idx, name){
     addLog('user','user','✅ Kullanıcı onaylandı: '+name,'var(--green)');
   }
 }
-function filterUsers(q){ const all=[{username:'Tayfun',email:'admin@canlitv.com',avatar:'👑',role:'admin',status:'active'},...getUsers()]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
-function filterUsersByRole(role){ const all=[{username:'Tayfun',email:'admin@canlitv.com',avatar:'👑',role:'admin',status:'active'},...getUsers()]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
+function filterUsers(q){ const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
+function filterUsersByRole(role){ const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
 function openAddUser(){ editingUserIdx=null; document.getElementById('userModalTitle').textContent='👤 Kullanıcı Ekle'; ['uUsername','uEmail','uPassword','uAvatar'].forEach(id=>document.getElementById(id).value=''); openModal('userModal'); }
-function editUser(idx){ editingUserIdx=idx; const all=[{username:'Tayfun',email:'admin@canlitv.com',avatar:'👑',role:'admin',status:'active'},...getUsers()]; const u=all[idx]; document.getElementById('userModalTitle').textContent='✏️ Kullanıcı Düzenle'; document.getElementById('uUsername').value=u.username; document.getElementById('uEmail').value=u.email||''; document.getElementById('uAvatar').value=u.avatar||''; document.getElementById('uRole').value=u.role||'user'; openModal('userModal'); }
+function editUser(idx){ editingUserIdx=idx; const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; const u=all[idx]; document.getElementById('userModalTitle').textContent='✏️ Kullanıcı Düzenle'; document.getElementById('uUsername').value=u.username; document.getElementById('uEmail').value=u.email||''; document.getElementById('uAvatar').value=u.avatar||''; document.getElementById('uRole').value=u.role||'user'; openModal('userModal'); }
 function saveUser(){
   const username=document.getElementById('uUsername').value.trim();
   const email=document.getElementById('uEmail').value.trim();
@@ -5018,8 +5462,8 @@ function saveUser(){
   renderUsers(); closeModal('userModal');
 }
 function banUser(idx, name){ if(!confirm(name+' kullanıcısını yasaklamak istiyor musunuz?')) return; showToast('⛔ '+name+' yasaklandı','warning'); addLog('user','user','⛔ Kullanıcı yasaklandı: '+name,'var(--accent)'); }
-function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'){ showToast('Admin silinemez!','warning'); return; } const users=getUsers(); const ri=users.findIndex(u=>u.username===name); if(ri>=0){ users.splice(ri,1); saveUsers(users); } renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
-function exportUsers(){ const data=JSON.stringify([{username:'Tayfun',email:'admin@canlitv.com',role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
+function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name==='TAYFUN GULLU'){ showToast('Admin silinemez!','warning'); return; } const users=getUsers(); const ri=users.findIndex(u=>u.username===name); if(ri>=0){ users.splice(ri,1); saveUsers(users); } renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
+function exportUsers(){ const data=JSON.stringify([{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
 
 /* M3U LIST */
 const m3uLists = [{id:1,name:'Ana Yayın Listesi',url:M3U_URL,channels:0,interval:6,active:true,lastUpdate:'Bilinmiyor'}];
@@ -5408,6 +5852,7 @@ window.addEventListener('load', ()=>{
     document.getElementById('splash').style.opacity='0';
     setTimeout(()=>{
       document.getElementById('splash').style.display='none';
+      showAgeWarning();
       document.getElementById('loginScreen').style.display='flex';
       // Beni Hatırla — sadece alanları doldur, otomatik giriş yapma
       const rem = localStorage.getItem('cltv_remember');
