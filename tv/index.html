@@ -2542,6 +2542,19 @@ tr:last-child td{border:none;}
         </div><!-- /bottom-area-wrap -->
 
         <!-- MOBİL ALT NAVİGASYON (sadece mobilde görünür) -->
+        <!-- MOBİL PANEL İÇERİKLERİ (üstte) -->
+        <div id="mobilePanelCats" class="mobile-panel active">
+          <div class="cat-bar-mobile" id="catBarMobile"></div>
+        </div>
+        <div id="mobilePanelRelated" class="mobile-panel">
+          <div class="sec-title" style="padding:8px 12px 4px;">ÖNERİLEN KANALLAR</div>
+          <div class="rel-grid" id="relGridMobile2" style="padding:0 8px 8px;"></div>
+        </div>
+        <div id="mobilePanelInfo" class="mobile-panel">
+          <div id="chInfoMobile" style="padding:8px;"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
+        </div>
+
+        <!-- MOBİL ALT NAVİGASYON (altta sabit) -->
         <div id="mobileBottomNav" style="display:none;">
           <button class="mob-nav-btn active" onclick="switchMobileTab('cats',this)">
             <span>📺</span><span>Kategoriler</span>
@@ -2552,18 +2565,6 @@ tr:last-child td{border:none;}
           <button class="mob-nav-btn" onclick="switchMobileTab('info',this)">
             <span>ℹ️</span><span>Kanal Bilgisi</span>
           </button>
-        </div>
-
-        <!-- MOBİL PANEL İÇERİKLERİ -->
-        <div id="mobilePanelCats" class="mobile-panel active">
-          <div class="cat-bar-mobile" id="catBarMobile"></div>
-        </div>
-        <div id="mobilePanelRelated" class="mobile-panel">
-          <div class="sec-title" style="padding:8px 12px 4px;">ÖNERİLEN KANALLAR</div>
-          <div class="rel-grid" id="relGridMobile2" style="padding:0 8px 8px;"></div>
-        </div>
-        <div id="mobilePanelInfo" class="mobile-panel">
-          <div id="chInfoMobile" style="padding:8px;"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
         </div>
 
         <!-- CHAT SIDEBAR -->
@@ -3273,9 +3274,13 @@ function loadM3U(){
 
 function buildCats(){
   const groups = [...new Set(allChannels.map(c=>c.group).filter(g=>g))].slice(0,22);
-  document.getElementById('catBar').innerHTML = groups.map((g,i)=>
+  const pillsHtml = groups.map((g,i)=>
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
+  document.getElementById('catBar').innerHTML = pillsHtml;
+  // Mobil panele de kopyala
+  const mob = document.getElementById('catBarMobile');
+  if(mob) mob.innerHTML = pillsHtml;
   if(groups.length) filterCat(groups[0], document.querySelector('.cat-pill'));
 }
 
