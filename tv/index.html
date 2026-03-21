@@ -3240,9 +3240,15 @@ function renderMobileCatChannels(cat){
 
 function filterCat(cat, el){
   currentCat = cat;
-  document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('#catBar .cat-pill').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
   renderList();
+}
+
+function filterMobileCat(cat, el){
+  document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderMobileCatChannels(cat);
 }
 
 function switchChTab(tab, btn){
