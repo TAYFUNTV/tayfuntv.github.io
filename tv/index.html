@@ -3245,12 +3245,6 @@ function filterCat(cat, el){
   renderList();
 }
 
-function filterMobileCat(cat, el){
-  document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>b.classList.remove('active'));
-  if(el) el.classList.add('active');
-  renderMobileCatChannels(cat);
-}
-
 function switchChTab(tab, btn){
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
