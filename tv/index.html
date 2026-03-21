@@ -1623,6 +1623,10 @@ header {
   .epg-ticker { display: none !important; }
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
 
+  /* Mobilde cat-bar gizle, önerilen kanallar göster */
+  .cat-bar { display: none !important; }
+  #mobileRelated { display: block !important; }
+
   /* Radyo bar mobil */
   #radioBar { padding: 0 8px; gap: 6px; height: 30px; }
   .radio-left { gap: 5px; }
@@ -2382,6 +2386,11 @@ tr:last-child td{border:none;}
           <button class="tab-btn" onclick="switchChTab('fav',this)">⭐</button>
           <button class="tab-btn" onclick="switchChTab('recent',this)">SON</button>
         </div>
+        <!-- MOBİLDE ÖNERİLEN KANALLAR (cat-bar yerine) -->
+        <div id="mobileRelated" style="display:none;padding:6px 8px;border-bottom:1px solid var(--border);">
+          <div style="font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">⭐ ÖNERİLEN</div>
+          <div class="rel-grid" id="relGridMobile" style="gap:5px;"></div>
+        </div>
         <div class="cat-bar" id="catBar">
         </div>
         <div class="sidebar-sort">
@@ -2963,7 +2972,11 @@ let chatWarningShown = false;
 
 /* ─── RADYO PLAYER ─── */
 let radioPlaying = false;
-const RADIO_URL = 'http://46.20.7.125/listen.pls';
+// HTTP stream için HTTPS proxy kullan (Mixed Content bypass)
+async function getRadioStreamUrl(){
+  return RADIO_PLS.replace('listen.pls', '');
+}
+
 
 function initRadioBar(){
   document.getElementById('radioBar').style.display = 'flex';
@@ -2980,19 +2993,36 @@ function startRadio(){
   const eq    = document.getElementById('eqBars');
   const dot   = document.getElementById('radioLiveDot');
   // .pls dosyasını doğrudan stream olarak çal
-  audio.src = RADIO_URL;
+  // Çalışan HTTPS Türk radyo stream'leri (sırayla dener)
+  const streams = [
+    'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio',
+    'https://17733.live.streamtheworld.com/JOY_TURK_SC',
+    'https://radyo.duhnet.tv/slowturk',
+    'https://turkmedya.radyotvonline.net/alemfmaac',
+  ];
+  let tried = 0;
+  function tryStream(){
+    if(tried >= streams.length){ showToast('📻 Radyo bağlanamadı', 'warning'); return; }
+    audio.src = streams[tried++];
+    audio.load();
+    audio.play().catch(()=>{ tryStream(); });
+  }
   audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
-  audio.play().then(() => {
-    radioPlaying = true;
-    btn.textContent = '⏹';
-    btn.classList.add('playing');
-    eq.classList.add('playing');
-    dot.classList.add('on');
-    document.getElementById('radioName').textContent = '📻 CANLI RADYO';
-  }).catch(err => {
-    console.log('Radio error:', err);
-    showToast('📻 Radyo bağlanamadı — URL kontrol edin', 'warning');
-  });
+  function tryStream(){
+    if(tried >= streams.length){ showToast('📻 Radyo bağlanamadı', 'warning'); return; }
+    const url = streams[tried++];
+    audio.src = url;
+    audio.load();
+    audio.play().then(() => {
+      radioPlaying = true;
+      btn.textContent = '⏹';
+      btn.classList.add('playing');
+      if(eq) eq.classList.add('playing');
+      if(dot) dot.classList.add('on');
+      document.getElementById('radioName').textContent = '📻 CANLI RADYO';
+    }).catch(() => tryStream());
+  }
+  tryStream();
 }
 
 function stopRadio(){
@@ -3515,7 +3545,7 @@ function ctxHide(){ if(ctxChannel===null) return; const url=allChannels[ctxChann
 function renderRelated(){
   const src = currentCh ? allChannels.filter(c=>c.group===currentCh.group&&c.url!==currentCh.url) : allChannels;
   const pick = [...src].sort(()=>Math.random()-.5).slice(0,12);
-  document.getElementById('relGrid').innerHTML = pick.map(ch=>{
+  const html = pick.map(ch=>{
     const idx = allChannels.indexOf(ch);
     return `
       <div class="rel-card" onclick="play(${idx})">
@@ -3524,6 +3554,10 @@ function renderRelated(){
         <div class="rc-group">${ch.group}</div>
       </div>`;
   }).join('');
+  document.getElementById('relGrid').innerHTML = html;
+  // Mobil grid de doldur
+  const mobile = document.getElementById('relGridMobile');
+  if(mobile) mobile.innerHTML = html;
 }
 
 /* EPG */
