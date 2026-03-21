@@ -892,35 +892,6 @@ header {
 }
 
 /* BOTTOM AREA */
-/* MOBİL ALT NAV */
-#mobileBottomNav {
-  display: none;
-  background: var(--bg2); border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.mob-nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  gap: 2px; padding: 6px 4px; background: none; border: none;
-  color: var(--muted); font-size: 9px; font-weight: 600;
-  cursor: pointer; transition: all .2s;
-}
-.mob-nav-btn span:first-child { font-size: 16px; }
-.mob-nav-btn.active { color: var(--accent); }
-.mob-nav-btn.active span:first-child { filter: drop-shadow(0 0 4px var(--accent)); }
-.mobile-panel { display: none; max-height: 160px; overflow-y: auto; }
-.mobile-panel.active { display: block; }
-.cat-bar-mobile { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; }
-.cat-bar-bottom {
-  display: flex; flex-wrap: wrap; gap: 5px;
-  padding: 10px 12px; border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.channel-list-bottom {
-  flex: 1; overflow-y: auto; display: flex; flex-wrap: wrap;
-  gap: 5px; padding: 8px;
-  align-content: flex-start;
-}
-
 .bottom-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
 .bottom-area-wrap { grid-column: 1; grid-row: 2; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
 
@@ -1652,17 +1623,6 @@ header {
   .epg-ticker { display: none !important; }
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
 
-
-  /* Cat-bar mobilde göster */
-  .cat-bar { display: flex !important; flex-wrap: wrap; }
-
-  /* Mobilde laptop sekmelerini gizle, kategori alanı göster */
-  #btabsDesktop   { display: none !important; }
-  #btab_related   { display: none !important; }
-  #btab_info      { display: none !important; }
-  #mobileCatsArea { display: flex !important; flex-direction: column; flex: 1; overflow: hidden; }
-  #mobileBottomNav { display: none !important; }
-
   /* Radyo bar mobil */
   #radioBar { padding: 0 8px; gap: 6px; height: 30px; }
   .radio-left { gap: 5px; }
@@ -1678,6 +1638,12 @@ header {
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important; }
   .movie-thumb { height: 100px !important; }
   .movie-title { font-size: 9px !important; }
+
+  /* Mobilde bottom-tabs gizle, kategori alanı göster */
+  .bottom-tabs  { display: none !important; }
+  #btab_related { display: none !important; }
+  #btab_info    { display: none !important; }
+  #mobileCatsArea { display: flex !important; }
 }
 
 
@@ -2422,11 +2388,6 @@ tr:last-child td{border:none;}
           <button class="tab-btn" onclick="switchChTab('fav',this)">⭐</button>
           <button class="tab-btn" onclick="switchChTab('recent',this)">SON</button>
         </div>
-        <!-- MOBİLDE ÖNERİLEN KANALLAR (cat-bar yerine) -->
-        <div id="mobileRelated" style="display:none;padding:6px 8px;border-bottom:1px solid var(--border);">
-          <div style="font-size:9px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:5px;">⭐ ÖNERİLEN</div>
-          <div class="rel-grid" id="relGridMobile" style="gap:5px;"></div>
-        </div>
         <div class="cat-bar" id="catBar">
         </div>
         <div class="sidebar-sort">
@@ -2528,35 +2489,32 @@ tr:last-child td{border:none;}
         <!-- BOTTOM AREA -->
         <div class="bottom-area-wrap">
         <div class="bottom-area">
-          <!-- LAPTOP: Önerilen + Kanal Bilgisi -->
-          <div class="bottom-tabs" id="btabsDesktop">
+          <div class="bottom-tabs">
             <button class="btab active" onclick="switchBtab('related',this)">ÖNERİLEN</button>
             <button class="btab" onclick="switchBtab('info',this)">KANAL BİLGİSİ</button>
+
           </div>
+          <!-- SUGGESTED -->
           <div class="btab-content active" id="btab_related">
             <div class="sec-title">ÖNERİLEN KANALLAR</div>
             <div class="rel-grid" id="relGrid"></div>
           </div>
+          <!-- EPG -->
           <div class="btab-content" id="btab_epg">
+            <div class="sec-title">YAYIN AKIŞI</div>
             <div id="epgContent"><div style="color:var(--muted);font-size:12px;">Yayın akışı için kanal seçin.</div></div>
           </div>
+          <!-- INFO -->
           <div class="btab-content" id="btab_info">
             <div class="sec-title">KANAL BİLGİSİ</div>
             <div id="chInfoContent"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
           </div>
-          <div class="btab-content" id="btab_chat" style="display:none;flex-direction:column;padding:10px 14px;">
-            <div id="chatBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:8px;"></div>
-            <div style="display:flex;gap:8px;flex-shrink:0;">
-              <input type="text" id="chatInput" placeholder="Mesajınızı yazın..."
-                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;"
-                onkeydown="if(event.key==='Enter')sendChat()">
-              <button onclick="sendChat()" style="background:var(--accent);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Gönder</button>
-            </div>
-          </div>
-          <!-- MOBİL: Kategori pill'leri + kanal listesi -->
+          <!-- CHAT (sağ panele taşındı) -->
+          <div class="btab-content" id="btab_chat" style="display:none;"><div id="chatBox"></div></div>
+          <!-- MOBİL KATEGORİLER (sadece 480px altında görünür) -->
           <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-            <div id="catBarMobile" class="cat-bar-bottom"></div>
-            <div id="channelListBottom" class="channel-list-bottom"></div>
+            <div id="catBarMobile" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0;"></div>
+            <div id="channelListBottom" style="flex:1;overflow-y:auto;display:flex;flex-wrap:wrap;gap:5px;padding:8px;align-content:flex-start;"></div>
           </div>
         </div>
         </div><!-- /bottom-area-wrap -->
@@ -3016,11 +2974,7 @@ let chatWarningShown = false;
 
 /* ─── RADYO PLAYER ─── */
 let radioPlaying = false;
-// HTTP stream için HTTPS proxy kullan (Mixed Content bypass)
-async function getRadioStreamUrl(){
-  return RADIO_PLS.replace('listen.pls', '');
-}
-
+const RADIO_URL = 'http://46.20.7.125/listen.pls';
 
 function initRadioBar(){
   document.getElementById('radioBar').style.display = 'flex';
@@ -3037,36 +2991,19 @@ function startRadio(){
   const eq    = document.getElementById('eqBars');
   const dot   = document.getElementById('radioLiveDot');
   // .pls dosyasını doğrudan stream olarak çal
-  // Çalışan HTTPS Türk radyo stream'leri (sırayla dener)
-  const streams = [
-    'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio',
-    'https://17733.live.streamtheworld.com/JOY_TURK_SC',
-    'https://radyo.duhnet.tv/slowturk',
-    'https://turkmedya.radyotvonline.net/alemfmaac',
-  ];
-  let tried = 0;
-  function tryStream(){
-    if(tried >= streams.length){ showToast('📻 Radyo bağlanamadı', 'warning'); return; }
-    audio.src = streams[tried++];
-    audio.load();
-    audio.play().catch(()=>{ tryStream(); });
-  }
+  audio.src = RADIO_URL;
   audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
-  function tryStream(){
-    if(tried >= streams.length){ showToast('📻 Radyo bağlanamadı', 'warning'); return; }
-    const url = streams[tried++];
-    audio.src = url;
-    audio.load();
-    audio.play().then(() => {
-      radioPlaying = true;
-      btn.textContent = '⏹';
-      btn.classList.add('playing');
-      if(eq) eq.classList.add('playing');
-      if(dot) dot.classList.add('on');
-      document.getElementById('radioName').textContent = '📻 CANLI RADYO';
-    }).catch(() => tryStream());
-  }
-  tryStream();
+  audio.play().then(() => {
+    radioPlaying = true;
+    btn.textContent = '⏹';
+    btn.classList.add('playing');
+    eq.classList.add('playing');
+    dot.classList.add('on');
+    document.getElementById('radioName').textContent = '📻 CANLI RADYO';
+  }).catch(err => {
+    console.log('Radio error:', err);
+    showToast('📻 Radyo bağlanamadı — URL kontrol edin', 'warning');
+  });
 }
 
 function stopRadio(){
@@ -3103,14 +3040,14 @@ function addSmsToTicker(name, msg){
 }
 
 function showAgeWarning(){
-  // Her açılışta göster — session/localStorage kullanma
+  if(sessionStorage.getItem('age_accepted')) return;
   document.getElementById('ageWarning').style.display = 'flex';
 }
 function hideAgeWarning(){
   document.getElementById('ageWarning').style.display = 'none';
 }
 function acceptAge(){
-  // kabul edildi — bir dahaki açılışta tekrar soracak
+  sessionStorage.setItem('age_accepted','1');
   document.getElementById('ageWarning').style.display = 'none';
 }
 function rejectAge(){
@@ -3159,11 +3096,6 @@ function loginSuccess(user){
   loadM3U();
   renderMovies();
   renderNotifs();
-  // Mobilde alt sekmeyi başlat
-  if(window.innerWidth <= 480){
-    document.getElementById('btab_related')?.classList.remove('active');
-    document.getElementById('btab_cats')?.classList.add('active');
-  }
   // Misafir/demo için blur kilidi ve Filmler sekmesi kilidi
   const moviesTab = document.querySelector('.nav-tab:nth-child(2)');
   if(user.guest || user.demo){
@@ -3273,41 +3205,34 @@ function loadM3U(){
 
 function buildCats(){
   const groups = [...new Set(allChannels.map(c=>c.group).filter(g=>g))].slice(0,22);
-  const pillsHtml = groups.map((g,i)=>
+  document.getElementById('catBar').innerHTML = groups.map((g,i)=>
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
-  document.getElementById('catBar').innerHTML = pillsHtml;
-  // Mobil kategori barı
+  // Mobil kategori barını doldur
   const mob = document.getElementById('catBarMobile');
   if(mob) mob.innerHTML = groups.map((g,i)=>
-    `<button class="cat-pill ${i===0?'active':''}" onclick="filterCatMobile('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
+    `<button class="cat-pill ${i===0?'active':''}" onclick="filterMobileCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
   if(groups.length){
     filterCat(groups[0], document.querySelector('#catBar .cat-pill'));
-    renderBottomCats(groups[0]);
+    renderMobileCatChannels(groups[0]);
   }
 }
 
-function filterCatMobile(cat, el){
+function filterMobileCat(cat, el){
   document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  renderBottomCats(cat);
+  renderMobileCatChannels(cat);
 }
 
-function filterCatBottom(cat, el){
-  document.querySelectorAll('#catBarBottom .cat-pill').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  renderBottomCats(cat);
-}
-
-function renderBottomCats(cat){
+function renderMobileCatChannels(cat){
   const list = document.getElementById('channelListBottom');
   if(!list) return;
-  const chs = allChannels.filter(c=> !cat || c.group===cat).slice(0,30);
-  list.innerHTML = chs.map((ch,i)=>{
+  const chs = allChannels.filter(c=> !cat || c.group===cat).slice(0,40);
+  list.innerHTML = chs.map(ch=>{
     const idx = allChannels.indexOf(ch);
-    return `<div onclick="play(${idx})" style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;min-width:120px;flex:1;max-width:48%;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="width:26px;height:26px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${ch.logo?`<img src="${ch.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:5px;" onerror="this.outerHTML='📺'">`:'📺'}</div>
+    return `<div onclick="play(${idx})" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex:1;min-width:130px;max-width:calc(50% - 3px);">
+      <div style="width:28px;height:28px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ch.logo?`<img src="${ch.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:5px;" onerror="this.outerHTML='📺'">`:'📺'}</div>
       <span style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ch.name}</span>
     </div>`;
   }).join('');
@@ -3628,7 +3553,7 @@ function ctxHide(){ if(ctxChannel===null) return; const url=allChannels[ctxChann
 function renderRelated(){
   const src = currentCh ? allChannels.filter(c=>c.group===currentCh.group&&c.url!==currentCh.url) : allChannels;
   const pick = [...src].sort(()=>Math.random()-.5).slice(0,12);
-  const html = pick.map(ch=>{
+  document.getElementById('relGrid').innerHTML = pick.map(ch=>{
     const idx = allChannels.indexOf(ch);
     return `
       <div class="rel-card" onclick="play(${idx})">
@@ -3637,10 +3562,6 @@ function renderRelated(){
         <div class="rc-group">${ch.group}</div>
       </div>`;
   }).join('');
-  document.getElementById('relGrid').innerHTML = html;
-  // Mobil grid de doldur
-  const mobile = document.getElementById('relGridMobile');
-  if(mobile) mobile.innerHTML = html;
 }
 
 /* EPG */
@@ -4382,40 +4303,7 @@ function switchBtab(tab, btn){
   document.querySelectorAll('.btab-content').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('btab_'+tab).classList.add('active');
-  if(tab==='chat'){ document.getElementById('btab_chat').style.display='flex'; setTimeout(renderChat,50); }
-  else { document.getElementById('btab_chat').style.display='none'; }
-}
-
-function switchMobileTab(tab, btn){
-  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.mobile-panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('mobilePanelCats'  .replace('cats',tab).replace('related',tab).replace('info',tab));
-  const panels = {cats:'mobilePanelCats', related:'mobilePanelRelated', info:'mobilePanelInfo'};
-  const panel = document.getElementById(panels[tab]);
-  if(panel) panel.classList.add('active');
-  // Önerilen paneli güncelle
-  if(tab==='related'){
-    const src = currentCh ? allChannels.filter(c=>c.group===currentCh.group&&c.url!==currentCh.url) : allChannels;
-    const pick = [...src].sort(()=>Math.random()-.5).slice(0,8);
-    const grid = document.getElementById('relGridMobile2');
-    if(grid) grid.innerHTML = pick.map(ch=>{
-      const idx = allChannels.indexOf(ch);
-      return `<div class="rel-card" onclick="play(${idx})"><div class="rc-icon">${ch.logo?`<img src="${ch.logo}" onerror="this.outerHTML='📺'">`:'📺'}</div><div class="rc-name">${ch.name}</div></div>`;
-    }).join('');
-  }
-  // Kanal bilgisi panelini güncelle
-  if(tab==='info' && currentCh){
-    const mob = document.getElementById('chInfoMobile');
-    const desktop = document.getElementById('chInfoContent');
-    if(mob && desktop) mob.innerHTML = desktop.innerHTML;
-  }
-  // Kategori bar'ını mobil panele kopyala
-  if(tab==='cats'){
-    const mobBar = document.getElementById('catBarMobile');
-    const mainBar = document.getElementById('catBar');
-    if(mobBar && mainBar) mobBar.innerHTML = mainBar.innerHTML;
-  }
+  if(tab==='chat') setTimeout(renderChat, 50);
 }
 
 /* SLEEP TIMER */
