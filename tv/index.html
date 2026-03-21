@@ -1644,6 +1644,7 @@ header {
   #btab_info      { display: none !important; }
   #mobileCatsArea { display: flex !important; }
   .sidebar-tabs   { display: none !important; }
+  .cat-bar        { display: none !important; }
 }
 
 
@@ -3229,8 +3230,8 @@ function renderMobileCats(cat){
 }
 function filterCat(cat, el){
   currentCat = cat;
-  document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('#catBar .cat-pill').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
   renderList();
 }
 
