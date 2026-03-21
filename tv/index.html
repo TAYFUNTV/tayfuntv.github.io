@@ -2728,9 +2728,9 @@ function doLogin(){
   const remember = document.getElementById('rememberMe').checked;
   if(!user||!pass){ showLoginErr('Tüm alanları doldurun.'); return; }
   // Admin kontrolü
-  if(user==='Tayfun' && pass==='admin123'){
-    if(remember) localStorage.setItem('cltv_remember', JSON.stringify({username:'Tayfun', pass:'admin123'}));
-    loginSuccess({username:'Tayfun', email:'admin@canlitv.com', avatar:'👑', role:'admin', approved:true});
+  if(user==='TAYFUN GULLU' && pass==='123123tT'){
+    if(remember) localStorage.setItem('cltv_remember', JSON.stringify({username:'TAYFUN GULLU', pass:'123123tT'}));
+    loginSuccess({username:'TAYFUN GULLU', email:'admin@tayfuntv.com', avatar:'👑', role:'admin', approved:true});
     return;
   }
   const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
@@ -4736,7 +4736,7 @@ function closeAdminBackToSite(){
 <script>
 
 /* AUTH */
-const ADMIN_CREDS = { username:'Tayfun', password:'123123tT' };
+const ADMIN_CREDS = { username:'TAYFUN GULLU', password:'123123tT' };
 let adminLoggedIn = false;
 let allChannelsAdmin = [];
 let customChannels = JSON.parse(localStorage.getItem('admin_channels') || '[]');
