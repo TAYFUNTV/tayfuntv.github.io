@@ -1656,18 +1656,12 @@ header {
   /* Cat-bar mobilde göster */
   .cat-bar { display: flex !important; flex-wrap: wrap; }
 
-  /* Mobilde laptop sekmelerini gizle, mobil sekmeleri göster */
-  #btabsDesktop { display: none !important; }
-  #mobileBottomTabs { display: flex !important; }
-  #btab_related { display: none !important; }
-  #btab_info    { display: none !important; }
-  #btab_cats    { display: none; }
-  #btab_cats.active { display: flex !important; flex-direction: column; flex: 1; overflow: hidden; }
-
-  /* Mobil alt navigasyon */
-  #mobileBottomNav { display: flex !important; }
-  .mobile-panel { display: none; }
-  .mobile-panel.active { display: block; }
+  /* Mobilde laptop sekmelerini gizle, kategori alanı göster */
+  #btabsDesktop   { display: none !important; }
+  #btab_related   { display: none !important; }
+  #btab_info      { display: none !important; }
+  #mobileCatsArea { display: flex !important; flex-direction: column; flex: 1; overflow: hidden; }
+  #mobileBottomNav { display: none !important; }
 
   /* Radyo bar mobil */
   #radioBar { padding: 0 8px; gap: 6px; height: 30px; }
@@ -2534,30 +2528,22 @@ tr:last-child td{border:none;}
         <!-- BOTTOM AREA -->
         <div class="bottom-area-wrap">
         <div class="bottom-area">
+          <!-- LAPTOP: Önerilen + Kanal Bilgisi -->
           <div class="bottom-tabs" id="btabsDesktop">
             <button class="btab active" onclick="switchBtab('related',this)">ÖNERİLEN</button>
             <button class="btab" onclick="switchBtab('info',this)">KANAL BİLGİSİ</button>
           </div>
-          <!-- MOBİL SEKMELER -->
-          <div class="bottom-tabs" id="mobileBottomTabs" style="display:none;">
-            <button class="btab active" onclick="switchBtab('cats',this)">📺 KATEGORİLER</button>
-            <button class="btab" onclick="switchBtab('chat',this)">💬 CHAT</button>
-          </div>
-          <!-- SUGGESTED -->
           <div class="btab-content active" id="btab_related">
             <div class="sec-title">ÖNERİLEN KANALLAR</div>
             <div class="rel-grid" id="relGrid"></div>
           </div>
-          <!-- EPG -->
           <div class="btab-content" id="btab_epg">
             <div id="epgContent"><div style="color:var(--muted);font-size:12px;">Yayın akışı için kanal seçin.</div></div>
           </div>
-          <!-- INFO -->
           <div class="btab-content" id="btab_info">
             <div class="sec-title">KANAL BİLGİSİ</div>
             <div id="chInfoContent"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
           </div>
-          <!-- CHAT -->
           <div class="btab-content" id="btab_chat" style="display:none;flex-direction:column;padding:10px 14px;">
             <div id="chatBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:8px;"></div>
             <div style="display:flex;gap:8px;flex-shrink:0;">
@@ -2567,39 +2553,13 @@ tr:last-child td{border:none;}
               <button onclick="sendChat()" style="background:var(--accent);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Gönder</button>
             </div>
           </div>
-          <!-- KATEGORİLER (sadece mobil) -->
-          <div class="btab-content" id="btab_cats">
-            <div class="cat-bar-bottom" id="catBarBottom"></div>
-            <div class="channel-list-bottom" id="channelListBottom"></div>
+          <!-- MOBİL: Kategori pill'leri + kanal listesi -->
+          <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+            <div id="catBarMobile" class="cat-bar-bottom"></div>
+            <div id="channelListBottom" class="channel-list-bottom"></div>
           </div>
         </div>
         </div><!-- /bottom-area-wrap -->
-
-        <!-- MOBİL ALT NAVİGASYON (sadece mobilde görünür) -->
-        <!-- MOBİL PANEL İÇERİKLERİ (üstte) -->
-        <div id="mobilePanelCats" class="mobile-panel active">
-          <div class="cat-bar-mobile" id="catBarMobile"></div>
-        </div>
-        <div id="mobilePanelRelated" class="mobile-panel">
-          <div class="sec-title" style="padding:8px 12px 4px;">ÖNERİLEN KANALLAR</div>
-          <div class="rel-grid" id="relGridMobile2" style="padding:0 8px 8px;"></div>
-        </div>
-        <div id="mobilePanelInfo" class="mobile-panel">
-          <div id="chInfoMobile" style="padding:8px;"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
-        </div>
-
-        <!-- MOBİL ALT NAVİGASYON (altta sabit) -->
-        <div id="mobileBottomNav" style="display:none;">
-          <button class="mob-nav-btn active" onclick="switchMobileTab('cats',this)">
-            <span>📺</span><span>Kategoriler</span>
-          </button>
-          <button class="mob-nav-btn" onclick="switchMobileTab('related',this)">
-            <span>⭐</span><span>Önerilen</span>
-          </button>
-          <button class="mob-nav-btn" onclick="switchMobileTab('info',this)">
-            <span>ℹ️</span><span>Kanal Bilgisi</span>
-          </button>
-        </div>
 
         <!-- CHAT SIDEBAR -->
         <div class="epg-sidebar">
@@ -3317,16 +3277,21 @@ function buildCats(){
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
   document.getElementById('catBar').innerHTML = pillsHtml;
-  // Alt bar
-  const bottom = document.getElementById('catBarBottom');
-  if(bottom) bottom.innerHTML = pillsHtml.replace(/onclick="filterCat\(/g, 'onclick="filterCatBottom(');
-  // Mobil panele de kopyala
+  // Mobil kategori barı
   const mob = document.getElementById('catBarMobile');
-  if(mob) mob.innerHTML = pillsHtml;
+  if(mob) mob.innerHTML = groups.map((g,i)=>
+    `<button class="cat-pill ${i===0?'active':''}" onclick="filterCatMobile('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
+  ).join('');
   if(groups.length){
-    filterCat(groups[0], document.querySelector('.cat-pill'));
+    filterCat(groups[0], document.querySelector('#catBar .cat-pill'));
     renderBottomCats(groups[0]);
   }
+}
+
+function filterCatMobile(cat, el){
+  document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderBottomCats(cat);
 }
 
 function filterCatBottom(cat, el){
