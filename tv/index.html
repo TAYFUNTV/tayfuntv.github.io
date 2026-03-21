@@ -910,6 +910,16 @@ header {
 .mobile-panel { display: none; max-height: 160px; overflow-y: auto; }
 .mobile-panel.active { display: block; }
 .cat-bar-mobile { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; }
+.cat-bar-bottom {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.channel-list-bottom {
+  flex: 1; overflow-y: auto; display: flex; flex-wrap: wrap;
+  gap: 5px; padding: 8px;
+  align-content: flex-start;
+}
 
 .bottom-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
 .bottom-area-wrap { grid-column: 1; grid-row: 2; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
@@ -1645,6 +1655,14 @@ header {
 
   /* Cat-bar mobilde göster */
   .cat-bar { display: flex !important; flex-wrap: wrap; }
+
+  /* Mobilde laptop sekmelerini gizle, mobil sekmeleri göster */
+  #btabsDesktop { display: none !important; }
+  #mobileBottomTabs { display: flex !important; }
+  #btab_related { display: none !important; }
+  #btab_info    { display: none !important; }
+  #btab_cats    { display: none; }
+  #btab_cats.active { display: flex !important; flex-direction: column; flex: 1; overflow: hidden; }
 
   /* Mobil alt navigasyon */
   #mobileBottomNav { display: flex !important; }
@@ -2516,10 +2534,14 @@ tr:last-child td{border:none;}
         <!-- BOTTOM AREA -->
         <div class="bottom-area-wrap">
         <div class="bottom-area">
-          <div class="bottom-tabs">
+          <div class="bottom-tabs" id="btabsDesktop">
             <button class="btab active" onclick="switchBtab('related',this)">ÖNERİLEN</button>
             <button class="btab" onclick="switchBtab('info',this)">KANAL BİLGİSİ</button>
-
+          </div>
+          <!-- MOBİL SEKMELER -->
+          <div class="bottom-tabs" id="mobileBottomTabs" style="display:none;">
+            <button class="btab active" onclick="switchBtab('cats',this)">📺 KATEGORİLER</button>
+            <button class="btab" onclick="switchBtab('chat',this)">💬 CHAT</button>
           </div>
           <!-- SUGGESTED -->
           <div class="btab-content active" id="btab_related">
@@ -2528,7 +2550,6 @@ tr:last-child td{border:none;}
           </div>
           <!-- EPG -->
           <div class="btab-content" id="btab_epg">
-            <div class="sec-title">YAYIN AKIŞI</div>
             <div id="epgContent"><div style="color:var(--muted);font-size:12px;">Yayın akışı için kanal seçin.</div></div>
           </div>
           <!-- INFO -->
@@ -2536,8 +2557,21 @@ tr:last-child td{border:none;}
             <div class="sec-title">KANAL BİLGİSİ</div>
             <div id="chInfoContent"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
           </div>
-          <!-- CHAT (sağ panele taşındı) -->
-          <div class="btab-content" id="btab_chat" style="display:none;"><div id="chatBox"></div></div>
+          <!-- CHAT -->
+          <div class="btab-content" id="btab_chat" style="display:none;flex-direction:column;padding:10px 14px;">
+            <div id="chatBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:8px;"></div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <input type="text" id="chatInput" placeholder="Mesajınızı yazın..."
+                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:12px;outline:none;"
+                onkeydown="if(event.key==='Enter')sendChat()">
+              <button onclick="sendChat()" style="background:var(--accent);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">Gönder</button>
+            </div>
+          </div>
+          <!-- KATEGORİLER (sadece mobil) -->
+          <div class="btab-content" id="btab_cats">
+            <div class="cat-bar-bottom" id="catBarBottom"></div>
+            <div class="channel-list-bottom" id="channelListBottom"></div>
+          </div>
         </div>
         </div><!-- /bottom-area-wrap -->
 
@@ -3165,6 +3199,11 @@ function loginSuccess(user){
   loadM3U();
   renderMovies();
   renderNotifs();
+  // Mobilde alt sekmeyi başlat
+  if(window.innerWidth <= 480){
+    document.getElementById('btab_related')?.classList.remove('active');
+    document.getElementById('btab_cats')?.classList.add('active');
+  }
   // Misafir/demo için blur kilidi ve Filmler sekmesi kilidi
   const moviesTab = document.querySelector('.nav-tab:nth-child(2)');
   if(user.guest || user.demo){
@@ -3278,10 +3317,35 @@ function buildCats(){
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
   document.getElementById('catBar').innerHTML = pillsHtml;
+  // Alt bar
+  const bottom = document.getElementById('catBarBottom');
+  if(bottom) bottom.innerHTML = pillsHtml.replace(/onclick="filterCat\(/g, 'onclick="filterCatBottom(');
   // Mobil panele de kopyala
   const mob = document.getElementById('catBarMobile');
   if(mob) mob.innerHTML = pillsHtml;
-  if(groups.length) filterCat(groups[0], document.querySelector('.cat-pill'));
+  if(groups.length){
+    filterCat(groups[0], document.querySelector('.cat-pill'));
+    renderBottomCats(groups[0]);
+  }
+}
+
+function filterCatBottom(cat, el){
+  document.querySelectorAll('#catBarBottom .cat-pill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderBottomCats(cat);
+}
+
+function renderBottomCats(cat){
+  const list = document.getElementById('channelListBottom');
+  if(!list) return;
+  const chs = allChannels.filter(c=> !cat || c.group===cat).slice(0,30);
+  list.innerHTML = chs.map((ch,i)=>{
+    const idx = allChannels.indexOf(ch);
+    return `<div onclick="play(${idx})" style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;min-width:120px;flex:1;max-width:48%;transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:26px;height:26px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${ch.logo?`<img src="${ch.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:5px;" onerror="this.outerHTML='📺'">`:'📺'}</div>
+      <span style="font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ch.name}</span>
+    </div>`;
+  }).join('');
 }
 
 function filterCat(cat, el){
@@ -4353,7 +4417,8 @@ function switchBtab(tab, btn){
   document.querySelectorAll('.btab-content').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('btab_'+tab).classList.add('active');
-  if(tab==='chat') setTimeout(renderChat, 50);
+  if(tab==='chat'){ document.getElementById('btab_chat').style.display='flex'; setTimeout(renderChat,50); }
+  else { document.getElementById('btab_chat').style.display='none'; }
 }
 
 function switchMobileTab(tab, btn){
