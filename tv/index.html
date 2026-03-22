@@ -1641,19 +1641,51 @@ header {
   .tv-layout {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
-    height: calc(100vh - 56px);
+    height: calc(100vh - 78px); /* radioBar + header */
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
-  /* Main: tek sütun, chat sidebar alta */
+  /* Main: flex kolon */
   .main {
-    order: 1; flex: 0 0 auto;
-    grid-template-columns: 1fr !important;
-    grid-template-rows: auto auto auto !important;
+    order: 1;
+    flex: 0 0 auto;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: unset !important;
+    grid-template-rows: unset !important;
   }
-  .player-wrap  { grid-column: 1 !important; grid-row: 1 !important; }
-  .epg-ticker   { grid-column: 1 !important; }
-  .bottom-area-wrap { grid-column: 1 !important; grid-row: 2 !important; }
-  .epg-sidebar  { grid-column: 1 !important; grid-row: 3 !important; max-height: 200px; border-left: none; border-top: 1px solid var(--border); }
+  .player-wrap  { grid-column: unset !important; grid-row: unset !important; flex-shrink: 0; }
+  .epg-ticker   { grid-column: unset !important; flex-shrink: 0; }
+  .bottom-area-wrap { grid-column: unset !important; grid-row: unset !important; display: none !important; }
+  .epg-sidebar  { display: none !important; }
+
+  /* Sidebar: kanal sekmelerini kaplar */
+  .sidebar {
+    order: 2;
+    flex: 1;
+    overflow: hidden;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    display: flex !important;
+    flex-direction: column;
+    min-height: 0;
+  }
+  /* mobileCatsArea tam yüksekliği kaplasın */
+  #mobileCatsArea {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  #mobileCatTabs {
+    flex-shrink: 0;
+  }
+  #mobCatContent {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
 
   /* Dizi bölüm kartları mobil */
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important; }
@@ -1741,6 +1773,7 @@ header {
   border-bottom: 1px solid var(--border);
   cursor: pointer; transition: background .15s;
   animation: slideUpList .3s ease both;
+  flex-shrink: 0;
 }
 .mob-ch-item:active { background: rgba(232,55,61,.08); }
 .mob-ch-logo {
@@ -4597,9 +4630,10 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
+  cont.style.cssText = 'flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;position:relative;';
 
   if (tab === 'chat') {
-    cont.style.cssText = 'flex:1;position:relative;overflow:hidden;';
+    cont.style.cssText = 'flex:1;min-height:0;position:relative;overflow:hidden;display:flex;flex-direction:column;';
     cont.innerHTML =
       '<div id="mobChatBox" style="position:absolute;top:0;left:0;right:0;bottom:56px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:8px;">' +
         '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
