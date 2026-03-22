@@ -1688,16 +1688,14 @@ header {
     height: calc(100vh - 320px) !important;
     max-height: calc(100vh - 320px) !important;
     min-height: 100px !important;
-    overflow-y: scroll !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-y pinch-zoom !important;
     overscroll-behavior-y: contain !important;
     display: block !important;
-    will-change: scroll-position !important;
   }
   .mob-ch-item {
-    touch-action: pan-y !important;
+    pointer-events: auto;
     user-select: none !important;
     -webkit-user-select: none !important;
   }
@@ -4688,26 +4686,14 @@ function switchMobTab(tab, btn) {
   }).join('');
   cont.innerHTML = items;
 
-  // Scroll sırasında tıklama engeli — touchstart/touchmove/touchend ile
-  var touchStartY = 0;
-  var touchMoved = false;
-  cont.addEventListener('touchstart', function(e) {
-    touchStartY = e.touches[0].clientY;
-    touchMoved = false;
-  }, {passive: true});
-  cont.addEventListener('touchmove', function(e) {
-    if (Math.abs(e.touches[0].clientY - touchStartY) > 8) {
-      touchMoved = true;
-    }
-  }, {passive: true});
-  cont.addEventListener('touchend', function(e) {
-    if (touchMoved) return;
+  // Tek seferlik click delegasyonu
+  cont.addEventListener('click', function(e) {
     var item = e.target.closest('.mob-ch-item');
     if (item) {
       var idx = parseInt(item.getAttribute('data-idx'));
       if (!isNaN(idx)) play(idx);
     }
-  }, {passive: true});
+  });
 }
 
 function renderMobChat() {
