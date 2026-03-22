@@ -65,11 +65,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-@media (max-width: 768px) {
-  body {
-    overflow: hidden;
-  }
-}
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -1690,21 +1685,15 @@ header {
   }
   #mobCatContent {
     flex: 1 !important;
-    min-height: 0 !important;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-  #mobCatContent.chat-mode {
-    overflow: hidden !important;
-    overflow-y: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  .mob-ch-item {
-    pointer-events: auto;
-    user-select: none !important;
-    -webkit-user-select: none !important;
+    height: calc(100vh - 320px) !important;
+    max-height: calc(100vh - 320px) !important;
+    min-height: 100px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+    display: block !important;
   }
 
   /* Dizi bölüm kartları mobil */
@@ -4646,17 +4635,15 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.removeAttribute('style');
-  cont.classList.remove('chat-mode');
+  cont.style.cssText = '';
 
   if (tab === 'chat') {
-    cont.removeAttribute('style');
-    cont.classList.add('chat-mode');
+    cont.style.cssText = 'flex:1;min-height:0;position:relative;overflow:hidden;display:flex;flex-direction:column;';
     cont.innerHTML =
-      '<div id="mobChatBox" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;">' +
+      '<div id="mobChatBox" style="position:absolute;top:0;left:0;right:0;bottom:56px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:8px;">' +
         '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
       '</div>' +
-      '<div id="mobChatInputBar" style="flex-shrink:0;display:flex;gap:6px;align-items:center;padding:8px;border-top:1px solid var(--border);background:var(--bg2);">' +
+      '<div style="position:absolute;bottom:0;left:0;right:0;height:56px;display:flex;gap:6px;align-items:center;padding:6px 8px;border-top:1px solid var(--border);background:var(--bg2);">' +
         '<input type="text" id="mobChatInput" placeholder="Mesaj yaz..."' +
         ' style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:16px;outline:none;"' +
         ' autocorrect="off" autocapitalize="off"' +
@@ -4684,7 +4671,7 @@ function switchMobTab(tab, btn) {
     var logo = ch.logo
       ? '<img src="' + ch.logo + '" onerror="this.outerHTML=\'&#128250;\'" loading="lazy">'
       : '&#128250;';
-    return '<div class="mob-ch-item" data-idx="' + idx + '" style="animation-delay:' + (i*30) + 'ms">' +
+    return '<div class="mob-ch-item" onclick="play(' + idx + ')" style="animation-delay:' + (i*30) + 'ms">' +
       '<div class="mob-ch-logo">' + logo + '</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<div class="mob-ch-name">' + ch.name + '</div>' +
@@ -4694,15 +4681,6 @@ function switchMobTab(tab, btn) {
     '</div>';
   }).join('');
   cont.innerHTML = items;
-
-  // Tek seferlik click delegasyonu
-  cont.addEventListener('click', function(e) {
-    var item = e.target.closest('.mob-ch-item');
-    if (item) {
-      var idx = parseInt(item.getAttribute('data-idx'));
-      if (!isNaN(idx)) play(idx);
-    }
-  });
 }
 
 function renderMobChat() {
