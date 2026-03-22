@@ -1685,11 +1685,15 @@ header {
   }
   #mobCatContent {
     flex: 1 !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    position: relative !important;
-    display: flex !important;
-    flex-direction: column !important;
+    height: calc(100vh - 320px) !important;
+    max-height: calc(100vh - 320px) !important;
+    min-height: 100px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior-y: contain !important;
+    display: block !important;
   }
 
   /* Dizi bölüm kartları mobil */
@@ -1771,6 +1775,8 @@ header {
   cursor: pointer; transition: background .15s;
   animation: slideUpList .3s ease both;
   flex-shrink: 0;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
 }
 .mob-ch-item:active { background: rgba(232,55,61,.08); }
 .mob-ch-logo {
@@ -4629,7 +4635,7 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.style.cssText = 'flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;';
+  cont.style.cssText = '';
 
   if (tab === 'chat') {
     cont.style.cssText = 'flex:1;min-height:0;position:relative;overflow:hidden;display:flex;flex-direction:column;';
