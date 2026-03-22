@@ -4643,7 +4643,7 @@ function switchMobTab(tab, btn) {
   cont.style.cssText = '';
 
   if (tab === 'chat') {
-    cont.style.cssText = 'overflow:hidden;';
+    cont.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;height:calc(100vh - 320px);';
     cont.innerHTML =
       '<div id="mobChatBox" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;min-height:0;">' +
         '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
