@@ -1691,9 +1691,15 @@ header {
     overflow-y: scroll !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-y !important;
+    touch-action: pan-y pinch-zoom !important;
     overscroll-behavior-y: contain !important;
     display: block !important;
+    will-change: scroll-position !important;
+  }
+  .mob-ch-item {
+    touch-action: pan-y !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
   }
 
   /* Dizi bölüm kartları mobil */
@@ -4671,7 +4677,7 @@ function switchMobTab(tab, btn) {
     var logo = ch.logo
       ? '<img src="' + ch.logo + '" onerror="this.outerHTML=\'&#128250;\'" loading="lazy">'
       : '&#128250;';
-    return '<div class="mob-ch-item" onclick="play(' + idx + ')" style="animation-delay:' + (i*30) + 'ms">' +
+    return '<div class="mob-ch-item" data-idx="' + idx + '" style="animation-delay:' + (i*30) + 'ms">' +
       '<div class="mob-ch-logo">' + logo + '</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<div class="mob-ch-name">' + ch.name + '</div>' +
@@ -4681,6 +4687,27 @@ function switchMobTab(tab, btn) {
     '</div>';
   }).join('');
   cont.innerHTML = items;
+
+  // Scroll sırasında tıklama engeli — touchstart/touchmove/touchend ile
+  var touchStartY = 0;
+  var touchMoved = false;
+  cont.addEventListener('touchstart', function(e) {
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+  }, {passive: true});
+  cont.addEventListener('touchmove', function(e) {
+    if (Math.abs(e.touches[0].clientY - touchStartY) > 8) {
+      touchMoved = true;
+    }
+  }, {passive: true});
+  cont.addEventListener('touchend', function(e) {
+    if (touchMoved) return;
+    var item = e.target.closest('.mob-ch-item');
+    if (item) {
+      var idx = parseInt(item.getAttribute('data-idx'));
+      if (!isNaN(idx)) play(idx);
+    }
+  }, {passive: true});
 }
 
 function renderMobChat() {
