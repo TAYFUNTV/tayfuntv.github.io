@@ -4629,7 +4629,7 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.style.cssText = 'flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;position:relative;';
+  cont.style.cssText = 'flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;';
 
   if (tab === 'chat') {
     cont.style.cssText = 'flex:1;min-height:0;position:relative;overflow:hidden;display:flex;flex-direction:column;';
@@ -4660,7 +4660,7 @@ function switchMobTab(tab, btn) {
     return;
   }
 
-  cont.innerHTML = matched.map(function(ch, i) {
+  var items = matched.map(function(ch, i) {
     var idx = allChannels.indexOf(ch);
     var logo = ch.logo
       ? '<img src="' + ch.logo + '" onerror="this.outerHTML=\'&#128250;\'" loading="lazy">'
@@ -4674,6 +4674,7 @@ function switchMobTab(tab, btn) {
       '<span style="font-size:9px;color:var(--green);font-weight:700;">&#9679; CANLI</span>' +
     '</div>';
   }).join('');
+  cont.innerHTML = items;
 }
 
 function renderMobChat() {
