@@ -4640,15 +4640,18 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.style.cssText = '';
+  cont.removeAttribute('style');
 
   if (tab === 'chat') {
-    cont.style.cssText = 'display:flex;flex-direction:column;overflow:hidden;height:calc(100vh - 320px);';
+    var chatH = (window.innerHeight - 320);
+    var inputH = 58;
+    var boxH = chatH - inputH;
+    cont.setAttribute('style', 'overflow:hidden !important;overflow-y:hidden !important;height:' + chatH + 'px !important;');
     cont.innerHTML =
-      '<div id="mobChatBox" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;min-height:0;max-height:calc(100vh - 390px);">' +
+      '<div id="mobChatBox" style="height:' + boxH + 'px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;">' +
         '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
       '</div>' +
-      '<div id="mobChatInputBar" style="flex-shrink:0;display:flex;gap:6px;align-items:center;padding:8px;border-top:1px solid var(--border);background:var(--bg2);">' +
+      '<div id="mobChatInputBar" style="height:' + inputH + 'px;display:flex;gap:6px;align-items:center;padding:0 8px;border-top:1px solid var(--border);background:var(--bg2);">' +
         '<input type="text" id="mobChatInput" placeholder="Mesaj yaz..."' +
         ' style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:16px;outline:none;"' +
         ' autocorrect="off" autocapitalize="off"' +
