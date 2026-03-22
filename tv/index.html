@@ -2590,6 +2590,19 @@ tr:last-child td{border:none;}
       <div class="tv-layout">
       <!-- SIDEBAR -->
       <aside class="sidebar">
+        <!-- MOBİL KATEGORİ SEKME SİSTEMİ -->
+        <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+          <div id="mobileCatTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--border);flex-shrink:0;scrollbar-width:none;">
+            <button class="mob-cat-tab" onclick="switchMobTab('spor',this)">⚽ Spor</button>
+            <button class="mob-cat-tab" onclick="switchMobTab('ulusal',this)">📡 Ulusal</button>
+            <button class="mob-cat-tab" onclick="switchMobTab('yerel',this)">🏙️ Yerel</button>
+            <button class="mob-cat-tab" onclick="switchMobTab('belgesel',this)">🌍 Belgesel</button>
+            <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
+            <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
+          </div>
+          <div id="mobCatContent" style="flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative;"></div>
+        </div>
+        <!-- DESKTOP KANAL LİSTESİ -->
         <div class="sidebar-tabs">
           <button class="tab-btn active" onclick="switchChTab('all',this)">TÜM</button>
           <button class="tab-btn" onclick="switchChTab('fav',this)">⭐</button>
@@ -2718,18 +2731,7 @@ tr:last-child td{border:none;}
           </div>
           <!-- CHAT (sağ panele taşındı) -->
           <div class="btab-content" id="btab_chat" style="display:none;"><div id="chatBox"></div></div>
-          <!-- MOBİL KATEGORİ SEKME SİSTEMİ -->
-          <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-            <div id="mobileCatTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--border);flex-shrink:0;scrollbar-width:none;">
-              <button class="mob-cat-tab" onclick="switchMobTab('spor',this)">⚽ Spor</button>
-              <button class="mob-cat-tab" onclick="switchMobTab('ulusal',this)">📡 Ulusal</button>
-              <button class="mob-cat-tab" onclick="switchMobTab('yerel',this)">🏙️ Yerel</button>
-              <button class="mob-cat-tab" onclick="switchMobTab('belgesel',this)">🌍 Belgesel</button>
-              <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
-              <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
-            </div>
-            <div id="mobCatContent" style="flex:1;overflow:hidden;display:flex;flex-direction:column;"></div>
-          </div>
+
         </div>
         </div><!-- /bottom-area-wrap -->
 
