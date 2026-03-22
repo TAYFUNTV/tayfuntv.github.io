@@ -1637,59 +1637,59 @@ header {
   .search-bar { flex: 1; max-width: 200px; }
   .search-bar input { width: 100%; }
 
-  /* TV layout: alt alta */
+  /* TV layout: dikey yığın */
   .tv-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    height: calc(100vh - 78px); /* radioBar + header */
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 78px);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
   }
-  /* Main: flex kolon */
   .main {
     order: 1;
     flex: 0 0 auto;
     display: flex !important;
     flex-direction: column !important;
-    grid-template-columns: unset !important;
-    grid-template-rows: unset !important;
+    width: 100%;
   }
-  .player-wrap  { grid-column: unset !important; grid-row: unset !important; flex-shrink: 0; }
-  .epg-ticker   { grid-column: unset !important; flex-shrink: 0; }
-  .bottom-area-wrap { grid-column: unset !important; grid-row: unset !important; display: none !important; }
-  .epg-sidebar  { display: none !important; }
+  .bottom-area-wrap { display: none !important; }
+  .epg-sidebar      { display: none !important; }
 
-  /* Sidebar: kanal sekmelerini kaplar */
+  /* Sidebar: sekme alanı */
   .sidebar {
-    order: 2;
-    flex: 1;
-    overflow: hidden;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    display: flex !important;
-    flex-direction: column;
-    min-height: 0;
-  }
-  /* mobileCatsArea - 768px'de de göster */
-  #mobileCatsArea {
-    display: flex !important;
+    order: 2 !important;
     flex: 1 !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
   }
-  .sidebar-tabs   { display: none !important; }
-  .channel-list   { display: none !important; }
-  .sidebar-sort   { display: none !important; }
-  .cat-bar        { display: none !important; }
+  .sidebar-tabs  { display: none !important; }
+  .channel-list  { display: none !important; }
+  .sidebar-sort  { display: none !important; }
+  .cat-bar       { display: none !important; }
+
+  #mobileCatsArea {
+    display: flex !important;
+    flex: 1 !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
   #mobileCatTabs {
     flex-shrink: 0;
+    display: flex !important;
   }
   #mobCatContent {
     flex: 1 !important;
     min-height: 0 !important;
     overflow: hidden !important;
     position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Dizi bölüm kartları mobil */
@@ -1699,14 +1699,6 @@ header {
   /* Radyo bar 768px */
   .sms-msg { font-size: 10px; padding: 0 12px; }
   .radio-vol { width: 50px; }
-  .sidebar {
-    order: 2;
-    flex: 1;
-    overflow: hidden;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    height: 100%;
-  }
 
   /* Player oranı 16:9 mobil */
   .player-ratio { padding-top: 56.25% !important; height: auto !important; flex: none !important; }
