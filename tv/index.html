@@ -1671,12 +1671,17 @@ header {
     flex-direction: column;
     min-height: 0;
   }
-  /* mobileCatsArea tam yüksekliği kaplasın */
+  /* mobileCatsArea - 768px'de de göster */
   #mobileCatsArea {
+    display: flex !important;
     flex: 1 !important;
     min-height: 0 !important;
     overflow: hidden !important;
   }
+  .sidebar-tabs   { display: none !important; }
+  .channel-list   { display: none !important; }
+  .sidebar-sort   { display: none !important; }
+  .cat-bar        { display: none !important; }
   #mobileCatTabs {
     flex-shrink: 0;
   }
