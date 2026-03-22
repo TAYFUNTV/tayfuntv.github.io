@@ -251,9 +251,11 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   border: 1px solid var(--border2);
   border-radius: var(--radius2);
   padding: 40px; width: 380px;
+  max-width: calc(100vw - 32px);
   position: relative;
   box-shadow: var(--shadow);
   animation: fadeInUp .5s ease;
+  box-sizing: border-box;
 }
 .login-logo {
   font-family: 'Bebas Neue', sans-serif;
@@ -288,6 +290,9 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   border: 1px solid var(--border); border-radius: 8px;
   padding: 10px 14px; color: var(--text); font-size: 13px;
   outline: none; transition: border-color .2s;
+  -webkit-appearance: none;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 .login-field input:focus { border-color: rgba(232,55,61,.5); }
 .login-btn {
@@ -297,6 +302,9 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   font-size: 14px; font-weight: 700;
   margin-top: 6px; transition: var(--transition);
   letter-spacing: .8px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
 }
 .login-btn:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(232,55,61,.3); }
 .login-guest {
@@ -1588,6 +1596,18 @@ header {
 
 /* ===== TAM MOBİL UYUMLULUK ===== */
 @media (max-width: 768px) {
+  /* Login mobil */
+  #loginScreen { padding: 16px; align-items: flex-start; padding-top: 40px; overflow-y: auto; }
+  .login-box { padding: 24px 20px; width: 100%; max-width: 100%; border-radius: 12px; }
+  .login-logo { font-size: 22px; }
+  .login-field input {
+    font-size: 16px !important; /* iOS zoom engelle */
+    padding: 12px 14px;
+    -webkit-appearance: none;
+  }
+  .login-btn { padding: 14px; font-size: 15px; }
+  .login-tab { font-size: 13px; padding: 9px; }
+
   /* Header mobil iyileştirme */
   .search-bar { flex: 1; max-width: 200px; }
   .search-bar input { width: 100%; }
