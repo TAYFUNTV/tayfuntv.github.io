@@ -2377,11 +2377,11 @@ tr:last-child td{border:none;}
     <div id="loginForm">
       <div class="login-field">
         <label>KULLANICI ADI</label>
-        <input type="text" id="loginUser" placeholder="kullanici_adi" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="text" id="loginUser" placeholder="kullanici_adi" onkeydown="if(event.key==='Enter')doLogin()" autocorrect="off" autocapitalize="off" autocomplete="username" spellcheck="false">
       </div>
       <div class="login-field">
         <label>ŞİFRE</label>
-        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password" autocorrect="off" autocapitalize="off">
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2);user-select:none;">
@@ -3117,7 +3117,7 @@ function showLoginErr(msg){ const e=document.getElementById('loginErr'); e.textC
 function showLoginOk(msg){ const e=document.getElementById('loginOk'); e.textContent=msg; e.style.display='block'; }
 function doLogin(){
   const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
+  const pass = document.getElementById('loginPass').value.trim();
   const remember = document.getElementById('rememberMe').checked;
   if(!user||!pass){ showLoginErr('Tüm alanları doldurun.'); return; }
   // Admin kontrolü
