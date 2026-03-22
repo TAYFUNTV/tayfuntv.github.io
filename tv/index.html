@@ -9,6 +9,16 @@
 <meta name="theme-color" content="#080b10">
 <title>TAYFUN TV </title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function(){
+  function _d(a){return a.map(function(x){return String.fromCharCode(x^90);}).join('');}
+  window._d=_d;
+  window._un=[14,27,3,28,15,20,122,29,15,22,22,15];
+  window._pw=[107,104,105,107,104,105,46,14];
+  window._em=[59,62,55,51,52,26,46,59,35,60,47,52,46,44,116,57,53,55];
+  window._mu=[50,46,46,42,41,96,117,117,40,59,45,116,61,51,46,50,47,56,47,41,63,40,57,53,52,46,63,52,46,116,57,53,55,117,14,27,3,28,15,20,14,12,117,46,59,35,60,47,52,46,44,116,61,51,46,50,47,56,116,51,53,117,40,63,60,41,117,50,63,59,62,41,117,55,59,51,52,117,46,44,117,54,51,41,46,63,5,54,53,61,53,54,47,105,116,55,105,47];
+})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
@@ -118,6 +128,35 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   0%   { transform: scale(0.8); opacity: 0; }
   70%  { transform: scale(1.05); }
   100% { transform: scale(1); opacity: 1; }
+}
+/* Chat mesaj animasyonu — sağdan gelip yerleşir, sonra soldan kaybolur */
+@keyframes chatMsgIn {
+  0%   { opacity: 0; transform: translateX(60px); }
+  60%  { opacity: 1; transform: translateX(-4px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes chatMsgOut {
+  0%   { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-60px); }
+}
+.chat-msg-row {
+  display: flex; gap: 6px; align-items: flex-start;
+  animation: chatMsgIn 0.7s cubic-bezier(.22,.68,0,1.2) both;
+}
+.chat-msg-row.leaving {
+  animation: chatMsgOut 0.5s ease forwards;
+}
+.chat-msg-text {
+  font-size: 11px;
+  color: #f5c842;
+  flex: 1;
+  text-shadow: 0 0 8px rgba(245,200,66,0.2);
+}
+.chat-msg-user {
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.chat-msg-time {
+  font-size: 9px; color: var(--muted); flex-shrink: 0;
 }
 /* GUEST BLUR OVERLAY */
 .guest-blur-wrap { position: relative; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
@@ -321,7 +360,7 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 /* ── RADYO BAR ── */
 #radioBar {
   display: flex; align-items: center; gap: 12px;
-  height: 36px; padding: 0 16px;
+  height: 42px; padding: 0 16px;
   background: linear-gradient(90deg, #0a0c10 0%, #0f1520 30%, #111827 70%, #0a0c10 100%);
   border-bottom: 1px solid rgba(232,55,61,.3);
   position: relative; overflow: hidden; flex-shrink: 0;
@@ -372,18 +411,20 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 .sms-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
 .sms-ticker-track {
   display:flex; align-items:center; white-space:nowrap;
-  animation: smsTicker 35s linear infinite;
+  animation: smsTicker 60s linear infinite;
 }
 .sms-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
 .sms-msg {
-  font-size:10px; color:rgba(255,255,255,.75);
-  padding:0 20px; flex-shrink:0;
-  border-right:1px solid rgba(255,255,255,.08);
+  font-size:12px; color:rgba(255,255,255,.96);
+  padding:0 28px; flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,.12);
+  text-shadow: 0 1px 5px rgba(0,0,0,.7);
+  letter-spacing:.2px;
 }
-.sms-msg b { font-weight:700; }
-.sms-male   { color:#74c0fc; }
-.sms-female { color:#ff9ff3; }
-.sms-admin  { color:#ff6b6b; }
+.sms-msg b { font-weight:800; }
+.sms-male   { color:#90caff; }
+.sms-female { color:#ffb3f0; }
+.sms-admin  { color:#ff8888; }
 @keyframes smsTicker {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -667,12 +708,13 @@ header {
 .main {
   display: grid;
   grid-template-columns: 1fr 260px;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   overflow: hidden; background: var(--bg);
 }
 .player-wrap {
   position: relative; background: #000; flex-shrink: 0;
   grid-column: 1; grid-row: 1;
+  display: flex; flex-direction: column;
 }
 .bottom-area-wrap {
   grid-column: 1; grid-row: 2;
@@ -689,12 +731,31 @@ header {
   cursor: pointer; transition: all .15s;
 }
 .react-btn:hover { background: var(--bg4); transform: scale(1.15); }
+@keyframes chatLetterOut {
+  0%   { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-30px); }
+}
+@keyframes chatLetterIn {
+  0%   { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
 .epg-sidebar-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 15px; letter-spacing: 3px; color: var(--text);
+  font-size: 15px; letter-spacing: 3px;
   padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
   flex-shrink: 0; text-align: center;
   background: linear-gradient(135deg, rgba(232,55,61,.12), transparent);
+  overflow: hidden;
+}
+.epg-sidebar-title > span:first-child {
+  display: inline-flex; gap: 1px; align-items: center; justify-content: center;
+}
+.chat-title-letter {
+  display: inline-block;
+  background: linear-gradient(90deg, #f5c842, #ff9f43);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .epg-sidebar-content {
   flex: 1; overflow-y: auto; padding: 8px;
@@ -712,13 +773,33 @@ header {
 .epg-item-title { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .epg-item-dur { font-size: 9px; color: var(--muted); margin-top: 2px; }
 
-/* PLAYER */
-.player-wrap { position: relative; background: #000; flex-shrink: 0; }
+/* PLAYER - Desktop: fill all available space */
 .player-ratio {
   position: relative; width: 100%;
-  /* Header(60) + ctrl-bar(56) + btab-tabs(40) + chat-min(160) = ~316px rezerv */
-  padding-top: min(48%, calc(100vh - 316px));
+  padding-top: 0 !important;
+  flex: 1;
   background: #000; overflow: hidden;
+}
+/* Bottom area hidden on desktop */
+@media (min-width: 769px) {
+  .bottom-area-wrap {
+    display: none !important;
+  }
+  .epg-ticker {
+    display: none !important;
+  }
+  .player-wrap {
+    height: 100%;
+  }
+  .player-ratio {
+    height: 100%;
+  }
+  #video {
+    height: 100% !important;
+  }
+  .ctrl-bar {
+    flex-shrink: 0;
+  }
 }
 .player-idle {
   position: absolute; inset: 0;
@@ -1482,7 +1563,7 @@ header {
   .tv-layout { grid-template-columns: 1fr; height: auto; }
   .main { order: 1; }
   .sidebar { order: 2; border-right: none; border-top: 1px solid var(--border); }
-  .player-ratio { padding-top: 56.25%; }
+  .player-ratio { padding-top: 56.25% !important; height: auto !important; flex: none !important; }
   .idle-icon { font-size: 38px; }
   .idle-txt { font-size: 12px; }
   .idle-hint { display: none; }
@@ -1546,7 +1627,7 @@ header {
   }
 
   /* Player oranı 16:9 mobil */
-  .player-ratio { padding-top: 56.25%; }
+  .player-ratio { padding-top: 56.25% !important; height: auto !important; flex: none !important; }
 
   /* Kanal listesi mobil yüksekliği */
   .channel-list { max-height: calc(100vh - 380px); min-height: 200px; }
@@ -2528,7 +2609,7 @@ tr:last-child td{border:none;}
         <!-- CHAT SIDEBAR -->
         <div class="epg-sidebar">
           <div class="epg-sidebar-title" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>💬 CANLI SOHBET</span>
+            <span id="chatTitleAnim">💬 CANLI SOHBET</span>
             <button id="clearChatBtn" style="background:rgba(232,55,61,.15);border:1px solid rgba(232,55,61,.3);color:#ff6b6b;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:700;">🗑 Temizle</button>
           </div>
           <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
@@ -2945,9 +3026,9 @@ function doLogin(){
   const remember = document.getElementById('rememberMe').checked;
   if(!user||!pass){ showLoginErr('Tüm alanları doldurun.'); return; }
   // Admin kontrolü
-  if(user==='TAYFUN GULLU' && pass==='123123tT'){
-    if(remember) localStorage.setItem('cltv_remember', JSON.stringify({username:'TAYFUN GULLU', pass:'123123tT'}));
-    loginSuccess({username:'TAYFUN GULLU', email:'admin@tayfuntv.com', avatar:'👑', role:'admin', approved:true});
+  if(user===_d(_un) && pass===_d(_pw)){
+    if(remember) localStorage.setItem('cltv_remember', JSON.stringify({username:_d(_un)}));
+    loginSuccess({username:_d(_un), email:_d(_em), avatar:'👑', role:'admin', approved:true});
     return;
   }
   const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
@@ -2978,8 +3059,66 @@ function guestLogin(){ loginSuccess({username:'Misafir', email:'guest@tayfuntv.c
 function quickDemo(){ loginSuccess({username:'Demo User', email:'demo@canlitv.com', avatar:'🎬', demo:true}); }
 let chatWarningShown = false;
 
+/* ─── CANLI SOHBET BAŞLIK ANİMASYONU ─── */
+(function(){
+  const text = '💬 CANLI SOHBET';
+  const el = document.getElementById('chatTitleAnim');
+  if(!el) return;
+
+  // Harfleri span'lara böl
+  function buildLetters(){
+    el.innerHTML = [...text].map((ch, i) =>
+      `<span class="chat-title-letter" data-i="${i}" style="opacity:1;transform:translateX(0);transition:none;">${ch === ' ' ? '&nbsp;' : ch}</span>`
+    ).join('');
+  }
+  buildLetters();
+
+  function animateOut(){
+    const letters = el.querySelectorAll('.chat-title-letter');
+    const total = letters.length;
+    // Sağdan sola kaybol (sondan başa)
+    letters.forEach((span, i) => {
+      const delay = (total - 1 - i) * 60;
+      setTimeout(() => {
+        span.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        span.style.opacity = '0';
+        span.style.transform = 'translateX(-20px)';
+      }, delay);
+    });
+    // Hepsi kaybolduktan sonra geri gel
+    const outDone = total * 60 + 350;
+    setTimeout(() => animateIn(), outDone);
+  }
+
+  function animateIn(){
+    const letters = el.querySelectorAll('.chat-title-letter');
+    const total = letters.length;
+    // Önce hepsini sağda hazırla
+    letters.forEach(span => {
+      span.style.transition = 'none';
+      span.style.opacity = '0';
+      span.style.transform = 'translateX(20px)';
+    });
+    // Soldan sağa sırayla gel
+    letters.forEach((span, i) => {
+      setTimeout(() => {
+        span.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        span.style.opacity = '1';
+        span.style.transform = 'translateX(0)';
+      }, i * 60 + 50);
+    });
+    // Döngüyü tekrarla
+    const inDone = total * 60 + 2500;
+    setTimeout(() => animateOut(), inDone);
+  }
+
+  // 2 saniye bekleyip başlat
+  setTimeout(() => animateOut(), 2000);
+})();
+
 /* ─── RADYO PLAYER ─── */
 let radioPlaying = false;
+let radioLoading = false;
 const RADIO_URL = 'http://46.20.7.125/listen.pls';
 
 function initRadioBar(){
@@ -2988,28 +3127,60 @@ function initRadioBar(){
 }
 
 function toggleRadio(){
+  if(radioLoading) return;
   if(radioPlaying) stopRadio(); else startRadio();
 }
+
+var _radioUrls = [
+  'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio',
+  'https://listen.powerapp.com.tr/powerfm/mpeg/icecast.audio',
+  'https://radio-stream.trt.net.tr/trtfm/chunklist.m3u8',
+  'https://stream.zeno.fm/0r0xa792kwzuv'
+];
+var _radioUrlIdx = 0;
 
 function startRadio(){
   const audio = document.getElementById('radioAudio');
   const btn   = document.getElementById('radioPlayBtn');
   const eq    = document.getElementById('eqBars');
   const dot   = document.getElementById('radioLiveDot');
-  // .pls dosyasını doğrudan stream olarak çal
-  audio.src = 'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio';
-  audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
-  audio.play().then(() => {
-    radioPlaying = true;
-    btn.textContent = '⏹';
-    btn.classList.add('playing');
-    eq.classList.add('playing');
-    dot.classList.add('on');
-    document.getElementById('radioName').textContent = '📻 CANLI RADYO';
-  }).catch(err => {
-    console.log('Radio error:', err);
-    showToast('📻 Radyo bağlanamadı — URL kontrol edin', 'warning');
-  });
+
+  radioLoading = true;
+  btn.textContent = '⏳';
+  btn.classList.remove('playing');
+
+  function tryUrl(idx){
+    if(idx >= _radioUrls.length){
+      radioPlaying = false;
+      radioLoading = false;
+      btn.textContent = '▶';
+      btn.classList.remove('playing');
+      if(eq) eq.classList.remove('playing');
+      dot.classList.remove('on');
+      showToast('📻 Radyo bağlanamadı', 'warning');
+      return;
+    }
+    audio.src = _radioUrls[idx];
+    audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
+    audio.load();
+    audio.play().then(function(){
+      // Yüklenirken stopRadio çağrıldıysa dur
+      if(!radioLoading){ audio.pause(); audio.src=''; return; }
+      _radioUrlIdx = idx;
+      radioPlaying = true;
+      radioLoading = false;
+      btn.textContent = '⏹';
+      btn.classList.add('playing');
+      if(eq) eq.classList.add('playing');
+      dot.classList.add('on');
+      document.getElementById('radioName').textContent = '📻 CANLI RADYO';
+    }).catch(function(){
+      if(!radioLoading) return;
+      tryUrl(idx + 1);
+    });
+  }
+
+  tryUrl(0);
 }
 
 function stopRadio(){
@@ -3020,9 +3191,10 @@ function stopRadio(){
   audio.pause();
   audio.src = '';
   radioPlaying = false;
+  radioLoading = false;
   btn.textContent = '▶';
   btn.classList.remove('playing');
-  eq.classList.remove('playing');
+  if(eq) eq.classList.remove('playing');
   dot.classList.remove('on');
 }
 
@@ -3112,7 +3284,7 @@ function loginSuccess(user){
   setTimeout(()=>{
     showNotifPopup('📺 Hoş Geldiniz!', user.username + ' olarak giriş yapıldı.');
     // Admin girişini chat'e yaz
-    if(user.role === 'admin' || user.username === 'TAYFUN GULLU'){
+    if(user.role === 'admin' || user.username === _d(_un)){
       const now = new Date();
       const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
       chatMessages.push({u:'🔴 SİSTEM', m:`👑 Admin "${user.username}" giriş yaptı.`, t:t2});
@@ -3158,7 +3330,7 @@ document.addEventListener('click', e=>{
 });
 
 /* M3U */
-const M3U_URL = 'https://raw.githubusercontent.com/TAYFUNTV/tayfuntv.github.io/refs/heads/main/tv/liste_logolu3.m3u';
+const M3U_URL = _d(_mu);
 let hls;
 let favorites   = JSON.parse(localStorage.getItem('cltv_favs') || '[]');
 let allChannels = [];
@@ -3680,7 +3852,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function getChatUserColor(username){
   if(!username) return 'var(--blue)';
-  if(username === 'TAYFUN GULLU' || username === '🔴 SİSTEM') return '#ff6b6b';
+  if(username === _d(_un) || username === '🔴 SİSTEM') return '#ff6b6b';
   // Türk kadın isimleri
   const femaleNames = ['ayşe','fatma','zeynep','selin','elif','merve','esra','büşra','gül','sevgi','hatice','hanım','nur','derya','pınar','melek','bahar','ceren','yıldız','şule'];
   const lower = username.toLowerCase();
@@ -4970,7 +5142,7 @@ function closeAdminBackToSite(){
               </div>
               <div class="form-field form-full">
                 <label>M3U URL</label>
-                <input type="text" id="siteM3U" value="https://raw.githubusercontent.com/TAYFUNTV/tayfuntv.github.io/refs/heads/main/tv/liste_logolu3.m3u">
+                <input type="text" id="siteM3U" value="">
               </div>
               <div class="form-field">
                 <label>DEFAULT DİL</label>
@@ -5219,7 +5391,7 @@ function closeAdminBackToSite(){
 <script>
 
 /* AUTH */
-const ADMIN_CREDS = { username:'TAYFUN GULLU', password:'123123tT' };
+const ADMIN_CREDS = { get username(){return _d(_un);}, get password(){return _d(_pw);} };
 let adminLoggedIn = false;
 let allChannelsAdmin = [];
 let customChannels = JSON.parse(localStorage.getItem('admin_channels') || '[]');
@@ -5433,7 +5605,7 @@ function saveUsers(u){ localStorage.setItem('cltv_users',JSON.stringify(u)); }
 let allUsers = [];
 function renderUsers(){
   allUsers = getUsers();
-  const admins = [{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...allUsers];
+  const admins = [{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...allUsers];
   document.getElementById('stat_users').textContent = admins.length;
   document.getElementById('userBadge').textContent  = admins.length;
   renderUserTable(admins);
@@ -5479,10 +5651,10 @@ function approveUser(idx, name){
     addLog('user','user','✅ Kullanıcı onaylandı: '+name,'var(--green)');
   }
 }
-function filterUsers(q){ const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
-function filterUsersByRole(role){ const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
+function filterUsers(q){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
+function filterUsersByRole(role){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
 function openAddUser(){ editingUserIdx=null; document.getElementById('userModalTitle').textContent='👤 Kullanıcı Ekle'; ['uUsername','uEmail','uPassword','uAvatar'].forEach(id=>document.getElementById(id).value=''); openModal('userModal'); }
-function editUser(idx){ editingUserIdx=idx; const all=[{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; const u=all[idx]; document.getElementById('userModalTitle').textContent='✏️ Kullanıcı Düzenle'; document.getElementById('uUsername').value=u.username; document.getElementById('uEmail').value=u.email||''; document.getElementById('uAvatar').value=u.avatar||''; document.getElementById('uRole').value=u.role||'user'; openModal('userModal'); }
+function editUser(idx){ editingUserIdx=idx; const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; const u=all[idx]; document.getElementById('userModalTitle').textContent='✏️ Kullanıcı Düzenle'; document.getElementById('uUsername').value=u.username; document.getElementById('uEmail').value=u.email||''; document.getElementById('uAvatar').value=u.avatar||''; document.getElementById('uRole').value=u.role||'user'; openModal('userModal'); }
 function saveUser(){
   const username=document.getElementById('uUsername').value.trim();
   const email=document.getElementById('uEmail').value.trim();
@@ -5501,8 +5673,8 @@ function saveUser(){
   renderUsers(); closeModal('userModal');
 }
 function banUser(idx, name){ if(!confirm(name+' kullanıcısını yasaklamak istiyor musunuz?')) return; showToast('⛔ '+name+' yasaklandı','warning'); addLog('user','user','⛔ Kullanıcı yasaklandı: '+name,'var(--accent)'); }
-function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name==='TAYFUN GULLU'){ showToast('Admin silinemez!','warning'); return; } const users=getUsers(); const ri=users.findIndex(u=>u.username===name); if(ri>=0){ users.splice(ri,1); saveUsers(users); } renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
-function exportUsers(){ const data=JSON.stringify([{username:'TAYFUN GULLU',email:'admin@tayfuntv.com',role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
+function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name===_d(_un)){ showToast('Admin silinemez!','warning'); return; } const users=getUsers(); const ri=users.findIndex(u=>u.username===name); if(ri>=0){ users.splice(ri,1); saveUsers(users); } renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
+function exportUsers(){ const data=JSON.stringify([{username:_d(_un),email:_d(_em),role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
 
 /* M3U LIST */
 const m3uLists = [{id:1,name:'Ana Yayın Listesi',url:M3U_URL,channels:0,interval:6,active:true,lastUpdate:'Bilinmiyor'}];
@@ -5907,6 +6079,55 @@ window.addEventListener('load', ()=>{
   },2200);
 });
 
+</script>
+
+<script>
+(function(){
+  function isInput(e){
+    var t=e.target.tagName;
+    return t==='INPUT'||t==='TEXTAREA';
+  }
+
+  // Sağ tık engelle
+  document.addEventListener('contextmenu',function(e){
+    e.preventDefault();return false;
+  });
+
+  // Kopyalama / kesme engelle (input HARİÇ)
+  document.addEventListener('copy',function(e){
+    if(isInput(e))return true;
+    e.preventDefault();return false;
+  });
+  document.addEventListener('cut',function(e){
+    if(isInput(e))return true;
+    e.preventDefault();return false;
+  });
+
+  // Klavye kısayolları engelle (input HARİÇ)
+  document.addEventListener('keydown',function(e){
+    var inp=isInput(e);
+    if(e.key==='F12'){e.preventDefault();return false;}
+    if(e.ctrlKey&&e.shiftKey&&'IJC'.includes(e.key.toUpperCase())){e.preventDefault();return false;}
+    if(!inp&&e.ctrlKey&&['U','S','A','C','X'].includes(e.key.toUpperCase())){e.preventDefault();return false;}
+  });
+
+  // Metin seçimi engelle (input HARİÇ)
+  document.addEventListener('selectstart',function(e){
+    if(isInput(e))return true;
+    e.preventDefault();return false;
+  });
+
+  // Sürükleme engelle
+  document.addEventListener('dragstart',function(e){
+    e.preventDefault();return false;
+  });
+
+  // CSS user-select kapat
+  var s=document.documentElement.style;
+  s.userSelect='none';
+  s.webkitUserSelect='none';
+  s.msUserSelect='none';
+})();
 </script>
 </body>
                 </html>
