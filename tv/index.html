@@ -1673,6 +1673,50 @@ header {
   .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 
+/* MOBİL KATEGORİ SEKME STİLLERİ */
+.mob-cat-tab {
+  flex: 0 0 auto;
+  background: none; border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--muted); font-size: 11px; font-weight: 700;
+  padding: 10px 14px; white-space: nowrap;
+  cursor: pointer; transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: .3px;
+}
+.mob-cat-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(232,55,61,.06);
+}
+.mob-cat-tab:active { opacity: .7; }
+.mob-ch-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .15s;
+  animation: slideUpList .3s ease both;
+}
+.mob-ch-item:active { background: rgba(232,55,61,.08); }
+.mob-ch-logo {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; overflow: hidden;
+}
+.mob-ch-logo img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.mob-ch-name { font-size: 13px; font-weight: 600; }
+.mob-ch-group { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.mob-cat-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--muted); font-size: 12px;
+  padding: 40px 20px; text-align: center;
+}
+@media (max-width: 768px) {
+  #mobileCatTabs::-webkit-scrollbar { display: none; }
+}
+
 @media (max-width: 480px) {
   /* Küçük telefon için ek düzenlemeler */
   header { padding: 8px 10px; }
@@ -2599,9 +2643,17 @@ tr:last-child td{border:none;}
           </div>
           <!-- CHAT (sağ panele taşındı) -->
           <div class="btab-content" id="btab_chat" style="display:none;"><div id="chatBox"></div></div>
+          <!-- MOBİL KATEGORİ SEKME SİSTEMİ -->
           <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-            <div id="catBarMobile" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid var(--border);flex-shrink:0;"></div>
-            <div id="channelListBottom" style="flex:1;overflow-y:auto;display:flex;flex-wrap:wrap;gap:5px;padding:8px;align-content:flex-start;"></div>
+            <div id="mobileCatTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--border);flex-shrink:0;scrollbar-width:none;">
+              <button class="mob-cat-tab" onclick="switchMobTab('spor',this)">⚽ Spor</button>
+              <button class="mob-cat-tab" onclick="switchMobTab('ulusal',this)">📡 Ulusal</button>
+              <button class="mob-cat-tab" onclick="switchMobTab('yerel',this)">🏙️ Yerel</button>
+              <button class="mob-cat-tab" onclick="switchMobTab('belgesel',this)">🌍 Belgesel</button>
+              <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
+              <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
+            </div>
+            <div id="mobCatContent" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div>
           </div>
         </div>
         </div><!-- /bottom-area-wrap -->
@@ -4471,6 +4523,116 @@ function switchMainTab(tab, btn){
   }
 }
 
+
+/* ─── MOBİL KATEGORİ SEKME SİSTEMİ ─── */
+const MOB_TAB_KEYWORDS = {
+  spor:     ['spor','sport','futbol','basketbol','tenis','lig'],
+  ulusal:   ['ulusal','trt','atv','show','kanal d','star','fox','tv8','now','haber'],
+  yerel:    ['yerel','local','bolge','sehir','kent'],
+  belgesel: ['belgesel','document','nat geo','discovery','history','hayvan'],
+  sinema:   ['sinema','cinema','film','movie','dizi','series']
+};
+
+var mobActiveTab = null;
+
+function switchMobTab(tab, btn) {
+  if (mobActiveTab === tab) {
+    mobActiveTab = null;
+    document.querySelectorAll('.mob-cat-tab').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('mobCatContent').innerHTML = '';
+    return;
+  }
+  mobActiveTab = tab;
+  document.querySelectorAll('.mob-cat-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+
+  var cont = document.getElementById('mobCatContent');
+  cont.innerHTML = '';
+
+  if (tab === 'chat') {
+    cont.innerHTML =
+      '<div style="display:flex;flex-direction:column;height:100%;padding:8px;">' +
+        '<div id="mobChatBox" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:8px;">' +
+          '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+          '<input type="text" id="mobChatInput" placeholder="Mesaj yaz..."' +
+          ' style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:12px;outline:none;"' +
+          ' onkeydown="if(event.key===\'Enter\')sendMobChat()">' +
+          '<button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">&#8593;</button>' +
+        '</div>' +
+      '</div>';
+    renderMobChat();
+    return;
+  }
+
+  var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
+  var matched = allChannels.filter(function(ch) {
+    var g = (ch.group || '').toLowerCase();
+    var n = (ch.name  || '').toLowerCase();
+    return keywords.some(function(k){ return g.indexOf(k) !== -1 || n.indexOf(k) !== -1; });
+  });
+
+  if (!matched.length) {
+    cont.innerHTML = '<div class="mob-cat-empty"><div style="font-size:36px;">&#128219;</div><div>Bu kategoride kanal bulunamadi.</div></div>';
+    return;
+  }
+
+  cont.innerHTML = matched.map(function(ch, i) {
+    var idx = allChannels.indexOf(ch);
+    var logo = ch.logo
+      ? '<img src="' + ch.logo + '" onerror="this.outerHTML=\'&#128250;\'" loading="lazy">'
+      : '&#128250;';
+    return '<div class="mob-ch-item" onclick="play(' + idx + ')" style="animation-delay:' + (i*30) + 'ms">' +
+      '<div class="mob-ch-logo">' + logo + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div class="mob-ch-name">' + ch.name + '</div>' +
+        '<div class="mob-ch-group">' + ch.group + '</div>' +
+      '</div>' +
+      '<span style="font-size:9px;color:var(--green);font-weight:700;">&#9679; CANLI</span>' +
+    '</div>';
+  }).join('');
+}
+
+function renderMobChat() {
+  var box = document.getElementById('mobChatBox');
+  if (!box) return;
+  if (!chatMessages.length) {
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>';
+    return;
+  }
+  box.innerHTML = chatMessages.map(function(msg) {
+    return '<div style="display:flex;gap:6px;align-items:flex-start;">' +
+      '<span style="font-size:11px;font-weight:700;flex-shrink:0;color:' + getChatUserColor(msg.u) + '">' + msg.u + '</span>' +
+      '<span style="font-size:11px;color:var(--text2);flex:1;">' + (msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')) + '</span>' +
+      '<span style="font-size:9px;color:var(--muted);flex-shrink:0;">' + msg.t + '</span>' +
+    '</div>';
+  }).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+function sendMobChat() {
+  if (!localStorage.getItem('chat_accepted') && !chatWarningShown) {
+    if (currentUser && (currentUser.role === 'admin' || currentUser.guest)) {
+      // geç
+    } else {
+      document.getElementById('chatWarning').style.display = 'flex';
+      return;
+    }
+  }
+  var input = document.getElementById('mobChatInput');
+  if (!input) return;
+  var val = input.value.trim();
+  if (!val) return;
+  var now = new Date();
+  var t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  chatMessages.push({ u: (currentUser && currentUser.username) || 'Sen', m: val, t: t2 });
+  input.value = '';
+  renderMobChat();
+  renderChat();
+}
+/* ─── MOBİL SEKME SONU ─── */
+
 function switchBtab(tab, btn){
   document.querySelectorAll('.btab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.btab-content').forEach(c=>c.classList.remove('active'));
@@ -5677,7 +5839,7 @@ function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek isti
 function exportUsers(){ const data=JSON.stringify([{username:_d(_un),email:_d(_em),role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
 
 /* M3U LIST */
-const m3uLists = [{id:1,name:'Ana Yayın Listesi',url:M3U_URL,channels:0,interval:6,active:true,lastUpdate:'Bilinmiyor'}];
+const m3uLists = [{id:1,name:'Ana Yayın Listesi',url:(typeof M3U_URL !== 'undefined' ? M3U_URL : ''),channels:0,interval:6,active:true,lastUpdate:'Bilinmiyor'}];
 function renderM3UList(){
   m3uLists[0].channels = allChannelsAdmin.length;
   document.getElementById('m3uList').innerHTML = m3uLists.map((m,i)=>`
