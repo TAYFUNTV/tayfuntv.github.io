@@ -4638,6 +4638,8 @@ function switchMobTab(tab, btn) {
     mobActiveTab = null;
     document.querySelectorAll('.mob-cat-tab').forEach(function(b){ b.classList.remove('active'); });
     document.getElementById('mobCatContent').innerHTML = '';
+    var old = document.getElementById('mobChatInputBar');
+    if (old) old.remove();
     return;
   }
   mobActiveTab = tab;
@@ -4648,28 +4650,17 @@ function switchMobTab(tab, btn) {
   cont.innerHTML = '';
   cont.removeAttribute('style');
   cont.classList.remove('chat-mode');
+  var oldInput = document.getElementById('mobChatInputBar');
+  if (oldInput) oldInput.remove();
 
   if (tab === 'chat') {
     cont.removeAttribute('style');
     cont.classList.remove('chat-mode');
-    // Üst alanları ölç: radioBar + header + player + ctrlbar + catTabs
-    var radioBar = document.getElementById('radioBar');
-    var header = document.querySelector('header');
-    var player = document.getElementById('playerRatio');
-    var ctrlBar = document.querySelector('.ctrl-bar');
-    var catTabs = document.getElementById('mobileCatTabs');
-    var topH = (radioBar ? radioBar.offsetHeight : 42)
-             + (header ? header.offsetHeight : 60)
-             + (player ? player.offsetHeight : 200)
-             + (ctrlBar ? ctrlBar.offsetHeight : 56)
-             + (catTabs ? catTabs.offsetHeight : 44);
-    var inputH = 56;
-    var boxH = Math.max(100, window.innerHeight - topH - inputH - 130);
     cont.innerHTML =
-      '<div id="mobChatBox" style="width:100%;height:' + boxH + 'px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;box-sizing:border-box;">' +
+      '<div id="mobChatBox" style="padding:8px;padding-bottom:64px;overflow-y:auto;-webkit-overflow-scrolling:touch;">' +
         '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">Henüz mesaj yok.</div>' +
       '</div>' +
-      '<div id="mobChatInputBar" style="width:100%;height:' + inputH + 'px;display:flex;gap:6px;align-items:center;padding:0 8px;border-top:1px solid var(--border);background:var(--bg2);box-sizing:border-box;">' +
+      '<div id="mobChatInputBar" style="position:fixed;bottom:56px;left:0;right:0;height:56px;display:flex;gap:6px;align-items:center;padding:0 8px;border-top:1px solid var(--border);background:var(--bg2);z-index:999;">' +
         '<input type="text" id="mobChatInput" placeholder="Mesaj yaz..."' +
         ' style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:16px;outline:none;"' +
         ' autocorrect="off" autocapitalize="off"' +
