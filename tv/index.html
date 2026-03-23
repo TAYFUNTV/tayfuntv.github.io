@@ -1789,8 +1789,10 @@ header {
   cursor: pointer; transition: background .15s;
   animation: slideUpList .3s ease both;
   flex-shrink: 0;
-  touch-action: pan-y;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .mob-ch-item:active { background: rgba(232,55,61,.08); }
 .mob-ch-logo {
@@ -4720,33 +4722,70 @@ function switchMobTab(tab, btn) {
   }).join('');
   cont.innerHTML = items;
 
-  // Scroll'u etkinleştir
-  cont.style.overflowY = 'auto';
-  cont.style.overflowX = 'hidden';
-  cont.style.webkitOverflowScrolling = 'touch';
+  // APK WebView uyumlu scroll — CSS overflow WebView'da çalışmadığı için
+  // container sabit yükseklikte tutulup içerik transform ile kaydırılır
+  cont.style.overflow = 'hidden';
+  cont.style.position = 'relative';
 
-  // Kanal öğelerine tıklama eventi — delegated
-  var _moved = false, _startY = 0, _raf;
+  // İç wrapper oluştur
+  var inner = document.createElement('div');
+  inner.id = 'mobChInner';
+  inner.style.cssText = 'position:relative;will-change:transform;';
+  // Mevcut içeriği inner'a taşı
+  inner.innerHTML = cont.innerHTML;
+  cont.innerHTML = '';
+  cont.appendChild(inner);
+
+  var scrollY = 0;
+  var maxScroll = 0;
+  var startY = 0, startScroll = 0;
+  var moved = false;
+  var velY = 0, lastY = 0, lastT = 0;
+  var raf = null;
+
+  function getMax() {
+    return Math.max(0, inner.offsetHeight - cont.offsetHeight);
+  }
+  function applyScroll(y) {
+    scrollY = Math.max(0, Math.min(y, getMax()));
+    inner.style.transform = 'translateY(' + (-scrollY) + 'px)';
+  }
 
   cont._tsHandler = function(e) {
-    _startY = e.touches[0].clientY;
-    _moved = false;
-    cancelAnimationFrame(_raf);
+    cancelAnimationFrame(raf);
+    startY = e.touches[0].clientY;
+    startScroll = scrollY;
+    lastY = startY; lastT = Date.now();
+    moved = false; velY = 0;
   };
-
   cont._tmHandler = function(e) {
-    if (Math.abs(e.touches[0].clientY - _startY) > 5) _moved = true;
+    var dy = startY - e.touches[0].clientY;
+    var now = Date.now();
+    var dt = now - lastT || 1;
+    velY = (e.touches[0].clientY - lastY) / dt;
+    lastY = e.touches[0].clientY; lastT = now;
+    if (Math.abs(dy) > 4) { moved = true; e.preventDefault(); }
+    applyScroll(startScroll + dy);
   };
-
   cont._teHandler = function(e) {
-    if (!_moved) {
+    if (!moved) {
       var item = e.target.closest('.mob-ch-item');
       if (item) { var idx = parseInt(item.getAttribute('data-idx')); if (!isNaN(idx)) play(idx); }
+      return;
     }
+    // Momentum
+    var v = -velY * 18;
+    function momentum() {
+      if (Math.abs(v) < 0.4) return;
+      applyScroll(scrollY + v);
+      v *= 0.93;
+      raf = requestAnimationFrame(momentum);
+    }
+    raf = requestAnimationFrame(momentum);
   };
 
   cont.addEventListener('touchstart', cont._tsHandler, {passive:true});
-  cont.addEventListener('touchmove',  cont._tmHandler, {passive:true});
+  cont.addEventListener('touchmove',  cont._tmHandler, {passive:false});
   cont.addEventListener('touchend',   cont._teHandler, {passive:true});
 }
 
