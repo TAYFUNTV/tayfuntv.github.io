@@ -6578,22 +6578,10 @@ window.addEventListener('load', ()=>{
     if(!inp&&e.ctrlKey&&['U','S','A','C','X'].includes(e.key.toUpperCase())){e.preventDefault();return false;}
   });
 
-  // Metin seçimi engelle (input HARİÇ)
-  document.addEventListener('selectstart',function(e){
-    if(isInput(e))return true;
-    e.preventDefault();return false;
+  // CSS user-select sadece yazı elementlerinde kapat
+  document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
+    el.style.webkitUserSelect='none';
   });
-
-  // Sürükleme engelle
-  document.addEventListener('dragstart',function(e){
-    e.preventDefault();return false;
-  });
-
-  // CSS user-select kapat
-  var s=document.documentElement.style;
-  s.userSelect='none';
-  s.webkitUserSelect='none';
-  s.msUserSelect='none';
 })();
 </script>
 </body>
