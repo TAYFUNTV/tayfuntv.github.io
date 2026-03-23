@@ -57,13 +57,14 @@
 
 /* RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overscroll-behavior: none; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 @media (max-width: 768px) {
   body {
@@ -1691,12 +1692,12 @@ header {
   #mobCatContent {
     flex: 1 !important;
     min-height: 0 !important;
-    overflow-y: scroll !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain !important;
+    overscroll-behavior-y: none !important;
+    overscroll-behavior: none !important;
     touch-action: pan-y !important;
-    display: block !important;
   }
   #mobCatContent * {
     touch-action: pan-y !important;
@@ -2614,7 +2615,7 @@ tr:last-child td{border:none;}
       <!-- SIDEBAR -->
       <aside class="sidebar">
         <!-- MOBİL KATEGORİ SEKME SİSTEMİ -->
-        <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+        <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
           <div id="mobileCatTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--border);flex-shrink:0;scrollbar-width:none;">
             <button class="mob-cat-tab" onclick="switchMobTab('spor',this)">⚽ Spor</button>
             <button class="mob-cat-tab" onclick="switchMobTab('ulusal',this)">📡 Ulusal</button>
@@ -2623,7 +2624,7 @@ tr:last-child td{border:none;}
             <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
             <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
           </div>
-          <div id="mobCatContent" style="flex:1;min-height:0;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;position:relative;"></div>
+          <div id="mobCatContent" style="flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative;"></div>
         </div>
         <!-- DESKTOP KANAL LİSTESİ -->
         <div class="sidebar-tabs">
@@ -4654,21 +4655,13 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.style.overflowY = 'scroll';
-  cont.style.overflowX = 'hidden';
-  cont.style.display = '';
-  cont.style.flexDirection = '';
-  cont.style.webkitOverflowScrolling = 'touch';
-  cont.style.overscrollBehaviorY = 'contain';
+  cont.removeAttribute('style');
   cont.classList.remove('chat-mode');
   var oldInput = document.getElementById('mobChatInputBar');
   if (oldInput) oldInput.remove();
 
   if (tab === 'chat') {
-    cont.style.overflowY = 'hidden';
-    cont.style.overflowX = 'hidden';
-    cont.style.display = 'flex';
-    cont.style.flexDirection = 'column';
+    cont.removeAttribute('style');
     cont.classList.remove('chat-mode');
     cont.innerHTML =
       '<div id="mobChatBox" style="padding:8px;padding-bottom:64px;overflow-y:auto;-webkit-overflow-scrolling:touch;">' +
@@ -4728,11 +4721,44 @@ function switchMobTab(tab, btn) {
   }).join('');
   cont.innerHTML = items;
 
-  // Kanal tıklama — native scroll ile çalışır
-  cont.addEventListener('click', function(e) {
-    var item = e.target.closest('.mob-ch-item');
-    if (item) { var idx = parseInt(item.getAttribute('data-idx')); if (!isNaN(idx)) play(idx); }
-  });
+  // Touch scroll — WebView pull-to-refresh engelli
+  var _ty = 0, _moved = false, _ss = 0, _vy = 0, _ly = 0, _lt = 0, _raf = null;
+
+  cont.addEventListener('touchstart', function(e) {
+    if (_raf) { cancelAnimationFrame(_raf); _raf = null; }
+    _ty = e.touches[0].clientY;
+    _ly = _ty; _lt = Date.now();
+    _ss = cont.scrollTop; _moved = false; _vy = 0;
+  }, {passive:true});
+
+  cont.addEventListener('touchmove', function(e) {
+    var now = Date.now();
+    var curY = e.touches[0].clientY;
+    var dy = _ty - curY;
+    var dt = now - _lt || 1;
+    _vy = (curY - _ly) / dt;
+    _ly = curY; _lt = now;
+    if (Math.abs(dy) > 3) _moved = true;
+    e.preventDefault();
+    e.stopPropagation();
+    cont.scrollTop = _ss + dy;
+  }, {passive:false});
+
+  cont.addEventListener('touchend', function(e) {
+    if (!_moved) {
+      var item = e.target.closest('.mob-ch-item');
+      if (item) { var idx = parseInt(item.getAttribute('data-idx')); if (!isNaN(idx)) play(idx); }
+      return;
+    }
+    var vel = -_vy * 12;
+    function momentum() {
+      if (Math.abs(vel) < 0.3) return;
+      cont.scrollTop -= vel;
+      vel *= 0.93;
+      _raf = requestAnimationFrame(momentum);
+    }
+    _raf = requestAnimationFrame(momentum);
+  }, {passive:true});
 }
 
 function renderMobChat() {
