@@ -57,26 +57,17 @@
 
 /* RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html {
-  scroll-behavior: smooth;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
-}
+html { scroll-behavior: smooth; }
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
 }
 @media (max-width: 768px) {
   body {
     overflow-x: hidden;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
-    touch-action: pan-x pan-y;
   }
 }
 body::before {
@@ -1703,8 +1694,9 @@ header {
     overflow-y: scroll !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: auto !important;
+    overscroll-behavior-y: contain !important;
     touch-action: pan-y !important;
+    display: block !important;
   }
   #mobCatContent * {
     touch-action: pan-y !important;
@@ -2631,7 +2623,7 @@ tr:last-child td{border:none;}
             <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
             <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
           </div>
-          <div id="mobCatContent" style="flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative;"></div>
+          <div id="mobCatContent" style="flex:1;overflow-y:scroll;overflow-x:hidden;display:flex;flex-direction:column;position:relative;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;"></div>
         </div>
         <!-- DESKTOP KANAL LİSTESİ -->
         <div class="sidebar-tabs">
@@ -4662,13 +4654,17 @@ function switchMobTab(tab, btn) {
 
   var cont = document.getElementById('mobCatContent');
   cont.innerHTML = '';
-  cont.removeAttribute('style');
+  cont.style.overflowY = 'scroll';
+  cont.style.overflowX = 'hidden';
+  cont.style.webkitOverflowScrolling = 'touch';
+  cont.style.overscrollBehaviorY = 'contain';
   cont.classList.remove('chat-mode');
   var oldInput = document.getElementById('mobChatInputBar');
   if (oldInput) oldInput.remove();
 
   if (tab === 'chat') {
-    cont.removeAttribute('style');
+    cont.style.overflowY = 'hidden';
+    cont.style.overflowX = 'hidden';
     cont.classList.remove('chat-mode');
     cont.innerHTML =
       '<div id="mobChatBox" style="padding:8px;padding-bottom:64px;overflow-y:auto;-webkit-overflow-scrolling:touch;">' +
@@ -4728,43 +4724,11 @@ function switchMobTab(tab, btn) {
   }).join('');
   cont.innerHTML = items;
 
-  // Manuel scroll — WebView uyumlu
-  var _ts = 0, _ty = 0, _moved = false, _ss = 0, _vy = 0, _ly = 0, _lt = 0;
-
-  cont.addEventListener('touchstart', function(e) {
-    _ts = Date.now(); _ty = e.touches[0].clientY;
-    _ly = _ty; _lt = _ts;
-    _ss = cont.scrollTop; _moved = false; _vy = 0;
-  }, {passive:true});
-
-  cont.addEventListener('touchmove', function(e) {
-    var now = Date.now();
-    var dy = _ty - e.touches[0].clientY;
-    var dt = now - _lt;
-    _vy = dt > 0 ? (e.touches[0].clientY - _ly) / dt : 0;
-    _ly = e.touches[0].clientY; _lt = now;
-    if (Math.abs(dy) > 5) _moved = true;
-    cont.scrollTop = _ss + dy;
-  }, {passive:false});
-
-  cont.addEventListener('touchend', function(e) {
-    if (!_moved) {
-      var item = e.target.closest('.mob-ch-item');
-      if (item) { var idx = parseInt(item.getAttribute('data-idx')); if (!isNaN(idx)) play(idx); }
-      return;
-    }
-    // Momentum scroll
-    var vel = -_vy * 15;
-    var raf;
-    function momentum() {
-      if (Math.abs(vel) < 0.5) return;
-      cont.scrollTop -= vel;
-      vel *= 0.95;
-      raf = requestAnimationFrame(momentum);
-    }
-    raf = requestAnimationFrame(momentum);
-    cont.addEventListener('touchstart', function() { cancelAnimationFrame(raf); }, {once:true, passive:true});
-  }, {passive:true});
+  // Tıklama tespiti — kaydırma yerel scroll ile yapılır
+  cont.addEventListener('click', function(e) {
+    var item = e.target.closest('.mob-ch-item');
+    if (item) { var idx = parseInt(item.getAttribute('data-idx')); if (!isNaN(idx)) play(idx); }
+  });
 }
 
 function renderMobChat() {
@@ -6531,21 +6495,6 @@ function ccRender() {
     ccRender();
     if (typeof renderMovies === 'function') renderMovies();
   }, 400);
-})();
-
-/* ─── PULL-TO-REFRESH ENGELLE ─── */
-(function(){
-  var startY = 0;
-  document.addEventListener('touchstart', function(e){
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchmove', function(e){
-    var y = e.touches[0].clientY;
-    // Sayfa en üstündeyse ve aşağı çekiyorsa engelle
-    if (y > startY && (window.scrollY || document.documentElement.scrollTop) === 0) {
-      e.preventDefault();
-    }
-  }, { passive: false });
 })();
 
 /* INIT */
