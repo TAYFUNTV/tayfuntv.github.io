@@ -4719,19 +4719,29 @@ function switchMobTab(tab, btn) {
   }).join('');
   cont.innerHTML = items;
 
-  // WebView scroll fix — touch olaylarını container'a ilet
-  cont.style.overflowY = 'scroll';
-  cont.style.webkitOverflowScrolling = 'touch';
-  cont.style.touchAction = 'pan-y';
+  // Manuel scroll — WebView uyumlu
+  var _startY = 0, _lastY = 0, _moved = false, _scrollStart = 0;
 
-  // Kaydırma ile tıklama ayırt et
-  var _startY = 0, _moved = false;
-  cont.addEventListener('touchstart', function(e){ _startY = e.touches[0].clientY; _moved = false; }, {passive:true});
-  cont.addEventListener('touchmove',  function(e){ if(Math.abs(e.touches[0].clientY - _startY) > 5) _moved = true; }, {passive:true});
-  cont.addEventListener('touchend',   function(e){
-    if(_moved) return;
+  cont.addEventListener('touchstart', function(e) {
+    _startY = e.touches[0].clientY;
+    _lastY  = _startY;
+    _scrollStart = cont.scrollTop;
+    _moved = false;
+  }, {passive:true});
+
+  cont.addEventListener('touchmove', function(e) {
+    var dy = _startY - e.touches[0].clientY;
+    if (Math.abs(dy) > 5) _moved = true;
+    cont.scrollTop = _scrollStart + dy;
+  }, {passive:true});
+
+  cont.addEventListener('touchend', function(e) {
+    if (_moved) return;
     var item = e.target.closest('.mob-ch-item');
-    if(item){ var idx = parseInt(item.getAttribute('data-idx')); if(!isNaN(idx)) play(idx); }
+    if (item) {
+      var idx = parseInt(item.getAttribute('data-idx'));
+      if (!isNaN(idx)) play(idx);
+    }
   }, {passive:true});
 }
 
