@@ -4733,7 +4733,8 @@ function switchMobTab(tab, btn) {
     var dy = _startY - e.touches[0].clientY;
     if (Math.abs(dy) > 5) _moved = true;
     cont.scrollTop = _scrollStart + dy;
-  }, {passive:true});
+    e.stopPropagation();
+  }, {passive:false});
 
   cont.addEventListener('touchend', function(e) {
     if (_moved) return;
