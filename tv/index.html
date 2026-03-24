@@ -5078,7 +5078,7 @@ const MOB_TAB_KEYWORDS = {
   ulusal:   ['ulusal'],
   yerel:    ['yerel'],
   belgesel: ['belgesel'],
-  sinema:   ['sinema']
+  sinema:   ['sinema','sİnema','sınema','cinema']
 };
 
 var mobActiveTab = null;
@@ -5140,11 +5140,20 @@ function switchMobTab(tab, btn) {
   }
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
+  // Türkçe karakter normalize: İ→i, I→ı, Ş→ş vb.
+  function trNorm(s) {
+    return (s||'').trim()
+      .replace(/İ/g,'i').replace(/I/g,'i')
+      .replace(/Ğ/g,'g').replace(/Ü/g,'u')
+      .replace(/Ş/g,'s').replace(/Ö/g,'o').replace(/Ç/g,'c')
+      .toLowerCase();
+  }
   var matched = allChannels.filter(function(ch) {
-    var g = (ch.group || '').trim().toLowerCase();
-    // SADECE grup adına tam eşleşme
+    var g = trNorm(ch.group);
+    // Tam eşleşme VEYA içeriyorsa (includes)
     return keywords.some(function(k){
-      return g === k.trim().toLowerCase();
+      var kn = trNorm(k);
+      return g === kn || g.includes(kn);
     });
   });
   // Tekrar edenleri kaldır (aynı URL'ye sahip kanallar)
