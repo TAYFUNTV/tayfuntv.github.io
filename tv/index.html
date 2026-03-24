@@ -805,6 +805,13 @@ header {
   .bottom-area-wrap {
     display: none !important;
   }
+  /* FİLMLER & DİZİLER bölümü laptop/desktop tarafında gizli */
+  #moviesTabContent {
+    display: none !important;
+  }
+  button.nav-tab[onclick*="movies"] {
+    display: none !important;
+  }
   .epg-ticker {
     display: none !important;
   }
@@ -4601,6 +4608,8 @@ function createNotifPopup(){
 
 /* MAIN TAB SWITCH */
 function switchMainTab(tab, btn){
+  // Desktop (laptop) tarafında filmler/diziler sekmesi devre dışı
+  if(tab==='movies' && window.innerWidth >= 769) return;
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -5139,10 +5148,6 @@ function closeAdminBackToSite(){
       <div class="sidebar-item" onclick="showPage('m3u',this)">
         <span class="si-icon">📋</span><span>M3U Listeler</span>
       </div>
-      <div class="sidebar-item" onclick="showPage('content',this)">
-        <span class="si-icon">🎬</span><span>Film & Dizi Ekle</span>
-        <span class="si-badge" id="contentBadge">0</span>
-      </div>
       <div class="sidebar-section">KULLANICILAR</div>
       <div class="sidebar-item" onclick="showPage('users',this)">
         <span class="si-icon">👥</span><span>Kullanıcılar</span>
@@ -5268,115 +5273,6 @@ function closeAdminBackToSite(){
             <div class="stat-num" style="font-size:22px;" id="stat_uptime">99%</div>
             <div class="stat-label">SİSTEM UPTIME</div>
           </div>
-        </div>
-      </div>
-
-      <!-- FİLM & DİZİ EKLE -->
-      <div class="admin-page" id="page_content">
-        <div class="page-header">
-          <div class="page-title">🎬 Film & Dizi Ekle</div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-          <!-- FORM -->
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;">
-            <div style="font-size:13px;font-weight:700;margin-bottom:16px;">➕ Yeni İçerik Ekle</div>
-            <div class="form-grid">
-              <div class="form-field form-full">
-                <label>İÇERİK TÜRÜ</label>
-                <select id="ccType" onchange="ccToggleSeason()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;">
-                  <option value="series">📺 Dizi Bölümü</option>
-                  <option value="movie">🎬 Film</option>
-                </select>
-              </div>
-              <div class="form-field form-full">
-                <label>BAŞLIK *</label>
-                <input type="text" id="ccTitle" placeholder="Örn: Game of Thrones">
-              </div>
-              <div class="form-field form-full">
-                <label>URL * <span style="color:var(--muted);font-size:10px;font-weight:400;">(.m3u8 HLS veya embed URL)</span></label>
-                <input type="text" id="ccUrl" placeholder="https://.../index.m3u8?token=... veya embed URL">
-              </div>
-              <div id="ccSeasonRow" style="display:contents;">
-                <div class="form-field">
-                  <label>SEZON</label>
-                  <input type="number" id="ccSeason" placeholder="1" min="1">
-                </div>
-                <div class="form-field">
-                  <label>BÖLÜM</label>
-                  <input type="number" id="ccEp" placeholder="1" min="1">
-                </div>
-              </div>
-              <div class="form-field">
-                <label>KATEGORİ / TÜR</label>
-                <select id="ccGenre" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;">
-                  <option value="movie">🎬 Genel Film</option>
-                  <option value="action">💥 Aksiyon</option>
-                  <option value="drama">🎭 Drama</option>
-                  <option value="comedy">😂 Komedi</option>
-                  <option value="horror">👻 Korku</option>
-                  <option value="scifi">🚀 Bilim Kurgu</option>
-                  <option value="doc">🌍 Belgesel</option>
-                  <option value="kids">🧸 Çocuk</option>
-                  <option value="yerli">🇹🇷 Yerli</option>
-                  <option value="fantasy">🔮 Fantezi</option>
-                  <option value="erotic">🔞 Erotik</option>
-                </select>
-              </div>
-              <div class="form-field">
-                <label>YIL</label>
-                <input type="number" id="ccYear" placeholder="2024">
-              </div>
-              <div class="form-field form-full">
-                <label>POSTER URL <span style="color:var(--muted);font-size:10px;font-weight:400;">(opsiyonel)</span></label>
-                <input type="text" id="ccPoster" placeholder="https://image.tmdb.org/t/p/w342/...">
-              </div>
-            </div>
-
-            <div style="background:rgba(232,55,61,.07);border:1px solid rgba(232,55,61,.2);border-radius:8px;padding:12px;margin:14px 0;font-size:11px;color:var(--text2);line-height:1.7;">
-              <b style="color:var(--accent);">💡 HLS (.m3u8) URL Nasıl Bulunur?</b><br>
-              1. Vidmody veya başka sitede bölümü aç<br>
-              2. <b>F12 → Network</b> sekmesini aç → <b>.m3u8</b> filtrele<br>
-              3. Çıkan linki kopyala → buraya yapıştır<br>
-              <span style="color:var(--muted);">⚠️ Bu linkler token'lı — birkaç saatte bir değişir.</span>
-            </div>
-
-            <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="ccSave()">💾 İçeriği Ekle</button>
-          </div>
-
-          <!-- BİLGİ KUTUSU -->
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;">
-            <div style="font-size:13px;font-weight:700;margin-bottom:14px;">📊 Eklenen İçerikler</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
-                <div style="font-size:28px;font-weight:800;color:var(--accent);" id="ccStatTotal">0</div>
-                <div style="font-size:11px;color:var(--muted);">Toplam</div>
-              </div>
-              <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
-                <div style="font-size:28px;font-weight:800;color:var(--blue);" id="ccStatSeries">0</div>
-                <div style="font-size:11px;color:var(--muted);">Dizi Bölümü</div>
-              </div>
-            </div>
-            <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">DESTEKLENEN URL TİPLERİ</div>
-            <div style="font-size:11px;color:var(--text2);line-height:2;background:var(--bg3);border-radius:8px;padding:12px;">
-              <div>✅ <code style="color:var(--green);">.m3u8</code> — HLS stream (en iyi, dahili oynatıcı)</div>
-              <div>✅ <code style="color:var(--blue);">vidsrc.to/embed/tv/...</code> — Embed iframe</div>
-              <div>✅ <code style="color:var(--blue);">dizipal2036.com/bolum/...</code> — Yeni sekme</div>
-              <div>✅ Herhangi bir embed URL</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TABLO -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;">
-          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:13px;font-weight:700;">📋 İçerik Listesi</div>
-            <button class="btn btn-secondary btn-xs" onclick="ccClearAll()">🗑️ Tümünü Sil</button>
-          </div>
-          <table class="admin-table">
-            <thead><tr><th>Başlık</th><th>Tür</th><th>URL Tipi</th><th>Yıl</th><th>İşlem</th></tr></thead>
-            <tbody id="ccTableBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Henüz içerik eklenmedi.</td></tr></tbody>
-          </table>
         </div>
       </div>
 
@@ -6411,150 +6307,6 @@ function exportData(){
   downloadFile('admin-export.json',JSON.stringify(data,null,2),'application/json');
   showToast('📥 Veri dışa aktarıldı','success');
 }
-
-/* ─── FİLM & DİZİ EKLE (Admin) ─── */
-let ccItems = JSON.parse(localStorage.getItem('cc_items') || '[]');
-
-function ccToggleSeason() {
-  const isSeries = document.getElementById('ccType').value === 'series';
-  const row = document.getElementById('ccSeasonRow');
-  if (row) row.style.display = isSeries ? 'contents' : 'none';
-}
-
-function ccSave() {
-  const title  = document.getElementById('ccTitle').value.trim();
-  const rawUrl = document.getElementById('ccUrl').value.trim();
-  const type   = document.getElementById('ccType').value;
-  const season = document.getElementById('ccSeason') ? document.getElementById('ccSeason').value.trim() : '';
-  const ep     = document.getElementById('ccEp') ? document.getElementById('ccEp').value.trim() : '';
-  const catVal = document.getElementById('ccGenre').value; // select'ten kategori kodu
-  const year   = document.getElementById('ccYear').value.trim() || new Date().getFullYear();
-  const poster = document.getElementById('ccPoster').value.trim();
-
-  if (!title || !rawUrl) { showToast('Başlık ve URL zorunlu!', 'warning'); return; }
-
-  const epLabel = (type === 'series' && season && ep)
-    ? ` S${season.padStart(2,'0')}E${ep.padStart(2,'0')}` : '';
-  const fullTitle = title + epLabel;
-
-  // URL tipi belirle
-  const isHLS    = _isM3U8(rawUrl);
-  const isEmbed  = rawUrl.includes('vidsrc') || rawUrl.includes('embed');
-  const extlink  = !isHLS && !isEmbed;
-
-  // cat: dizi ise 'series', film ise seçilen kategori
-  const cat = type === 'series' ? 'series' : catVal;
-  // Görünen tür etiketi
-  const catLabels = {movie:'Film',action:'Aksiyon',drama:'Drama',comedy:'Komedi',horror:'Korku',scifi:'Bilim Kurgu',doc:'Belgesel',kids:'Çocuk',yerli:'Yerli',fantasy:'Fantezi',erotic:'Erotik'};
-  const genreLabel = type === 'series' ? 'Dizi' : (catLabels[catVal] || 'Film');
-
-  const item = {
-    e: type === 'series' ? '📺' : '🎬',
-    t: fullTitle,
-    g: genreLabel + (epLabel ? ' ·' + epLabel : ''),
-    r: '—', y: String(year),
-    b: 'badge-new', cat,
-    url: rawUrl, poster,
-    show: type === 'series' ? title : undefined,
-    ep: ep ? parseInt(ep) : undefined,
-    extlink,
-    addedAt: Date.now()
-  };
-
-  // MOVIES_ALL'a ekle
-  if (!MOVIES_ALL.find(m => m.t === item.t && m.url === item.url)) {
-    MOVIES_ALL.push(item);
-  }
-
-  ccItems.push(item);
-  localStorage.setItem('cc_items', JSON.stringify(ccItems));
-
-  ccRender();
-  renderMovies();
-
-  // Formu temizle
-  ['ccTitle','ccUrl','ccSeason','ccEp','ccYear','ccPoster'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('ccType').value = 'series';
-  document.getElementById('ccGenre').value = 'movie';
-  ccToggleSeason();
-
-  const typeLabel = isHLS ? '✅ HLS stream' : extlink ? '✅ Yeni sekme linki' : '✅ Embed URL';
-  showToast(typeLabel + ' olarak eklendi', 'success');
-  addLog('channel','content','➕ İçerik eklendi: '+fullTitle,'var(--green)');
-}
-
-function ccDelete(idx) {
-  if (!confirm('Bu içeriği silmek istiyor musunuz?')) return;
-  const item = ccItems[idx];
-  ccItems.splice(idx, 1);
-  localStorage.setItem('cc_items', JSON.stringify(ccItems));
-  const mi = MOVIES_ALL.findIndex(m => m.t === item.t && m.url === item.url);
-  if (mi >= 0) MOVIES_ALL.splice(mi, 1);
-  ccRender();
-  renderMovies();
-  showToast('🗑️ Silindi', 'warning');
-}
-
-function ccClearAll() {
-  if (!ccItems.length) return;
-  if (!confirm('Tüm eklenen içerikler silinsin mi?')) return;
-  ccItems.forEach(item => {
-    const mi = MOVIES_ALL.findIndex(m => m.t === item.t && m.url === item.url);
-    if (mi >= 0) MOVIES_ALL.splice(mi, 1);
-  });
-  ccItems = [];
-  localStorage.setItem('cc_items', '[]');
-  ccRender();
-  renderMovies();
-  showToast('🗑️ Tüm içerikler silindi', 'warning');
-}
-
-function ccRender() {
-  const badge = document.getElementById('contentBadge');
-  const total = document.getElementById('ccStatTotal');
-  const series = document.getElementById('ccStatSeries');
-  const tbody = document.getElementById('ccTableBody');
-  if (badge) badge.textContent = ccItems.length;
-  if (total) total.textContent = ccItems.length;
-  if (series) series.textContent = ccItems.filter(c => c.cat === 'series').length;
-  if (!tbody) return;
-  if (!ccItems.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Henüz içerik eklenmedi.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = ccItems.map((c, i) => {
-    const urlType = _isM3U8(c.url)
-      ? '<span style="color:var(--green);font-size:11px;">▶ HLS Stream</span>'
-      : c.extlink
-        ? '<span style="color:var(--gold);font-size:11px;">↗ Yeni Sekme</span>'
-        : '<span style="color:var(--blue);font-size:11px;">⬜ Embed</span>';
-    return `<tr>
-      <td style="font-weight:600;">${c.t}</td>
-      <td><span class="td-badge ${c.cat==='series'?'badge-online':'badge-admin'}">${c.cat==='series'?'📺 Dizi':'🎬 Film'}</span></td>
-      <td>${urlType}</td>
-      <td>${c.y}</td>
-      <td style="display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-xs" onclick="openMoviePlayer('${c.url.replace(/'/g,"\\'")}','${c.t.replace(/'/g,"\\'")}')">▶ Test</button>
-        <button class="btn btn-primary btn-xs" style="background:var(--accent);" onclick="ccDelete(${i})">🗑️</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// Sayfa yüklenince kayıtlı içerikleri yükle
-(function ccInit() {
-  ccItems.forEach(item => {
-    if (typeof MOVIES_ALL !== 'undefined' && !MOVIES_ALL.find(m => m.t === item.t && m.url === item.url)) {
-      MOVIES_ALL.push(item);
-    }
-  });
-  setTimeout(() => {
-    ccRender();
-    if (typeof renderMovies === 'function') renderMovies();
-  }, 400);
-})();
 
 /* INIT */
 window.addEventListener('load', ()=>{
