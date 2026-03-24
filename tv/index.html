@@ -71,6 +71,256 @@ body {
     overflow-x: hidden;
   }
 }
+/* ══════════════════════════════════════════════
+   TAYFUN TV — FİLM & DİZİ (TMDB) STYLES
+   ══════════════════════════════════════════════ */
+
+/* Tab override for movies */
+#moviesTabContent.active { display: flex !important; flex-direction: column !important; overflow: hidden !important; position: relative; }
+
+/* Category bar */
+.ttv-cat-wrap {
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 20px; overflow-x: auto; flex-shrink: 0;
+  display: flex; align-items: center; gap: 0;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.ttv-cat-wrap::-webkit-scrollbar { display: none; }
+.ttv-cat-item {
+  padding: 12px 16px; font-size: 11px; font-weight: 700; letter-spacing: .5px;
+  color: var(--muted); border-bottom: 2px solid transparent;
+  white-space: nowrap; cursor: pointer; transition: var(--transition); flex-shrink: 0;
+}
+.ttv-cat-item:hover { color: var(--text2); }
+.ttv-cat-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Genre pills */
+.ttv-genre-bar {
+  display: flex; gap: 6px; padding: 10px 20px; overflow-x: auto;
+  flex-shrink: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  background: var(--bg);
+}
+.ttv-genre-bar::-webkit-scrollbar { display: none; }
+.ttv-genre-pill {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--muted); font-size: 11px; font-weight: 600;
+  padding: 5px 14px; border-radius: 20px;
+  cursor: pointer; white-space: nowrap; transition: var(--transition); flex-shrink: 0;
+}
+.ttv-genre-pill.active, .ttv-genre-pill:hover {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+
+/* Filter bar */
+.ttv-filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  flex-shrink: 0; flex-wrap: nowrap;
+}
+.ttv-filter-bar::-webkit-scrollbar { display: none; }
+.ttv-filter-select {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); font-size: 11px; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; outline: none;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+  transition: var(--transition); flex-shrink: 0;
+}
+.ttv-filter-label { font-size: 10px; color: var(--muted); font-weight: 600; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; }
+.ttv-filter-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; }
+.ttv-sort-btn-grp { display: flex; gap: 4px; flex-shrink: 0; }
+.ttv-sort-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--muted); font-size: 10px; font-weight: 700;
+  padding: 5px 10px; border-radius: 6px;
+  cursor: pointer; white-space: nowrap; transition: var(--transition);
+}
+.ttv-sort-btn.active { background: var(--accent3); border-color: rgba(232,55,61,.3); color: var(--accent); }
+.ttv-hdr-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px;
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  transition: var(--transition); white-space: nowrap; cursor: pointer; flex-shrink: 0;
+}
+.ttv-hdr-btn:hover { background: var(--bg4); color: var(--text); }
+.ttv-hdr-btn.active { background: var(--accent3); border-color: rgba(232,55,61,.3); color: var(--accent); }
+.ttv-fav-count { background: var(--accent); color: #fff; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 10px; min-width: 16px; text-align: center; }
+
+/* Hero */
+.ttv-hero-section {
+  position: relative; border-radius: var(--radius2); overflow: hidden;
+  margin: 16px 0; height: 280px; cursor: pointer;
+  animation: fadeInUp .4s ease;
+}
+.ttv-hero-section:hover .ttv-hero-overlay { opacity: 1; }
+.ttv-hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  transition: transform .4s ease;
+}
+.ttv-hero-section:hover .ttv-hero-bg { transform: scale(1.03); }
+.ttv-hero-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,11,16,0) 0%, rgba(8,11,16,.4) 40%, rgba(8,11,16,.92) 100%),
+              linear-gradient(90deg, rgba(8,11,16,.8) 0%, transparent 60%);
+}
+.ttv-hero-content { position: absolute; bottom: 0; left: 0; padding: 24px; right: 0; }
+.ttv-hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; line-height: 1; margin-bottom: 6px; text-shadow: 0 2px 20px rgba(0,0,0,.8); }
+.ttv-hero-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 14px; max-width: 420px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ttv-hero-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s; }
+.ttv-hero-play { width: 64px; height: 64px; border-radius: 50%; background: rgba(232,55,61,.9); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; box-shadow: 0 0 30px rgba(232,55,61,.5); transition: transform .3s; }
+.ttv-hero-badge { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; padding: 3px 8px; border-radius: 4px; }
+.ttv-hero-badge.featured { background: var(--accent); color: #fff; }
+.ttv-hero-badge.score { background: rgba(0,0,0,.6); color: var(--gold); border: 1px solid rgba(245,200,66,.3); }
+.ttv-hero-badge.year { background: rgba(255,255,255,.1); color: var(--text2); }
+.ttv-hero-btn { display: flex; align-items: center; gap: 7px; padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: .5px; transition: var(--transition); cursor: pointer; border: none; }
+.ttv-hero-btn.primary { background: var(--accent); color: #fff; }
+.ttv-hero-btn.primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.ttv-hero-btn.secondary { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.15); backdrop-filter: blur(10px); }
+
+/* Card grid */
+.ttv-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+.ttv-card-grid-large { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.ttv-movie-card { cursor: pointer; position: relative; animation: fadeInUp .4s ease both; }
+.ttv-movie-card:hover .ttv-card-poster { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.6); }
+.ttv-card-poster {
+  width: 100%; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden;
+  background: var(--bg3); position: relative;
+  transition: transform .25s, box-shadow .25s; border: 1px solid var(--border);
+}
+.ttv-card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ttv-card-poster-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; color: var(--muted); background: linear-gradient(135deg, var(--bg3), var(--bg4)); }
+.ttv-card-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; border-radius: var(--radius); }
+.ttv-movie-card:hover .ttv-card-overlay { opacity: 1; }
+.ttv-card-play-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
+.ttv-card-score { position: absolute; top: 7px; left: 7px; background: rgba(0,0,0,.75); color: var(--gold); font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; backdrop-filter: blur(4px); }
+.ttv-card-type { position: absolute; top: 7px; right: 7px; font-size: 8px; font-weight: 800; letter-spacing: .8px; padding: 2px 6px; border-radius: 4px; backdrop-filter: blur(4px); }
+.ttv-card-type.movie { background: rgba(232,55,61,.8); color: #fff; }
+.ttv-card-type.tv { background: rgba(34,158,217,.8); color: #fff; }
+.ttv-card-fav-btn { position: absolute; bottom: 7px; right: 7px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,.7); border: 1px solid rgba(255,255,255,.1); color: var(--muted); font-size: 12px; display: flex; align-items: center; justify-content: center; transition: var(--transition); backdrop-filter: blur(4px); cursor: pointer; }
+.ttv-card-fav-btn.active, .ttv-card-fav-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(232,55,61,.15); }
+.ttv-card-info { padding: 8px 2px 0; }
+.ttv-card-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ttv-card-year { font-size: 10px; color: var(--muted); }
+
+/* Scroll row */
+.ttv-scroll-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.ttv-scroll-row::-webkit-scrollbar { display: none; }
+.ttv-scroll-card { flex-shrink: 0; width: 120px; }
+.ttv-scroll-card.wide { width: 160px; }
+
+/* Skeleton */
+.ttv-skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius); }
+.ttv-skeleton-poster { width: 100%; aspect-ratio: 2/3; border-radius: var(--radius); }
+.ttv-skeleton-text { height: 10px; border-radius: 4px; margin-top: 8px; }
+
+/* Search results */
+.ttv-search-results {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--radius2); overflow: hidden;
+  box-shadow: var(--shadow); z-index: 800;
+  max-height: 360px; overflow-y: auto; display: none;
+}
+.ttv-search-results.open { display: block; animation: fadeInUp .2s ease; }
+.ttv-sr-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; transition: background .15s; }
+.ttv-sr-item:hover { background: var(--bg3); }
+.ttv-sr-item + .ttv-sr-item { border-top: 1px solid var(--border); }
+.ttv-sr-thumb { width: 36px; height: 54px; border-radius: 5px; background: var(--bg3); flex-shrink: 0; overflow: hidden; }
+.ttv-sr-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ttv-sr-info { flex: 1; min-width: 0; }
+.ttv-sr-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ttv-sr-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.ttv-sr-type { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+.ttv-sr-type.movie { background: var(--accent3); color: var(--accent); }
+.ttv-sr-type.tv { background: rgba(34,158,217,.15); color: var(--blue); }
+
+/* Pagination */
+.ttv-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 0; flex-wrap: wrap; }
+.ttv-page-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+.ttv-page-btn:hover:not(:disabled) { background: var(--bg4); }
+.ttv-page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ttv-page-btn:disabled { opacity: .3; cursor: default; }
+
+/* Spinner */
+.ttv-spinner { width: 32px; height: 32px; border: 3px solid var(--bg3); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto; }
+
+/* Detail page */
+.ttv-detail-backdrop { position: relative; width: 100%; height: 340px; overflow: hidden; background: var(--bg2); }
+.ttv-detail-backdrop-img { position: absolute; inset: 0; background-size: cover; background-position: center top; filter: blur(1px); transform: scale(1.04); }
+.ttv-detail-backdrop-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,11,16,.2) 0%, rgba(8,11,16,.7) 60%, rgba(8,11,16,1) 100%), linear-gradient(90deg, rgba(8,11,16,.6) 0%, transparent 50%); }
+.ttv-detail-header-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; }
+.ttv-detail-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+.ttv-detail-close:hover { background: rgba(232,55,61,.5); }
+.ttv-detail-main { position: relative; padding: 0 20px 40px; margin-top: -60px; }
+.ttv-detail-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1.5px; line-height: 1; margin-bottom: 8px; }
+.ttv-detail-poster { width: 110px; height: 165px; border-radius: var(--radius2); background: var(--bg3); border: 2px solid var(--border2); overflow: hidden; flex-shrink: 0; box-shadow: 0 8px 30px rgba(0,0,0,.6); }
+.ttv-detail-poster img { width: 100%; height: 100%; object-fit: cover; }
+.ttv-detail-btn { display: flex; align-items: center; gap: 7px; padding: 10px 20px; border-radius: 9px; font-size: 12px; font-weight: 700; letter-spacing: .5px; transition: var(--transition); cursor: pointer; flex-shrink: 0; border: none; font-family: 'DM Sans', sans-serif; }
+.ttv-detail-btn-primary { background: var(--accent); color: #fff; }
+.ttv-detail-btn-primary:hover { background: var(--accent2); box-shadow: 0 4px 16px rgba(232,55,61,.4); }
+.ttv-detail-btn-outline { background: var(--bg3); border: 1px solid var(--border2) !important; color: var(--text); }
+.ttv-detail-btn-outline:hover { background: var(--bg4); border-color: var(--accent) !important; color: var(--accent); }
+.ttv-meta-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+.ttv-meta-label { font-size: 9px; color: var(--muted); font-weight: 700; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 4px; }
+.ttv-meta-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.ttv-detail-tag { font-size: 9px; font-weight: 700; letter-spacing: .8px; padding: 3px 8px; border-radius: 4px; }
+.ttv-detail-tag.genre { background: rgba(255,255,255,.08); color: var(--text2); }
+.ttv-detail-tag.year { background: var(--accent3); color: var(--accent); }
+.ttv-detail-tag.score { background: rgba(245,200,66,.15); color: var(--gold); }
+.ttv-detail-tag.runtime { background: rgba(255,255,255,.06); color: var(--muted); }
+
+/* Cast */
+.ttv-cast-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.ttv-cast-row::-webkit-scrollbar { display: none; }
+.ttv-cast-card { flex-shrink: 0; width: 72px; text-align: center; }
+.ttv-cast-photo { width: 72px; height: 72px; border-radius: 50%; background: var(--bg3); border: 2px solid var(--border); overflow: hidden; margin-bottom: 6px; }
+.ttv-cast-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Season tabs */
+.ttv-season-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
+.ttv-season-tabs::-webkit-scrollbar { display: none; }
+.ttv-season-tab { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: var(--transition); white-space: nowrap; flex-shrink: 0; }
+.ttv-season-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Episode items */
+.ttv-episode-item { display: flex; align-items: center; gap: 12px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; cursor: pointer; transition: var(--transition); margin-bottom: 8px; }
+.ttv-episode-item:hover { background: var(--bg3); }
+.ttv-episode-thumb { width: 80px; height: 45px; border-radius: 6px; background: var(--bg3); flex-shrink: 0; overflow: hidden; }
+.ttv-episode-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* No results */
+.ttv-no-results { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ttv-hero-section { height: 220px; }
+  .ttv-hero-title { font-size: 24px; }
+  .ttv-hero-desc { display: none; }
+  .ttv-hero-btn { padding: 7px 14px; font-size: 11px; }
+  .ttv-cat-wrap { padding: 0 12px; }
+  .ttv-genre-bar { padding: 8px 12px; }
+  .ttv-filter-bar { padding: 6px 12px; }
+  .ttv-card-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  .ttv-card-grid-large { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  .ttv-detail-backdrop { height: 260px; }
+  .ttv-detail-title { font-size: 22px; }
+  .ttv-detail-poster { width: 90px; height: 135px; }
+  .ttv-filter-bar { flex-wrap: nowrap; }
+}
+@media (max-width: 400px) {
+  .ttv-card-grid { grid-template-columns: repeat(3, 1fr); }
+  .ttv-hero-section { height: 190px; }
+}
+@media (min-width: 1200px) {
+  .ttv-card-grid-large { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}
 body::before {
   content: '';
   position: fixed; inset: 0;
@@ -624,17 +874,28 @@ header {
 }
 .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
 .cat-bar {
-  display: flex; gap: 4px; padding: 8px 10px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 .cat-bar::-webkit-scrollbar { display: none; }
 .cat-pill {
-  background: var(--bg3); border: 1px solid var(--border);
-  color: var(--muted); font-size: 9px; font-weight: 600;
-  padding: 3px 8px; border-radius: var(--radius3);
-  cursor: pointer; white-space: nowrap; transition: var(--transition);
+  flex: 1;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 8px;
+  font-weight: 800;
+  padding: 5px 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: .5px;
 }
 .cat-pill.active, .cat-pill:hover {
   background: var(--accent); border-color: var(--accent); color: #fff;
@@ -805,13 +1066,7 @@ header {
   .bottom-area-wrap {
     display: none !important;
   }
-  /* FİLMLER & DİZİLER bölümü laptop/desktop tarafında gizli */
-  #moviesTabContent {
-    display: none !important;
-  }
-  button.nav-tab[onclick*="movies"] {
-    display: none !important;
-  }
+  /* FİLMLER & DİZİLER bölümü tüm cihazlarda aktif */
   .epg-ticker {
     display: none !important;
   }
@@ -1683,7 +1938,13 @@ header {
   .sidebar-tabs  { display: none !important; }
   .channel-list  { display: none !important; }
   .sidebar-sort  { display: none !important; }
-  .cat-bar       { display: none !important; }
+  .cat-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
 
   #mobileCatsArea {
     display: flex !important;
@@ -1778,16 +2039,17 @@ header {
   flex: 0 0 auto;
   background: none; border: none;
   border-bottom: 3px solid transparent;
-  color: var(--muted); font-size: 11px; font-weight: 700;
-  padding: 10px 14px; white-space: nowrap;
+  color: var(--muted); font-size: 12px; font-weight: 800;
+  padding: 11px 16px; white-space: nowrap;
   cursor: pointer; transition: all .2s;
   font-family: 'DM Sans', sans-serif;
-  letter-spacing: .3px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 .mob-cat-tab.active {
   color: var(--accent);
   border-bottom-color: var(--accent);
-  background: rgba(232,55,61,.06);
+  background: rgba(232,55,61,.08);
 }
 .mob-cat-tab:active { opacity: .7; }
 .mob-ch-item {
@@ -1841,7 +2103,22 @@ header {
   .fav-btn { font-size: 13px; }
 
   /* Cat bar küçük */
-  .cat-pill { font-size: 9px; padding: 3px 7px; }
+  .cat-pill {
+  flex: 1;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 8px;
+  font-weight: 800;
+  padding: 5px 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
 
   /* Sidebar tabs */
   .tab-btn { font-size: 9px; padding: 10px 4px; letter-spacing: 0.5px; }
@@ -1880,7 +2157,13 @@ header {
   from { opacity:0; transform:translateY(30px); }
   to   { opacity:1; transform:translateY(0); }
 }
-  .cat-bar        { display: none !important; }
+  .cat-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
 }
 
 
@@ -2809,37 +3092,186 @@ tr:last-child td{border:none;}
   </div>
 
   <!-- MOVIES TAB -->
-  <div class="tab-content" id="moviesTabContent">
-    <div id="moviesTab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <div class="tab-content" id="moviesTabContent" style="flex-direction:column;overflow:hidden;">
 
-      <!-- ── FİLTRE ── -->
-      <div class="movies-filter" id="moviesFilter">
-        <button class="m-filter active" onclick="filterMovies('all',this)">Tümü</button>
-        <button class="m-filter" onclick="filterMovies('action',this)">Aksiyon</button>
-        <button class="m-filter" onclick="filterMovies('drama',this)">Drama</button>
-        <button class="m-filter" onclick="filterMovies('comedy',this)">Komedi</button>
-        <button class="m-filter" onclick="filterMovies('horror',this)">Korku</button>
-        <button class="m-filter" onclick="filterMovies('scifi',this)">Bilim Kurgu</button>
-        <button class="m-filter" onclick="filterMovies('doc',this)">Belgesel</button>
-        <button class="m-filter" onclick="filterMovies('kids',this)">Çocuk</button>
-        <button class="m-filter" onclick="filterMovies('yerli',this)">Yerli</button>
-        <button class="m-filter" onclick="filterMovies('fantasy',this)">Fantezi</button>
-        <button class="m-filter" onclick="filterMovies('erotic',this)">Erotik</button>
-        <button class="m-filter" onclick="filterMovies('series',this)">Diziler</button>
-      </div>
-
-      <!-- ── İÇERİK ── -->
-      <div style="overflow-y:auto;flex:1;padding:4px 0 16px;">
-        <div class="sec-title" id="sec1Title">TREND İÇERİKLER</div>
-        <div class="movies-grid" id="moviesGrid"></div>
-        <div id="seasonDivider" style="display:none;"></div>
-        <div class="sec-title" id="sec2Title" style="margin-top:20px;">YENİ EKLENENLER</div>
-        <div class="movies-grid" id="moviesGrid2"></div>
-        <div class="sec-title" id="sec3Title" style="margin-top:20px;">POPÜLER İÇERİKLER</div>
-        <div class="movies-grid" id="moviesGrid3"></div>
-      </div>
-
+    <!-- ── TMDB FİLM & DİZİ SEKMESİ ── -->
+    <!-- CATEGORY BAR -->
+    <div class="ttv-cat-wrap" id="ttvCatBar">
+      <div class="ttv-cat-item active" onclick="ttvSetCategory('all',this)">Tümü</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('movie',this)">🎬 Filmler</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('tv',this)">📺 Diziler</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('trending',this)">🔥 Trend</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('toprated',this)">⭐ En İyi</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('upcoming',this)">🎭 Yakında</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('animation',this)">🎨 Animasyon</div>
+      <div class="ttv-cat-item" onclick="ttvSetCategory('documentary',this)">🎥 Belgesel</div>
     </div>
+
+    <!-- GENRE PILLS -->
+    <div class="ttv-genre-bar" id="ttvGenreBar">
+      <div class="ttv-genre-pill active" onclick="ttvSetGenre(null,this)">Tüm Türler</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(28,this)">Aksiyon</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(12,this)">Macera</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(16,this)">Animasyon</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(35,this)">Komedi</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(80,this)">Suç</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(99,this)">Belgesel</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(18,this)">Dram</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(14,this)">Fantazi</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(27,this)">Korku</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(9648,this)">Gizem</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(10749,this)">Romantik</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(878,this)">Bilim Kurgu</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(53,this)">Gerilim</div>
+      <div class="ttv-genre-pill" onclick="ttvSetGenre(10752,this)">Savaş</div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="ttv-filter-bar">
+      <span class="ttv-filter-label">SIRALA:</span>
+      <div class="ttv-sort-btn-grp">
+        <button class="ttv-sort-btn active" onclick="ttvSetSort('popularity.desc',this)">Popüler</button>
+        <button class="ttv-sort-btn" onclick="ttvSetSort('vote_average.desc',this)">En İyi</button>
+        <button class="ttv-sort-btn" onclick="ttvSetSort('release_date.desc',this)">Yeni</button>
+        <button class="ttv-sort-btn" onclick="ttvSetSort('vote_count.desc',this)">Çok Oy</button>
+      </div>
+      <div class="ttv-filter-sep"></div>
+      <span class="ttv-filter-label">YIL:</span>
+      <select class="ttv-filter-select" id="ttvYearFilter" onchange="ttvApplyFilters()">
+        <option value="">Tümü</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+        <option value="2021">2021</option>
+        <option value="2020">2020</option>
+        <option value="2019">2019</option>
+        <option value="2018">2018</option>
+        <option value="2015">2015–2017</option>
+        <option value="2010">2010–2014</option>
+      </select>
+      <select class="ttv-filter-select" id="ttvLangFilter" onchange="ttvApplyFilters()">
+        <option value="">Tüm Diller</option>
+        <option value="tr">Türkçe</option>
+        <option value="en">İngilizce</option>
+        <option value="ko">Korece</option>
+        <option value="es">İspanyolca</option>
+        <option value="fr">Fransızca</option>
+        <option value="ja">Japonca</option>
+      </select>
+      <div class="ttv-filter-sep"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;">
+        <div class="ttv-search-wrap" style="position:relative;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none;">🔍</span>
+          <input type="text" id="ttvSearchInput" placeholder="Film veya dizi ara..." 
+            style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 12px 7px 32px;color:var(--text);font-size:12px;outline:none;width:180px;font-family:'DM Sans',sans-serif;"
+            oninput="ttvOnSearch(this.value)" onblur="setTimeout(()=>ttvCloseSearch(),200)">
+          <div id="ttvSearchDropdown" class="ttv-search-results"></div>
+        </div>
+        <button class="ttv-hdr-btn" id="ttvFavBtn" onclick="ttvShowFavorites()" title="Favorilerim">
+          ❤️ <span>Favoriler</span> <span class="ttv-fav-count" id="ttvFavCount">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT SCROLL -->
+    <div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;" id="ttvScrollArea">
+      <div style="padding:0 20px 100px;" id="ttvMainContent">
+
+        <!-- Favorites Section -->
+        <div id="ttvFavoritesSection" style="display:none;">
+          <div style="margin:16px 0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;"><span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>❤️ Favorilerim</div>
+              <button style="font-size:11px;color:var(--blue);font-weight:600;cursor:pointer;background:none;border:none;" onclick="ttvClearFavorites()">Temizle</button>
+            </div>
+            <div class="ttv-card-grid" id="ttvFavGrid"></div>
+          </div>
+        </div>
+
+        <!-- Hero -->
+        <div id="ttvHeroWrap"></div>
+
+        <!-- Trending -->
+        <div id="ttvTrendSection" style="margin:16px 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;"><span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>🔥 Bu Hafta Trend</div>
+            <span style="font-size:11px;color:var(--blue);font-weight:600;cursor:pointer;" onclick="ttvSetCategory('trending',document.querySelectorAll('.ttv-cat-item')[3])">Tümünü Gör</span>
+          </div>
+          <div class="ttv-scroll-row" id="ttvTrendRow"></div>
+        </div>
+
+        <!-- Main grid -->
+        <div id="ttvMainSection" style="margin:16px 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;"><span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span><span id="ttvMainSectionTitle">🎬 Tüm Filmler & Diziler</span></div>
+            <span id="ttvResultCount" style="font-size:10px;color:var(--muted);"></span>
+          </div>
+          <div class="ttv-card-grid ttv-card-grid-large" id="ttvMainGrid"></div>
+          <div id="ttvLoadingSpinner" style="display:none;"><div class="ttv-spinner"></div></div>
+          <div class="ttv-pagination" id="ttvPagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL PAGE (full screen overlay inside app) -->
+    <div id="ttvDetailPage" style="display:none;position:absolute;inset:0;z-index:600;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+      <div class="ttv-detail-backdrop">
+        <div class="ttv-detail-backdrop-img" id="ttvDetailBackdrop"></div>
+        <div class="ttv-detail-backdrop-grad"></div>
+        <div class="ttv-detail-header-bar">
+          <button class="ttv-detail-close" onclick="ttvCloseDetail()">✕</button>
+          <div style="display:flex;gap:8px;">
+            <button class="ttv-hdr-btn" id="ttvDetailFavBtn" onclick="ttvToggleDetailFav()" style="background:rgba(0,0,0,.5);backdrop-filter:blur(8px);">❤️ <span id="ttvDetailFavText">Favoriye Ekle</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="ttv-detail-main">
+        <div style="display:flex;gap:18px;align-items:flex-end;margin-bottom:20px;">
+          <div class="ttv-detail-poster"><img id="ttvDetailPoster" src="" alt="" onerror="this.style.display='none'"><div style="display:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;">🎬</div></div>
+          <div style="flex:1;padding-bottom:8px;">
+            <div class="ttv-detail-title" id="ttvDetailTitle"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;" id="ttvDetailTags"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="ttv-detail-btn ttv-detail-btn-primary" id="ttvDetailTrailerBtn" onclick="ttvOpenTrailer()">▶ Fragman</button>
+              <button class="ttv-detail-btn ttv-detail-btn-outline" onclick="ttvShareDetail()">↗ Paylaş</button>
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom:22px;">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Konu</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;" id="ttvDetailOverview"></div>
+        </div>
+        <div style="margin-bottom:22px;">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;" id="ttvDetailMeta"></div>
+        </div>
+        <div style="margin-bottom:22px;" id="ttvCastSection">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Oyuncular</div>
+          <div class="ttv-cast-row" id="ttvCastRow"></div>
+        </div>
+        <div style="margin-bottom:22px;" id="ttvSeasonsSection" style="display:none">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Bölümler</div>
+          <div class="ttv-season-tabs" id="ttvSeasonTabs"></div>
+          <div id="ttvEpisodeList"></div>
+        </div>
+        <div style="margin-bottom:22px;">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">Benzer İçerikler</div>
+          <div class="ttv-scroll-row" id="ttvSimilarRow"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAILER MODAL -->
+    <div id="ttvTrailerModal" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;">
+      <div style="width:100%;max-width:800px;background:var(--bg2);border-radius:var(--radius2);border:1px solid var(--border2);overflow:hidden;animation:popIn .3s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:700;" id="ttvTrailerTitle">Fragman</div>
+          <button style="width:30px;height:30px;border-radius:8px;background:var(--bg3);color:var(--text);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;" onclick="ttvCloseTrailer()">✕</button>
+        </div>
+        <div style="position:relative;width:100%;aspect-ratio:16/9;"><iframe id="ttvTrailerFrame" src="" allowfullscreen allow="autoplay" style="width:100%;height:100%;border:none;display:block;"></iframe></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- NOTIFICATIONS TAB -->
@@ -3543,7 +3975,12 @@ function loadM3U(){
 }
 
 function buildCats(){
-  const groups = [...new Set(allChannels.map(c=>c.group).filter(g=>g))].slice(0,22);
+  // Normalize grup adlarını: trim + tekrar önle
+  const seen = new Set();
+  const groups = allChannels
+    .map(c => (c.group || '').trim())
+    .filter(g => g && !seen.has(g.toLowerCase()) && seen.add(g.toLowerCase()))
+    .slice(0, 22);
   document.getElementById('catBar').innerHTML = groups.map((g,i)=>
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
@@ -4608,8 +5045,6 @@ function createNotifPopup(){
 
 /* MAIN TAB SWITCH */
 function switchMainTab(tab, btn){
-  // Desktop (laptop) tarafında filmler/diziler sekmesi devre dışı
-  if(tab==='movies' && window.innerWidth >= 769) return;
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -4639,11 +5074,11 @@ function switchMainTab(tab, btn){
 
 /* ─── MOBİL KATEGORİ SEKME SİSTEMİ ─── */
 const MOB_TAB_KEYWORDS = {
-  spor:     ['spor','sport','futbol','basketbol','tenis','lig'],
-  ulusal:   ['ulusal','trt','atv','show','kanal d','star','fox','tv8','now','haber'],
-  yerel:    ['yerel','local','bolge','sehir','kent'],
-  belgesel: ['belgesel','document','nat geo','discovery','history','hayvan'],
-  sinema:   ['sinema','cinema','film','movie','dizi','series']
+  spor:     ['spor','sport'],
+  ulusal:   ['ulusal'],
+  yerel:    ['yerel'],
+  belgesel: ['belgesel'],
+  sinema:   ['sinema']
 };
 
 var mobActiveTab = null;
@@ -4706,9 +5141,18 @@ function switchMobTab(tab, btn) {
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
   var matched = allChannels.filter(function(ch) {
-    var g = (ch.group || '').toLowerCase();
-    var n = (ch.name  || '').toLowerCase();
-    return keywords.some(function(k){ return g.indexOf(k) !== -1 || n.indexOf(k) !== -1; });
+    var g = (ch.group || '').trim().toLowerCase();
+    // SADECE grup adına tam eşleşme
+    return keywords.some(function(k){
+      return g === k.trim().toLowerCase();
+    });
+  });
+  // Tekrar edenleri kaldır (aynı URL'ye sahip kanallar)
+  var seenUrls = new Set();
+  matched = matched.filter(function(ch){
+    if(seenUrls.has(ch.url)) return false;
+    seenUrls.add(ch.url);
+    return true;
   });
 
   if (!matched.length) {
@@ -6333,6 +6777,485 @@ window.addEventListener('load', ()=>{
 </script>
 
 <script>
+/* ══════════════════════════════════════════════
+   TAYFUN TV — FİLM & DİZİ (TMDB) ENGINE
+   ══════════════════════════════════════════════ */
+
+const TTV_API_KEY = '4287ad07e2db4f1ba8dee3ab274ca516';
+const TTV_BASE    = 'https://api.themoviedb.org/3';
+const TTV_IMG     = 'https://image.tmdb.org/t/p/';
+const TTV_LANG    = 'tr-TR';
+
+let ttvCategory   = 'all';
+let ttvGenre      = null;
+let ttvSort       = 'popularity.desc';
+let ttvPage       = 1;
+let ttvTotalPages = 1;
+let ttvDetail     = null;
+let ttvTrailerKey = null;
+let ttvFavorites  = JSON.parse(localStorage.getItem('ttv_favs') || '[]');
+let ttvSearchTmr  = null;
+let ttvLoading    = false;
+let ttvInited     = false;
+
+async function ttvApi(path, params={}) {
+  const url = new URL(TTV_BASE + path);
+  url.searchParams.set('api_key', TTV_API_KEY);
+  url.searchParams.set('language', TTV_LANG);
+  for (const [k,v] of Object.entries(params)) if(v!==null&&v!==undefined&&v!=='') url.searchParams.set(k,v);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('TTV API Error');
+    return await r.json();
+  } catch(e) { console.error(e); return null; }
+}
+
+// Called when user switches to movies tab
+function ttvInit() {
+  if (ttvInited) return;
+  ttvInited = true;
+  ttvRenderFavCount();
+  ttvLoadHero();
+  ttvLoadTrending();
+  ttvLoadMain();
+}
+
+async function ttvLoadHero() {
+  const data = await ttvApi('/trending/all/week');
+  if (!data?.results?.length) return;
+  const items = data.results.filter(i=>i.backdrop_path).slice(0,5);
+  let idx = 0;
+  ttvRenderHero(items[idx]);
+  setInterval(() => { idx=(idx+1)%items.length; ttvRenderHero(items[idx]); }, 7000);
+}
+
+function ttvRenderHero(item) {
+  const title = item.title||item.name||'';
+  const year  = (item.release_date||item.first_air_date||'').slice(0,4);
+  const score = item.vote_average ? item.vote_average.toFixed(1) : '–';
+  const desc  = item.overview||'';
+  const bg    = item.backdrop_path ? TTV_IMG+'w1280'+item.backdrop_path : '';
+  const type  = item.media_type==='tv'?'tv':'movie';
+  const d     = JSON.stringify(item).replace(/"/g,'&quot;');
+  document.getElementById('ttvHeroWrap').innerHTML = `
+    <div class="ttv-hero-section" onclick="ttvOpenDetail(${d})">
+      <div class="ttv-hero-bg" style="background-image:url('${bg}')"></div>
+      <div class="ttv-hero-gradient"></div>
+      <div class="ttv-hero-overlay"><div class="ttv-hero-play">▶</div></div>
+      <div class="ttv-hero-content">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span class="ttv-hero-badge featured">${type==='tv'?'DİZİ':'FİLM'}</span>
+          <span class="ttv-hero-badge score">★ ${score}</span>
+          ${year?`<span class="ttv-hero-badge year">${year}</span>`:''}
+        </div>
+        <div class="ttv-hero-title">${title}</div>
+        <div class="ttv-hero-desc">${desc}</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="ttv-hero-btn primary" onclick="event.stopPropagation();ttvOpenDetail(${d})">▶ Detaylar</button>
+          <button class="ttv-hero-btn secondary" onclick="event.stopPropagation();ttvToggleFav(${item.id},'${title.replace(/'/g,"\'")}',${JSON.stringify(item)})">
+            ${ttvIsFav(item.id)?'❤️':'🤍'} ${ttvIsFav(item.id)?'Favoride':'Favoriye Ekle'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function ttvLoadTrending() {
+  const data = await ttvApi('/trending/all/week');
+  if (!data?.results) return;
+  document.getElementById('ttvTrendRow').innerHTML = data.results.slice(0,12).map((item,i)=>`
+    <div class="ttv-scroll-card wide" style="animation-delay:${i*.05}s" onclick="ttvOpenDetail(${JSON.stringify(item).replace(/"/g,'&quot;')})">
+      ${ttvPosterCard(item,'wide')}
+    </div>`).join('');
+}
+
+async function ttvLoadMain(page=1) {
+  if (ttvLoading) return;
+  ttvLoading = true;
+  ttvPage = page;
+  const grid = document.getElementById('ttvMainGrid');
+  document.getElementById('ttvLoadingSpinner').style.display='block';
+  grid.innerHTML = ttvSkeletons(12);
+
+  let path, params={sort_by:ttvSort, page, with_original_language: document.getElementById('ttvLangFilter').value||undefined};
+  const year = document.getElementById('ttvYearFilter').value;
+  if(year){params['primary_release_year']=year;params['first_air_date_year']=year;}
+  if(ttvGenre) params['with_genres']=ttvGenre;
+
+  if(ttvCategory==='trending'){path='/trending/all/week';delete params.sort_by;}
+  else if(ttvCategory==='toprated'){path='/movie/top_rated';}
+  else if(ttvCategory==='upcoming'){path='/movie/upcoming';}
+  else if(ttvCategory==='movie'){path='/discover/movie';}
+  else if(ttvCategory==='tv'){path='/discover/tv';}
+  else if(ttvCategory==='animation'){path='/discover/movie';params.with_genres='16';}
+  else if(ttvCategory==='documentary'){path='/discover/movie';params.with_genres='99';}
+  else{path='/discover/movie';}
+
+  const data = await ttvApi(path, params);
+  document.getElementById('ttvLoadingSpinner').style.display='none';
+  ttvLoading = false;
+
+  if (!data?.results?.length) {
+    grid.innerHTML=`<div class="ttv-no-results" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:14px;">🎭</div><div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px;">Sonuç Bulunamadı</div><div style="font-size:13px;">Farklı bir filtre deneyin.</div></div>`;
+    document.getElementById('ttvPagination').innerHTML='';
+    return;
+  }
+  ttvTotalPages = Math.min(data.total_pages||1, 20);
+  document.getElementById('ttvResultCount').textContent=`${(data.total_results||0).toLocaleString('tr-TR')} sonuç`;
+  grid.innerHTML = data.results.map((item,i)=>`
+    <div class="ttv-movie-card" style="animation-delay:${i*.03}s" onclick="ttvOpenDetail(${JSON.stringify(item).replace(/"/g,'&quot;')})">
+      ${ttvPosterCard(item)}
+    </div>`).join('');
+  ttvRenderPagination();
+  document.getElementById('ttvScrollArea')?.scrollTo({top:0,behavior:'smooth'});
+}
+
+function ttvPosterCard(item){
+  const title=item.title||item.name||'—';
+  const year=(item.release_date||item.first_air_date||'').slice(0,4);
+  const score=item.vote_average?item.vote_average.toFixed(1):'?';
+  const type=item.media_type==='tv'?'tv':(item.name&&!item.title?'tv':'movie');
+  const poster=item.poster_path?TTV_IMG+'w342'+item.poster_path:'';
+  const fav=ttvIsFav(item.id);
+  const d=JSON.stringify(item).replace(/"/g,'&quot;');
+  return `
+    <div class="ttv-card-poster">
+      ${poster?`<img src="${poster}" alt="${title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''}
+      <div class="ttv-card-poster-ph" ${poster?'style="display:none"':''}>🎬</div>
+      <div class="ttv-card-overlay"><div class="ttv-card-play-btn">▶</div></div>
+      <div class="ttv-card-score">★ ${score}</div>
+      <div class="ttv-card-type ${type}">${type==='tv'?'DİZİ':'FİLM'}</div>
+      <button class="ttv-card-fav-btn ${fav?'active':''}" onclick="event.stopPropagation();ttvToggleFav(${item.id},'${title.replace(/'/g,"\'")}',${d})">${fav?'❤️':'🤍'}</button>
+    </div>
+    <div class="ttv-card-info">
+      <div class="ttv-card-title">${title}</div>
+      <div class="ttv-card-year">${year||'—'}</div>
+    </div>`;
+}
+
+function ttvSkeletons(n){
+  return Array(n).fill(0).map(()=>`
+    <div>
+      <div class="ttv-skeleton ttv-skeleton-poster"></div>
+      <div class="ttv-skeleton ttv-skeleton-text" style="margin-top:8px;width:80%"></div>
+      <div class="ttv-skeleton ttv-skeleton-text" style="width:40%"></div>
+    </div>`).join('');
+}
+
+function ttvRenderPagination(){
+  const el=document.getElementById('ttvPagination');
+  if(ttvTotalPages<=1){el.innerHTML='';return;}
+  let html=`<button class="ttv-page-btn" onclick="ttvLoadMain(${ttvPage-1})" ${ttvPage<=1?'disabled':''}>‹</button>`;
+  const start=Math.max(1,ttvPage-2), end=Math.min(ttvTotalPages,ttvPage+2);
+  if(start>1) html+=`<button class="ttv-page-btn" onclick="ttvLoadMain(1)">1</button>${start>2?'<span style="color:var(--muted);font-size:12px;padding:0 4px">…</span>':''}`;
+  for(let i=start;i<=end;i++) html+=`<button class="ttv-page-btn ${i===ttvPage?'active':''}" onclick="ttvLoadMain(${i})">${i}</button>`;
+  if(end<ttvTotalPages) html+=`${end<ttvTotalPages-1?'<span style="color:var(--muted);font-size:12px;padding:0 4px">…</span>':''}<button class="ttv-page-btn" onclick="ttvLoadMain(${ttvTotalPages})">${ttvTotalPages}</button>`;
+  html+=`<button class="ttv-page-btn" onclick="ttvLoadMain(${ttvPage+1})" ${ttvPage>=ttvTotalPages?'disabled':''}>›</button>`;
+  el.innerHTML=html;
+}
+
+function ttvSetCategory(cat,el){
+  ttvCategory=cat;
+  document.querySelectorAll('.ttv-cat-item').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles={all:'🎬 Tüm Filmler & Diziler',movie:'🎬 Filmler',tv:'📺 Diziler',trending:'🔥 Trend İçerikler',toprated:'⭐ En İyi Puanlı',upcoming:'🎭 Yakında Geliyor',animation:'🎨 Animasyon',documentary:'🎥 Belgesel'};
+  document.getElementById('ttvMainSectionTitle').textContent=titles[cat]||'🎬 İçerikler';
+  document.getElementById('ttvTrendSection').style.display=cat==='all'?'':'none';
+  document.getElementById('ttvHeroWrap').style.display=cat==='all'?'':'none';
+  ttvHideFavorites();
+  ttvLoadMain(1);
+}
+
+function ttvSetGenre(genreId,el){
+  ttvGenre=genreId;
+  document.querySelectorAll('.ttv-genre-pill').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ttvLoadMain(1);
+}
+
+function ttvSetSort(sort,el){
+  ttvSort=sort;
+  document.querySelectorAll('.ttv-sort-btn').forEach(e=>e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ttvLoadMain(1);
+}
+
+function ttvApplyFilters(){ ttvLoadMain(1); }
+
+async function ttvOpenDetail(item){
+  ttvDetail=item;
+  const type=item.media_type==='tv'?'tv':(item.name&&!item.title?'tv':'movie');
+  const dp=document.getElementById('ttvDetailPage');
+  dp.style.display='block';
+  dp.style.animation='fadeIn .3s ease';
+
+  const title=item.title||item.name||'';
+  const year=(item.release_date||item.first_air_date||'').slice(0,4);
+  const score=item.vote_average?item.vote_average.toFixed(1):'–';
+  const desc=item.overview||'Açıklama bulunamadı.';
+  const poster=item.poster_path?TTV_IMG+'w500'+item.poster_path:'';
+  const backdrop=item.backdrop_path?TTV_IMG+'w1280'+item.backdrop_path:poster;
+
+  document.getElementById('ttvDetailBackdrop').style.backgroundImage=`url('${backdrop}')`;
+  document.getElementById('ttvDetailPoster').src=poster;
+  document.getElementById('ttvDetailTitle').textContent=title;
+  document.getElementById('ttvDetailOverview').textContent=desc;
+  document.getElementById('ttvDetailTags').innerHTML=`
+    <span class="ttv-detail-tag year">${year||'—'}</span>
+    <span class="ttv-detail-tag score">★ ${score}</span>
+    <span class="ttv-detail-tag genre">${type==='tv'?'Dizi':'Film'}</span>`;
+  ttvUpdateDetailFavBtn(item.id);
+
+  // Fetch full details
+  const [details, credits, videos] = await Promise.all([
+    ttvApi('/'+type+'/'+item.id),
+    ttvApi('/'+type+'/'+item.id+'/credits'),
+    ttvApi('/'+type+'/'+item.id+'/videos')
+  ]);
+
+  if(details){
+    const runtime=details.runtime?Math.floor(details.runtime/60)+'s '+details.runtime%60+'dk':
+                  (details.episode_run_time?.[0]?details.episode_run_time[0]+'dk':'—');
+    const genres=(details.genres||[]).slice(0,3).map(g=>g.name).join(', ')||'—';
+    document.getElementById('ttvDetailTags').innerHTML=`
+      <span class="ttv-detail-tag year">${year||'—'}</span>
+      <span class="ttv-detail-tag score">★ ${score}</span>
+      ${(details.genres||[]).slice(0,3).map(g=>`<span class="ttv-detail-tag genre">${g.name}</span>`).join('')}
+      <span class="ttv-detail-tag runtime">${runtime}</span>`;
+    document.getElementById('ttvDetailMeta').innerHTML=`
+      <div class="ttv-meta-item"><div class="ttv-meta-label">Yayın Tarihi</div><div class="ttv-meta-val">${(details.release_date||details.first_air_date||'—').slice(0,10)}</div></div>
+      <div class="ttv-meta-item"><div class="ttv-meta-label">Orijinal Dil</div><div class="ttv-meta-val">${(details.original_language||'—').toUpperCase()}</div></div>
+      <div class="ttv-meta-item"><div class="ttv-meta-label">Tür</div><div class="ttv-meta-val">${genres}</div></div>
+      <div class="ttv-meta-item"><div class="ttv-meta-label">Oy Sayısı</div><div class="ttv-meta-val">${(details.vote_count||0).toLocaleString('tr-TR')}</div></div>
+      ${type==='tv'?`<div class="ttv-meta-item"><div class="ttv-meta-label">Sezon</div><div class="ttv-meta-val">${details.number_of_seasons||'—'}</div></div>
+      <div class="ttv-meta-item"><div class="ttv-meta-label">Bölüm</div><div class="ttv-meta-val">${details.number_of_episodes||'—'}</div></div>`:''}`;
+
+    // Seasons
+    if(type==='tv'&&details.seasons?.length){
+      document.getElementById('ttvSeasonsSection').style.display='';
+      const tabs=details.seasons.filter(s=>s.season_number>0);
+      document.getElementById('ttvSeasonTabs').innerHTML=tabs.map((s,i)=>`
+        <div class="ttv-season-tab ${i===0?'active':''}" onclick="ttvLoadSeason(${item.id},${s.season_number},this)">${s.name}</div>`).join('');
+      if(tabs[0]) ttvLoadSeason(item.id,tabs[0].season_number,document.querySelector('.ttv-season-tab'));
+    } else {
+      document.getElementById('ttvSeasonsSection').style.display='none';
+    }
+  }
+
+  // Cast
+  if(credits?.cast?.length){
+    document.getElementById('ttvCastRow').innerHTML=credits.cast.slice(0,15).map(p=>`
+      <div class="ttv-cast-card">
+        <div class="ttv-cast-photo">
+          ${p.profile_path?`<img src="${TTV_IMG}w185${p.profile_path}" alt="${p.name}" loading="lazy">`:'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">👤</div>'}
+        </div>
+        <div style="font-size:10px;font-weight:600;color:var(--text);line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${p.name}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${p.character||''}</div>
+      </div>`).join('');
+    document.getElementById('ttvCastSection').style.display='';
+  } else {
+    document.getElementById('ttvCastSection').style.display='none';
+  }
+
+  // Trailer
+  ttvTrailerKey=null;
+  const trailerBtn=document.getElementById('ttvDetailTrailerBtn');
+  if(videos?.results){
+    const tr=videos.results.find(v=>v.type==='Trailer'&&v.site==='YouTube')||videos.results[0];
+    if(tr){ttvTrailerKey=tr.key;document.getElementById('ttvTrailerTitle').textContent=tr.name||'Fragman';}
+  }
+  trailerBtn.style.opacity=ttvTrailerKey?'1':'.4';
+
+  // Similar
+  const sim=await ttvApi('/'+type+'/'+item.id+'/similar');
+  if(sim?.results?.length){
+    document.getElementById('ttvSimilarRow').innerHTML=sim.results.slice(0,10).map(s=>`
+      <div class="ttv-scroll-card wide" onclick="ttvOpenDetail(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+        ${ttvPosterCard(s)}
+      </div>`).join('');
+  }
+}
+
+async function ttvLoadSeason(showId,seasonNum,el){
+  document.querySelectorAll('.ttv-season-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const data=await ttvApi('/tv/'+showId+'/season/'+seasonNum);
+  if(!data?.episodes) return;
+  document.getElementById('ttvEpisodeList').innerHTML=data.episodes.map(ep=>`
+    <div class="ttv-episode-item">
+      <div style="font-size:10px;font-weight:800;color:var(--muted);width:24px;flex-shrink:0;">${ep.episode_number}</div>
+      <div class="ttv-episode-thumb">
+        ${ep.still_path?`<img src="${TTV_IMG}w300${ep.still_path}" alt="" loading="lazy">`:'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;">🎬</div>'}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ep.name||'Bölüm '+ep.episode_number}</div>
+        <div style="font-size:10px;color:var(--muted);">${ep.air_date||''} ${ep.runtime?'· '+ep.runtime+'dk':''}</div>
+      </div>
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;">▶</div>
+    </div>`).join('');
+}
+
+function ttvCloseDetail(){
+  document.getElementById('ttvDetailPage').style.display='none';
+  ttvCloseTrailer();
+}
+
+function ttvOpenTrailer(){
+  if(!ttvTrailerKey) return;
+  const m=document.getElementById('ttvTrailerModal');
+  m.style.display='flex';
+  document.getElementById('ttvTrailerFrame').src=`https://www.youtube.com/embed/${ttvTrailerKey}?autoplay=1`;
+}
+
+function ttvCloseTrailer(){
+  document.getElementById('ttvTrailerModal').style.display='none';
+  document.getElementById('ttvTrailerFrame').src='';
+}
+
+document.getElementById('ttvTrailerModal')?.addEventListener('click',e=>{if(e.target===document.getElementById('ttvTrailerModal')) ttvCloseTrailer();});
+
+function ttvIsFav(id){ return ttvFavorites.some(f=>f.id===id); }
+
+function ttvToggleFav(id,title,item){
+  if(typeof item==='string') try{item=JSON.parse(item);}catch(e){}
+  if(ttvIsFav(id)){
+    ttvFavorites=ttvFavorites.filter(f=>f.id!==id);
+  } else {
+    ttvFavorites.push(item||{id,title});
+  }
+  localStorage.setItem('ttv_favs',JSON.stringify(ttvFavorites));
+  ttvRenderFavCount();
+  ttvUpdateDetailFavBtn(id);
+  document.querySelectorAll('.ttv-card-fav-btn').forEach(btn=>{
+    if(parseInt(btn.getAttribute('onclick')?.match(/ttvToggleFav\((\d+)/)?.[1])===id){
+      btn.classList.toggle('active',ttvIsFav(id));
+      btn.textContent=ttvIsFav(id)?'❤️':'🤍';
+    }
+  });
+  if(document.getElementById('ttvFavoritesSection')?.style.display!=='none') ttvRenderFavGrid();
+}
+
+function ttvToggleDetailFav(){
+  if(!ttvDetail) return;
+  ttvToggleFav(ttvDetail.id,ttvDetail.title||ttvDetail.name,ttvDetail);
+}
+
+function ttvUpdateDetailFavBtn(id){
+  const fav=ttvIsFav(id);
+  const el=document.getElementById('ttvDetailFavText');
+  if(el) el.textContent=fav?'Favoride':'Favoriye Ekle';
+  const btn=document.getElementById('ttvDetailFavBtn');
+  if(btn) btn.style.color=fav?'var(--accent)':'';
+}
+
+function ttvRenderFavCount(){
+  const el=document.getElementById('ttvFavCount');
+  if(el) el.textContent=ttvFavorites.length;
+}
+
+function ttvShowFavorites(){
+  const fs=document.getElementById('ttvFavoritesSection');
+  const isOpen=fs?.style.display!=='none';
+  ttvHideFavorites();
+  if(!isOpen){
+    fs.style.display='block';
+    ttvRenderFavGrid();
+    document.getElementById('ttvHeroWrap').style.display='none';
+    document.getElementById('ttvTrendSection').style.display='none';
+    document.getElementById('ttvMainSection').style.display='none';
+    document.getElementById('ttvFavBtn')?.classList.add('active');
+  }
+}
+
+function ttvHideFavorites(){
+  const fs=document.getElementById('ttvFavoritesSection');
+  if(fs) fs.style.display='none';
+  const hero=document.getElementById('ttvHeroWrap');
+  if(hero) hero.style.display='';
+  const trend=document.getElementById('ttvTrendSection');
+  if(trend) trend.style.display='';
+  const main=document.getElementById('ttvMainSection');
+  if(main) main.style.display='';
+  document.getElementById('ttvFavBtn')?.classList.remove('active');
+}
+
+function ttvRenderFavGrid(){
+  const grid=document.getElementById('ttvFavGrid');
+  if(!ttvFavorites.length){
+    grid.innerHTML=`<div class="ttv-no-results" style="grid-column:1/-1"><div style="font-size:48px;margin-bottom:14px;">💔</div><div style="font-size:16px;font-weight:700;color:var(--text2);margin-bottom:6px;">Henüz favori yok</div></div>`;
+    return;
+  }
+  grid.innerHTML=ttvFavorites.map((item,i)=>`
+    <div class="ttv-movie-card" style="animation-delay:${i*.04}s" onclick="ttvOpenDetail(${JSON.stringify(item).replace(/"/g,'&quot;')})">
+      ${ttvPosterCard(item)}
+    </div>`).join('');
+}
+
+function ttvClearFavorites(){
+  if(!confirm('Tüm favoriler silinsin mi?')) return;
+  ttvFavorites=[];
+  localStorage.setItem('ttv_favs','[]');
+  ttvRenderFavCount();
+  ttvRenderFavGrid();
+}
+
+function ttvOnSearch(q){
+  clearTimeout(ttvSearchTmr);
+  if(q.length<2){ttvCloseSearch();return;}
+  ttvSearchTmr=setTimeout(()=>ttvDoSearch(q),400);
+}
+
+async function ttvDoSearch(q){
+  const data=await ttvApi('/search/multi',{query:q});
+  const results=(data?.results||[]).filter(r=>r.media_type!=='person').slice(0,8);
+  const dd=document.getElementById('ttvSearchDropdown');
+  if(!results.length){
+    dd.innerHTML='<div style="padding:16px;font-size:12px;color:var(--muted);text-align:center">Sonuç bulunamadı</div>';
+    dd.classList.add('open'); return;
+  }
+  dd.innerHTML=results.map(item=>{
+    const title=item.title||item.name||'';
+    const year=(item.release_date||item.first_air_date||'').slice(0,4);
+    const type=item.media_type==='tv'?'tv':'movie';
+    const poster=item.poster_path?TTV_IMG+'w92'+item.poster_path:'';
+    const d=JSON.stringify(item).replace(/"/g,'&quot;');
+    return `<div class="ttv-sr-item" onclick="ttvOpenDetail(${d});ttvCloseSearch()">
+      <div class="ttv-sr-thumb">${poster?`<img src="${poster}" alt="">`:''}</div>
+      <div class="ttv-sr-info">
+        <div class="ttv-sr-title">${title}</div>
+        <div class="ttv-sr-meta">${year||'—'} · ★ ${item.vote_average?.toFixed(1)||'?'}</div>
+      </div>
+      <span class="ttv-sr-type ${type}">${type==='tv'?'DİZİ':'FİLM'}</span>
+    </div>`;
+  }).join('');
+  dd.classList.add('open');
+}
+
+function ttvCloseSearch(){ document.getElementById('ttvSearchDropdown')?.classList.remove('open'); }
+
+function ttvShareDetail(){
+  const title=ttvDetail?.title||ttvDetail?.name||'';
+  if(navigator.share){ navigator.share({title:title+' — TAYFUN TV',url:window.location.href}); }
+  else{ navigator.clipboard?.writeText(window.location.href); }
+}
+
+// Hook into switchMainTab to init TMDB on first visit
+const _origSwitchMainTab = window.switchMainTab;
+window.switchMainTab = function(tab, btn) {
+  if(typeof _origSwitchMainTab === 'function') _origSwitchMainTab(tab, btn);
+  if(tab === 'movies') ttvInit();
+};
+
+// Keyboard support for detail page
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape'){
+    if(document.getElementById('ttvTrailerModal')?.style.display==='flex') ttvCloseTrailer();
+    else if(document.getElementById('ttvDetailPage')?.style.display!=='none') ttvCloseDetail();
+  }
+});
+</script>
+
+<script>
 (function(){
   function isInput(e){
     var t=e.target.tagName;
@@ -6370,3 +7293,22 @@ window.addEventListener('load', ()=>{
 </script>
 </body>
                 </html>
+
+@media (min-width: 769px) {
+  .cat-pill {
+  flex: 1;
+  text-align: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 8px;
+  font-weight: 800;
+  padding: 5px 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+}
