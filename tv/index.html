@@ -5078,7 +5078,7 @@ const MOB_TAB_KEYWORDS = {
   ulusal:   ['ulusal'],
   yerel:    ['yerel'],
   belgesel: ['belgesel'],
-  sinema:   ['sinema','sİnema','sınema','cinema']
+  sinema:   ['sinema']
 };
 
 var mobActiveTab = null;
@@ -5140,20 +5140,11 @@ function switchMobTab(tab, btn) {
   }
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
-  // Türkçe karakter normalize: İ→i, I→ı, Ş→ş vb.
-  function trNorm(s) {
-    return (s||'').trim()
-      .replace(/İ/g,'i').replace(/I/g,'i')
-      .replace(/Ğ/g,'g').replace(/Ü/g,'u')
-      .replace(/Ş/g,'s').replace(/Ö/g,'o').replace(/Ç/g,'c')
-      .toLowerCase();
-  }
   var matched = allChannels.filter(function(ch) {
-    var g = trNorm(ch.group);
-    // Tam eşleşme VEYA içeriyorsa (includes)
+    var g = (ch.group || '').trim().toLowerCase();
+    // SADECE grup adına tam eşleşme
     return keywords.some(function(k){
-      var kn = trNorm(k);
-      return g === kn || g.includes(kn);
+      return g === k.trim().toLowerCase();
     });
   });
   // Tekrar edenleri kaldır (aynı URL'ye sahip kanallar)
@@ -7298,6 +7289,45 @@ document.addEventListener('keydown', e => {
   document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
     el.style.webkitUserSelect='none';
   });
+})();
+</script>
+
+<script>
+// Median WebView / APK için JS tabanlı mobil layout zorlaması
+// CSS media query bazen WebView'da çalışmadığı için innerWidth ile kontrol edilir
+(function applyMobileLayout() {
+  function check() {
+    var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
+    var isMobile = w <= 768;
+    var catBar       = document.getElementById('catBar');
+    var mobileCats   = document.getElementById('mobileCatsArea');
+    var sidebarTabs  = document.querySelector('.sidebar-tabs');
+    var channelList  = document.getElementById('channelList');
+    var sidebarSort  = document.querySelector('.sidebar-sort');
+
+    if (isMobile) {
+      if (catBar)      catBar.style.setProperty('display','none','important');
+      if (sidebarTabs) sidebarTabs.style.setProperty('display','none','important');
+      if (channelList) channelList.style.setProperty('display','none','important');
+      if (sidebarSort) sidebarSort.style.setProperty('display','none','important');
+      if (mobileCats)  mobileCats.style.setProperty('display','flex','important');
+    } else {
+      if (catBar)      catBar.style.removeProperty('display');
+      if (sidebarTabs) sidebarTabs.style.removeProperty('display');
+      if (channelList) channelList.style.removeProperty('display');
+      if (sidebarSort) sidebarSort.style.removeProperty('display');
+      if (mobileCats)  mobileCats.style.setProperty('display','none','important');
+    }
+  }
+  // Sayfa yüklenince çalıştır
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', check);
+  } else {
+    check();
+  }
+  // Yükleme tamamlandıktan sonra tekrar (WebView geç raporlayabilir)
+  window.addEventListener('load', check);
+  window.addEventListener('resize', check);
 })();
 </script>
 </body>
