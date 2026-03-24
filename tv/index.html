@@ -1938,13 +1938,8 @@ header {
   .sidebar-tabs  { display: none !important; }
   .channel-list  { display: none !important; }
   .sidebar-sort  { display: none !important; }
-  .cat-bar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 6px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
+  .cat-bar       { display: none !important; }
+  
 
   #mobileCatsArea {
     display: flex !important;
@@ -2153,19 +2148,12 @@ header {
   .sidebar-tabs   { display: none !important; }
   .channel-list   { display: none !important; }
   .sidebar-sort   { display: none !important; }
+  .cat-bar        { display: none !important; }
 @keyframes slideUpList {
   from { opacity:0; transform:translateY(30px); }
   to   { opacity:1; transform:translateY(0); }
 }
-  .cat-bar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 6px;
-  flex-wrap: nowrap;
-  overflow: hidden;
 }
-}
-
 
 /* ============================================
    ADMIN PANEL CSS
@@ -5140,21 +5128,14 @@ function switchMobTab(tab, btn) {
   }
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
-  // Türkçe büyük harf normalize (İ→i, Ş→s vb.)
   function trNorm(s) {
     return (s || '').trim()
-      .replace(/İ/g, 'i')  // İ
-      .replace(/ı/g, 'i')  // ı
-      .replace(/Ş/g, 's')  // Ş
-      .replace(/ş/g, 's')  // ş
-      .replace(/Ğ/g, 'g')  // Ğ
-      .replace(/ğ/g, 'g')  // ğ
-      .replace(/Ü/g, 'u')  // Ü
-      .replace(/ü/g, 'u')  // ü
-      .replace(/Ö/g, 'o')  // Ö
-      .replace(/ö/g, 'o')  // ö
-      .replace(/Ç/g, 'c')  // Ç
-      .replace(/ç/g, 'c')  // ç
+      .replace(/İ/g,'i').replace(/ı/g,'i')
+      .replace(/Ş/g,'s').replace(/ş/g,'s')
+      .replace(/Ğ/g,'g').replace(/ğ/g,'g')
+      .replace(/Ü/g,'u').replace(/ü/g,'u')
+      .replace(/Ö/g,'o').replace(/ö/g,'o')
+      .replace(/Ç/g,'c').replace(/ç/g,'c')
       .toLowerCase();
   }
   var matched = allChannels.filter(function(ch) {
@@ -7306,6 +7287,41 @@ document.addEventListener('keydown', e => {
   document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
     el.style.webkitUserSelect='none';
   });
+})();
+</script>
+
+<script>
+// Median APK WebView: CSS media query çalışmadığında JS ile zorla
+(function applyMobileLayout() {
+  function check() {
+    var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
+    var isMobile = w <= 768;
+    var catBar      = document.getElementById('catBar');
+    var mobileCats  = document.getElementById('mobileCatsArea');
+    var sidebarTabs = document.querySelector('.sidebar-tabs');
+    var channelList = document.getElementById('channelList');
+    var sidebarSort = document.querySelector('.sidebar-sort');
+    if (isMobile) {
+      if (catBar)      catBar.style.setProperty('display','none','important');
+      if (sidebarTabs) sidebarTabs.style.setProperty('display','none','important');
+      if (channelList) channelList.style.setProperty('display','none','important');
+      if (sidebarSort) sidebarSort.style.setProperty('display','none','important');
+      if (mobileCats)  mobileCats.style.setProperty('display','flex','important');
+    } else {
+      if (catBar)      catBar.style.removeProperty('display');
+      if (sidebarTabs) sidebarTabs.style.removeProperty('display');
+      if (channelList) channelList.style.removeProperty('display');
+      if (sidebarSort) sidebarSort.style.removeProperty('display');
+      if (mobileCats)  mobileCats.style.setProperty('display','none','important');
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', check);
+  } else {
+    check();
+  }
+  window.addEventListener('load', check);
+  window.addEventListener('resize', check);
 })();
 </script>
 </body>
