@@ -25,6 +25,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 
+
+
+/* YD Grid */
+.yd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 768px) {
+  .yd-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+}
+.yd-chip.active {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+/* YD Modal episode scroll */
+#yd-mEpisodes::-webkit-scrollbar { width: 3px; }
+#yd-mEpisodes::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+.yd-modal-body::-webkit-scrollbar { width: 3px; }
+.yd-modal-body::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
 /* ROOT VARIABLES */
 :root {
   --bg:       #080b10;
@@ -1938,8 +1961,13 @@ header {
   .sidebar-tabs  { display: none !important; }
   .channel-list  { display: none !important; }
   .sidebar-sort  { display: none !important; }
-  .cat-bar       { display: none !important; }
-  
+  .cat-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
 
   #mobileCatsArea {
     display: flex !important;
@@ -2148,12 +2176,19 @@ header {
   .sidebar-tabs   { display: none !important; }
   .channel-list   { display: none !important; }
   .sidebar-sort   { display: none !important; }
-  .cat-bar        { display: none !important; }
 @keyframes slideUpList {
   from { opacity:0; transform:translateY(30px); }
   to   { opacity:1; transform:translateY(0); }
 }
+  .cat-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
+}
+
 
 /* ============================================
    ADMIN PANEL CSS
@@ -3079,6 +3114,27 @@ tr:last-child td{border:none;}
     </div><!-- /guestBlurWrap -->
   </div>
 
+
+    <!-- YD MODAL -->
+    <div class="yd-modal-bg" id="yd-modal" onclick="if(event.target===this)ydCloseModal()">
+      <div class="yd-modal">
+        <div class="yd-modal-hero">
+          <img class="yd-modal-bg-img" id="yd-mBg" src="" alt="">
+          <button class="yd-modal-close" onclick="ydCloseModal()">✕</button>
+          <div class="yd-modal-title-wrap">
+            <div class="yd-modal-title" id="yd-mTitle"></div>
+          </div>
+        </div>
+        <div class="yd-modal-body" style="overflow-y:auto;max-height:calc(90vh - 190px);">
+          <div class="yd-modal-tags" id="yd-mTags"></div>
+          <div class="yd-modal-desc" id="yd-mDesc"></div>
+          <div class="yd-modal-src-lbl">İZLE</div>
+          <div id="yd-mSrcs"></div>
+          <div id="yd-mEpisodes" style="margin-top:14px;display:none;"></div>
+        </div>
+      </div>
+    </div>
+
   <!-- MOVIES TAB -->
   <div class="tab-content" id="moviesTabContent" style="flex-direction:column;overflow:hidden;">
 
@@ -3163,6 +3219,56 @@ tr:last-child td{border:none;}
     </div>
 
     <!-- MAIN CONTENT SCROLL -->
+    
+    <!-- YD DİZİ & FİLM BÖLÜMÜ -->
+    <div id="ydSection" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none;flex-direction:column;">
+      <div style="padding:16px 16px 0;">
+        <!-- Filtre Chipleri -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="yd-chip active" onclick="ydSetCat('all',this)" style="background:var(--accent);border:1px solid var(--accent);color:#fff;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">Tümü</button>
+          <button class="yd-chip" onclick="ydSetCat('series',this)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">📺 Diziler</button>
+          <button class="yd-chip" onclick="ydSetCat('movie',this)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">🎬 Filmler</button>
+          <button class="yd-chip" onclick="ydSetCat('fantasy',this)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">🐉 Fantezi</button>
+          <button class="yd-chip" onclick="ydSetCat('crime',this)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">🔫 Suç</button>
+        </div>
+      </div>
+
+      <!-- Trend -->
+      <div style="padding:0 16px 14px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>🔥 Trend
+        </div>
+        <div class="yd-grid" id="yd-trend"></div>
+      </div>
+
+      <!-- TR Dublaj -->
+      <div style="padding:0 16px 14px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>🇹🇷 Türkçe Dublaj
+        </div>
+        <div class="yd-grid" id="yd-tr"></div>
+      </div>
+
+      <!-- Yeni Eklenen -->
+      <div style="padding:0 16px 14px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>🆕 Yeni Eklenen
+        </div>
+        <div class="yd-grid" id="yd-recent"></div>
+      </div>
+
+      <!-- Tüm İçerikler -->
+      <div style="padding:0 16px 80px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="display:block;width:3px;height:16px;background:var(--accent);border-radius:2px;"></span>Tüm İçerikler
+          </div>
+          <span style="font-size:11px;color:var(--muted);" id="yd-all-count"></span>
+        </div>
+        <div class="yd-grid" id="yd-all"></div>
+      </div>
+    </div>
+
     <div style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;" id="ttvScrollArea">
       <div style="padding:0 20px 100px;" id="ttvMainContent">
 
@@ -3189,6 +3295,17 @@ tr:last-child td{border:none;}
           <div class="ttv-scroll-row" id="ttvTrendRow"></div>
         </div>
 
+        <!-- GOT Section — Diziler sekmesinde ydOpenModal ile açılır -->
+        <div id="gotDizilerSection" style="display:none;margin:16px 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <span style="display:block;width:3px;height:16px;background:var(--gold);border-radius:2px;"></span>
+              🐉 Game of Thrones
+            </div>
+          </div>
+          <div class="yd-grid" id="gotDizilerGrid"></div>
+        </div>
+
         <!-- Main grid -->
         <div id="ttvMainSection" style="margin:16px 0;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -3199,6 +3316,7 @@ tr:last-child td{border:none;}
           <div id="ttvLoadingSpinner" style="display:none;"><div class="ttv-spinner"></div></div>
           <div class="ttv-pagination" id="ttvPagination"></div>
         </div>
+
       </div>
     </div>
 
@@ -4604,7 +4722,9 @@ document.getElementById('btab_chat').addEventListener('click', ()=>setTimeout(re
 
 /* MOVIE PLAYER */
 function _isM3U8(url) {
-  return url && (url.includes('.m3u8') || url.includes('/hls/') || url.includes('index.m3u8'));
+  if (!url) return false;
+  if (url.includes('vidmody.com')) return false;
+  return url.includes('.m3u8') || url.includes('/hls/') || url.includes('index.m3u8');
 }
 
 function openMoviePlayer(url, title) {
@@ -4668,7 +4788,13 @@ function openMoviePlayer(url, title) {
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  if (_isM3U8(url)) {
+  if (url && url.includes('vidmody.com')) {
+    // vidmody — her zaman iframe ile aç
+    frame.src = url;
+    frame.style.display = 'block';
+    loader.style.display = 'none';
+    m3uWrap.style.display = 'none';
+  } else if (_isM3U8(url)) {
     // Direkt HLS.js ile oynat
     _playHLS(url, video, loader);
   } else if (url && url.startsWith('http')) {
@@ -4751,7 +4877,100 @@ function closeMoviePlayer() {
 
 /* ─── YD DATA & LOGIC ─── */
 const YD_CONTENT = [
-  {id:'y1',type:'series',cat:['fantasy','drama'],title:'Game of Thrones',year:'2011–2019',season:'8 Sezon',platform:'HBO',score:'9.2',badge:'yd-badge-tr',bl:'TR Dublaj',poster:'https://image.tmdb.org/t/p/w342/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',backdrop:'https://image.tmdb.org/t/p/original/suopoADq0k8YZr4dQXcU6pToj6s.jpg',desc:'Westeros\u2019un Iron Throne için savaşan güçlü hanedanların, siyasi entrikalar ve epik savaşlarla anlatıldığı efsanevi fantezi dizisi.',trending:true,trDub:true,recent:false,sources:[{icon:'🎬',name:'Dizipal',lang:'🇹🇷 Türkçe Dublaj · 1. Bölüm',url:'https://dizipal2036.com/bolum/game-of-thrones-1-sezon-1-bolum'},{icon:'🔗',name:'vidsrc.to',lang:'🌍 Orijinal Dil (EN)',url:'https://vidsrc.to/embed/tv/tt0944947/1/1'}]},
+  {id:'y1',type:'series',cat:['fantasy','drama'],title:'Game of Thrones',year:'2011–2019',season:'8 Sezon',platform:'HBO',score:'9.2',badge:'yd-badge-tr',bl:'TR Dublaj',poster:'https://image.tmdb.org/t/p/w342/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',backdrop:'https://image.tmdb.org/t/p/original/suopoADq0k8YZr4dQXcU6pToj6s.jpg',desc:'Westeros\u2019un Iron Throne için savaşan güçlü hanedanların, siyasi entrikalar ve epik savaşlarla anlatıldığı efsanevi fantezi dizisi.',trending:true,trDub:true,recent:false,
+  sources:[{icon:'🎬',name:'Dizipal',lang:'🇹🇷 Türkçe Dublaj · 1. Bölüm',url:'https://dizipal2036.com/bolum/game-of-thrones-1-sezon-1-bolum'},{icon:'🔗',name:'vidsrc.to',lang:'🌍 Orijinal Dil (EN)',url:'https://vidsrc.to/embed/tv/tt0944947/1/1'}],
+  episodes:{
+    1:[
+      {ep:1,title:'Kış Geliyor',rating:'9.1',url:'https://load.prectv63.lol/hls/8/cdn801/d95878622fec7b3567da30c62879e8ae17361571578.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:2,title:'Kral Yolu',rating:'8.8',url:'https://load.prectv63.lol/hls/8/cdn801/ff31a91f09bdcebf8146273e39410df717361571095.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:3,title:'Lord Snow',rating:'8.7',url:'https://load.prectv63.lol/hls/8/cdn801/030a712b81d0ca2a2de58cfd97da94ef173615713315.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:4,title:'Sakatlar ve Piçler',rating:'8.7',url:'https://load.prectv63.lol/hls/8/cdn801/df9065d502c527fa76e62ee3079b1c92173615709115.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:5,title:'Kurt ve Aslan',rating:'9.0',url:'https://load.prectv63.lol/hls/8/cdn801/eb9988e4b7ecc29056d817c5f86829ed17361570697.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:6,title:'Altın Taç',rating:'9.1',url:'https://load.prectv63.lol/hls/8/cdn801/a1aa8bd210b3920cbbe63128f45861ed173615748810.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:7,title:'Kazan ya da Öl',rating:'9.1',url:'https://load.prectv63.lol/hls/8/cdn801/9e5cf04bd02c315d639427f26f4bbe53173615755414.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:8,title:'Sivri Uç',rating:'9.0',url:'https://load.prectv63.lol/hls/8/cdn801/537c973521bb0ba08f4d919ea420dcdc173615753010.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:9,title:'Baelor',rating:'9.6',url:'https://load.prectv63.lol/hls/8/cdn801/b387c131a544d76ecf57fa1e861e94d617361575076.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:10,title:'Ateş ve Kan',rating:'9.5',url:'https://load.prectv63.lol/hls/8/cdn801/f696f55e53d1e65c823ce841bddf2f90173615747011.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'}
+    ],
+    2:[
+      {ep:1,title:'Kuzey Seferi',rating:'8.6',url:'https://load.prectv63.lol/hls/8/cdn801/07db7ea5631d28be9fde9900c90be65417361579109.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:2,title:'Kral Yolunun Sonu',rating:'8.8',url:'https://load.prectv63.lol/hls/8/cdn801/d8c3096c1b0727bb3f75a490627baab217361578918.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:3,title:'Bahçe Nedir Ki',rating:'8.5',url:'https://load.prectv63.lol/hls/8/cdn801/145d5cf9f92b292abacd281093fea70a173615787413.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:4,title:'Demirin Çocukları',rating:'8.7',url:'https://load.prectv63.lol/hls/8/cdn801/ab8ae8dd86ade8e89b779b3e3b1b5c81173615785915.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:5,title:'Kuzeyin Hanımı',rating:'8.6',url:'https://load.prectv63.lol/hls/8/cdn801/50894b58efb9a46571d3fd623b8e66ea173615792710.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:6,title:'Eski Tanrılar',rating:'8.8',url:'https://load.prectv63.lol/hls/8/cdn801/59d1e1ef7eeed71a13ced0da92b6e58117361579729.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:7,title:'Kara Su',rating:'8.9',url:'https://load.prectv63.lol/hls/8/cdn801/53349b33b5e347f7eac8cd0bdc026e40173615794915.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:8,title:'Blackwater',rating:'9.7',url:'https://load.prectv63.lol/hls/8/cdn801/8648bf55f2c6a195a97a94a2568e1381173615799111.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:9,title:'Balonun Sonu',rating:'9.2',url:'https://load.prectv63.lol/hls/8/cdn801/c8c26a652ae619a44a0b0c1a66df1bd917361580116.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'},
+      {ep:10,title:'Valar Morghulis',rating:'9.5',url:'https://load.prectv63.lol/hls/8/cdn801/47dace9927dae6b990a25fcb1ab86e6a173615803115.mp4/index.m3u8?token=-cGrMJhS4uHvNr6Xce7axw&tms=1771415514'}
+    ],
+    3:[
+      {ep:1,title:'Valar Dohaeris',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Karanis Yolu',rating:'8.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Yürüyüş Cezası',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr3.mp4/index.m3u8'},
+      {ep:4,title:'Yalnızca İki Ölü Adam',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr4.mp4/index.m3u8'},
+      {ep:5,title:'Öpücük Ateşi',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Kılıç Gökkuşağı',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr6.mp4/index.m3u8'},
+      {ep:7,title:'Ayı ve Güzel Kız',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr7.mp4/index.m3u8'},
+      {ep:8,title:'İkinci Oğullar',rating:'9.1',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr8.mp4/index.m3u8'},
+      {ep:9,title:'Kızıl Düğün',rating:'9.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr9.mp4/index.m3u8'},
+      {ep:10,title:'Mhysa',rating:'9.5',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/3/tr10.mp4/index.m3u8'}
+    ],
+    4:[
+      {ep:1,title:'İki Kılıç',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Aslanın Yavruları',rating:'9.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Kırıcı',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr3.mp4/index.m3u8'},
+      {ep:4,title:'Oathkeeper',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr4.mp4/index.m3u8'},
+      {ep:5,title:'İlk Adım',rating:'8.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Tanrıların Yasaları',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr6.mp4/index.m3u8'},
+      {ep:7,title:'Dağ ve Engereğin Dansı',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr7.mp4/index.m3u8'},
+      {ep:8,title:'Ejderha ve Zincir',rating:'9.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr8.mp4/index.m3u8'},
+      {ep:9,title:'Geçit Savunması',rating:'9.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr9.mp4/index.m3u8'},
+      {ep:10,title:'Çocuklar',rating:'9.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/4/tr10.mp4/index.m3u8'}
+    ],
+    5:[
+      {ep:1,title:'Savaşların Savaşları',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Ev',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Yüksek Sparrow',rating:'8.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr3.mp4/index.m3u8'},
+      {ep:4,title:'Oğullar ile Kızlar',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr4.mp4/index.m3u8'},
+      {ep:5,title:'Öldürücü Kadın',rating:'8.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Kör Adam',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr6.mp4/index.m3u8'},
+      {ep:7,title:'Armağan',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr7.mp4/index.m3u8'},
+      {ep:8,title:'Sert Ev',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr8.mp4/index.m3u8'},
+      {ep:9,title:'Dans eden Ejderhalar',rating:'9.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr9.mp4/index.m3u8'},
+      {ep:10,title:'Annelerin Merhemi',rating:'9.4',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/5/tr10.mp4/index.m3u8'}
+    ],
+    6:[
+      {ep:1,title:'Kırmızı Kadın',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Ev',rating:'9.2',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Kırık Adam',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr3.mp4/index.m3u8'},
+      {ep:4,title:'Kitap',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr4.mp4/index.m3u8'},
+      {ep:5,title:'Kapı',rating:'9.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Kan Kardeşi',rating:'8.7',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr6.mp4/index.m3u8'},
+      {ep:7,title:'Kırık Adamlar',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr7.mp4/index.m3u8'},
+      {ep:8,title:'Valar Morghulis',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr8.mp4/index.m3u8'},
+      {ep:9,title:'Piç Muharebesi',rating:'9.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr9.mp4/index.m3u8'},
+      {ep:10,title:'Rüzgarların Sesi',rating:'9.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/6/tr10.mp4/index.m3u8'}
+    ],
+    7:[
+      {ep:1,title:'Dragonstone',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Stormborn',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Kraliçenin Adaleti',rating:'9.2',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr3.mp4/index.m3u8'},
+      {ep:4,title:'Spoils of War',rating:'9.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr4.mp4/index.m3u8'},
+      {ep:5,title:'Eastwatch',rating:'9.0',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Duvarın Ötesi',rating:'9.4',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr6.mp4/index.m3u8'},
+      {ep:7,title:'Ejderha ve Kurt',rating:'9.6',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/7/tr7.mp4/index.m3u8'}
+    ],
+    8:[
+      {ep:1,title:'Winterfell',rating:'8.9',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/8/tr1.mp4/index.m3u8'},
+      {ep:2,title:'Uzun Gece Öncesinde',rating:'9.4',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/8/tr2.mp4/index.m3u8'},
+      {ep:3,title:'Uzun Gece',rating:'9.3',url:'https://load.prectv63.lol/hls/8/cdn801/1ea36c487340b3d0d56ef9e3dfc543bb173482200311.mp4/index.m3u8'},
+      {ep:4,title:'Son Büyük Savaş',rating:'8.7',url:'https://load.prectv63.lol/hls/8/cdn801/bf9c63511d64e49ad0b680b16d34902c17348215277.mp4/index.m3u8'},
+      {ep:5,title:'Çanlar',rating:'8.8',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/8/tr5.mp4/index.m3u8'},
+      {ep:6,title:'Iron Throne',rating:'8.5',url:'https://load.prectv63.lol/hls/2/cdn5/cdn2/game/8/tr6.mp4/index.m3u8'}
+    ]
+  }
+},
   {id:'y2',type:'series',cat:['crime','drama'],title:'Breaking Bad',year:'2008–2013',season:'5 Sezon',platform:'AMC',score:'9.5',badge:'yd-badge-hd',bl:'HD',poster:'https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',backdrop:'https://image.tmdb.org/t/p/original/84XPpjGvxNyExjSuLQe1SzSWedY.jpg',desc:'Kanser hastası kimya öğretmeni Walter White\u2019ın uyuşturucu dünyasına adım atmasıyla başlayan dönüşüm hikayesi.',trending:true,trDub:false,recent:false,sources:[{icon:'🎬',name:'Dizipal',lang:'🇹🇷 Türkçe Altyazı · 1. Bölüm',url:'https://dizipal2036.com/bolum/breaking-bad-1-sezon-1-bolum'},{icon:'🔗',name:'vidsrc.to',lang:'🌍 Orijinal Dil (EN)',url:'https://vidsrc.to/embed/tv/tt0903747/1/1'}]},
   {id:'y3',type:'series',cat:['scifi','drama'],title:'The Last of Us',year:'2023–',season:'2 Sezon',platform:'HBO Max',score:'8.8',badge:'yd-badge-new',bl:'YENİ',poster:'https://image.tmdb.org/t/p/w342/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg',backdrop:'https://image.tmdb.org/t/p/original/9flRCIQZEO4HimGSnSFE71dpkHD.jpg',desc:'Kıyamet sonrası dünyada hayatta kalmaya çalışan Joel ve Ellie\u2019nin zorlu yolculuğu.',trending:true,trDub:false,recent:true,sources:[{icon:'🎬',name:'Dizipal',lang:'🇹🇷 Türkçe Altyazı · 1. Bölüm',url:'https://dizipal2036.com/bolum/the-last-of-us-1-sezon-1-bolum'},{icon:'🔗',name:'vidsrc.to',lang:'🌍 Orijinal Dil (EN)',url:'https://vidsrc.to/embed/tv/tt3581920/1/1'}]},
   {id:'y4',type:'series',cat:['fantasy','drama'],title:'House of the Dragon',year:'2022–',season:'2 Sezon',platform:'HBO',score:'8.4',badge:'yd-badge-tr',bl:'TR Dublaj',poster:'https://image.tmdb.org/t/p/w342/z2yahl2uefxDCl0nogcRBstwruJ.jpg',backdrop:'https://image.tmdb.org/t/p/original/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg',desc:'Targaryen hanedanının iç savaşını konu alan Game of Thrones öncül dizisi.',trending:true,trDub:true,recent:true,sources:[{icon:'🎬',name:'Dizipal',lang:'🇹🇷 Türkçe Dublaj · 1. Bölüm',url:'https://dizipal2036.com/bolum/house-of-the-dragon-1-sezon-1-bolum'},{icon:'🔗',name:'vidsrc.to',lang:'🌍 Orijinal Dil (EN)',url:'https://vidsrc.to/embed/tv/tt11198330/1/1'}]},
@@ -4817,27 +5036,135 @@ function ydSetCat(cat,el){
   ydRender();
 }
 
+let _ydActiveSeason = 1;
+
 function ydOpenModal(c){
-  if(!c)return;
-  document.getElementById('yd-mBg').src=c.backdrop||c.poster;
-  document.getElementById('yd-mTitle').textContent=c.title;
-  document.getElementById('yd-mDesc').textContent=c.desc;
-  document.getElementById('yd-mTags').innerHTML=[
+  if(!c) return;
+  _ydActiveSeason = 1;
+  document.getElementById('yd-mBg').src = c.backdrop||c.poster;
+  document.getElementById('yd-mTitle').textContent = c.title;
+  document.getElementById('yd-mDesc').textContent = c.desc;
+  document.getElementById('yd-mTags').innerHTML = [
     `<span class="yd-modal-tag">⭐ ${c.score}</span>`,
     `<span class="yd-modal-tag">${c.year}</span>`,
-    c.season?`<span class="yd-modal-tag">${c.season}</span>`:'',
+    c.season ? `<span class="yd-modal-tag">${c.season}</span>` : '',
     `<span class="yd-modal-tag">${c.platform}</span>`,
-    c.trDub?`<span class="yd-modal-tag" style="color:var(--accent);">🇹🇷 TR Dublaj</span>`:'',
+    c.trDub ? `<span class="yd-modal-tag" style="color:var(--accent);">🇹🇷 TR Dublaj</span>` : '',
   ].join('');
-  document.getElementById('yd-mSrcs').innerHTML=c.sources.map(s=>`
-    <a class="yd-src-btn" href="${s.url}" target="_blank" rel="noopener">
-      <div class="yd-src-left"><span class="yd-src-icon">${s.icon}</span>
-        <div><div class="yd-src-name">${s.name}</div><div class="yd-src-lang">${s.lang}</div></div>
-      </div><span style="color:var(--muted);font-size:13px;">↗</span>
-    </a>`).join('');
+
+  const srcsEl = document.getElementById('yd-mSrcs');
+  const epArea = document.getElementById('yd-mEpisodes');
+
+  // Bölüm listesi var mı? (Dizipal entegrasyonu)
+  if(c.episodes && Object.keys(c.episodes).length > 0){
+    const seasons = Object.keys(c.episodes).map(Number).sort((a,b)=>a-b);
+
+    // Kaynak butonları — dış linkler (varsa)
+    srcsEl.innerHTML = c.sources.map(s=>`
+      <a class="yd-src-btn" href="${s.url}" target="_blank" rel="noopener">
+        <div class="yd-src-left"><span class="yd-src-icon">${s.icon}</span>
+          <div><div class="yd-src-name">${s.name}</div><div class="yd-src-lang">${s.lang}</div></div>
+        </div><span style="color:var(--muted);font-size:13px;">↗</span>
+      </a>`).join('');
+
+    // Bölüm alanı
+    epArea.style.display = 'block';
+
+    function renderEpArea(activeSeason){
+      _ydActiveSeason = activeSeason;
+      const eps = c.episodes[activeSeason] || [];
+      // Bölümleri window'a kaydet — URL string encode sorununu önler
+      window._ydEps = eps;
+      window._ydEpTitle = c.title;
+      window._ydEpSeason = activeSeason;
+      epArea.innerHTML = `
+        <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">📺 BÖLÜMLER</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+          ${seasons.map(s=>`<button onclick="ydSeasonSwitch(${s}, event)" style="background:${s===activeSeason?'var(--accent)':'var(--bg4)'};border:1px solid ${s===activeSeason?'var(--accent)':'var(--border)'};color:${s===activeSeason?'#fff':'var(--text2)'};padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">Sezon ${s}</button>`).join('')}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto;padding-right:4px;">
+          ${eps.map((ep,i)=>`
+            <div onclick="ydPlayIdx(${i},event)"
+              style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:background .15s;"
+              onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+              <div style="width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">${ep.ep}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ep.title}</div>
+                <div style="font-size:10px;color:var(--muted);">S${String(activeSeason).padStart(2,'0')}E${String(ep.ep).padStart(2,'0')} · ⭐ ${ep.rating}</div>
+              </div>
+              <span style="font-size:16px;">▶</span>
+            </div>`).join('')}
+        </div>`;
+    }
+    // Global'e bağla ki sezon butonları çalışsın
+    window._ydCurrentContent = c;
+    renderEpArea(seasons[0]);
+
+  } else {
+    // Bölüm yok — normal dış link modali
+    srcsEl.innerHTML = c.sources.map(s=>`
+      <a class="yd-src-btn" href="${s.url}" target="_blank" rel="noopener">
+        <div class="yd-src-left"><span class="yd-src-icon">${s.icon}</span>
+          <div><div class="yd-src-name">${s.name}</div><div class="yd-src-lang">${s.lang}</div></div>
+        </div><span style="color:var(--muted);font-size:13px;">↗</span>
+      </a>`).join('');
+    epArea.style.display = 'none';
+    epArea.innerHTML = '';
+  }
+
   document.getElementById('yd-modal').classList.add('open');
 }
-function ydCloseModal(){document.getElementById('yd-modal').classList.remove('open');}
+
+function ydSeasonSwitch(s, e){
+  e && e.stopPropagation();
+  const c = window._ydCurrentContent;
+  if(!c || !c.episodes) return;
+  const seasons = Object.keys(c.episodes).map(Number).sort((a,b)=>a-b);
+  const epArea = document.getElementById('yd-mEpisodes');
+  const eps = c.episodes[s] || [];
+  // window'a kaydet
+  window._ydEps = eps;
+  window._ydEpTitle = c.title;
+  window._ydEpSeason = s;
+  epArea.innerHTML = `
+    <div style="font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">📺 BÖLÜMLER</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      ${seasons.map(sn=>`<button onclick="ydSeasonSwitch(${sn}, event)" style="background:${sn===s?'var(--accent)':'var(--bg4)'};border:1px solid ${sn===s?'var(--accent)':'var(--border)'};color:${sn===s?'#fff':'var(--text2)'};padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;">Sezon ${sn}</button>`).join('')}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto;padding-right:4px;">
+      ${eps.map((ep,i)=>`
+        <div onclick="ydPlayIdx(${i},event)"
+          style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:background .15s;"
+          onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+          <div style="width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">${ep.ep}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ep.title}</div>
+            <div style="font-size:10px;color:var(--muted);">S${String(s).padStart(2,'0')}E${String(ep.ep).padStart(2,'0')} · ⭐ ${ep.rating}</div>
+          </div>
+          <span style="font-size:16px;">▶</span>
+        </div>`).join('')}
+    </div>`;
+}
+function ydPlayIdx(i, e){
+  e && e.stopPropagation();
+  const ep = window._ydEps ? window._ydEps[i] : null;
+  if(!ep) return;
+  const s = window._ydEpSeason || 1;
+  const showTitle = window._ydEpTitle || '';
+  const title = showTitle+' S'+String(s).padStart(2,'0')+'E'+String(ep.ep).padStart(2,'0')+' - '+ep.title;
+  ydCloseModal();
+  openMoviePlayer(ep.url, title);
+}
+
+function ydPlayEp(url, title, e){
+  e && e.stopPropagation();
+  ydCloseModal();
+  openMoviePlayer(url, title);
+}
+
+function ydCloseModal(){
+  document.getElementById('yd-modal').classList.remove('open');
+}
 
 // YD kaldırıldı
 
@@ -5066,7 +5393,7 @@ const MOB_TAB_KEYWORDS = {
   ulusal:   ['ulusal'],
   yerel:    ['yerel'],
   belgesel: ['belgesel'],
-  sinema:   ['sinema','SİNEMA','Sinema','SINEMA','cinema','Cinema']
+  sinema:   ['sinema']
 };
 
 var mobActiveTab = null;
@@ -5128,21 +5455,11 @@ function switchMobTab(tab, btn) {
   }
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
-  function trNorm(s) {
-    return (s || '').trim()
-      .replace(/İ/g,'i').replace(/ı/g,'i')
-      .replace(/Ş/g,'s').replace(/ş/g,'s')
-      .replace(/Ğ/g,'g').replace(/ğ/g,'g')
-      .replace(/Ü/g,'u').replace(/ü/g,'u')
-      .replace(/Ö/g,'o').replace(/ö/g,'o')
-      .replace(/Ç/g,'c').replace(/ç/g,'c')
-      .toLowerCase();
-  }
   var matched = allChannels.filter(function(ch) {
-    var g = trNorm(ch.group);
+    var g = (ch.group || '').trim().toLowerCase();
+    // SADECE grup adına tam eşleşme
     return keywords.some(function(k){
-      var kn = trNorm(k);
-      return g === kn || g.includes(kn);
+      return g === k.trim().toLowerCase();
     });
   });
   // Tekrar edenleri kaldır (aynı URL'ye sahip kanallar)
@@ -6960,6 +7277,16 @@ function ttvSetCategory(cat,el){
   document.getElementById('ttvMainSectionTitle').textContent=titles[cat]||'🎬 İçerikler';
   document.getElementById('ttvTrendSection').style.display=cat==='all'?'':'none';
   document.getElementById('ttvHeroWrap').style.display=cat==='all'?'':'none';
+  // GOT bölümü yalnızca Diziler sekmesinde görünür
+  const gotSec = document.getElementById('gotDizilerSection');
+  if(gotSec){
+    if(cat==='tv'){
+      gotSec.style.display='block';
+      gotDizilerRender();
+    } else {
+      gotSec.style.display='none';
+    }
+  }
   ttvHideFavorites();
   ttvLoadMain(1);
 }
@@ -7241,8 +7568,22 @@ function ttvShareDetail(){
 const _origSwitchMainTab = window.switchMainTab;
 window.switchMainTab = function(tab, btn) {
   if(typeof _origSwitchMainTab === 'function') _origSwitchMainTab(tab, btn);
-  if(tab === 'movies') ttvInit();
+  if(tab === 'movies') { ttvInit(); ydRender(); }
 };
+
+// GOT bölümü — Diziler sekmesinde YD_CONTENT'ten GOT'u yd-card stiliyle render et
+function gotDizilerRender(){
+  const grid = document.getElementById('gotDizilerGrid');
+  if(!grid) return;
+  // YD_CONTENT'ten sadece GOT'u bul
+  const got = YD_CONTENT.find(x => x.id === 'y1');
+  if(!got){ grid.innerHTML=''; return; }
+  // ydMakeCard ile birebir aynı kart
+  grid.innerHTML = ydMakeCard(got);
+}
+
+// YD Section toggle — GOT Diziler sekmesine taşındığı için artık kullanılmıyor
+function ydToggleSection(btn){}
 
 // Keyboard support for detail page
 document.addEventListener('keydown', e => {
@@ -7287,41 +7628,6 @@ document.addEventListener('keydown', e => {
   document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
     el.style.webkitUserSelect='none';
   });
-})();
-</script>
-
-<script>
-// Median APK WebView: CSS media query çalışmadığında JS ile zorla
-(function applyMobileLayout() {
-  function check() {
-    var w = window.innerWidth || document.documentElement.clientWidth || screen.width;
-    var isMobile = w <= 768;
-    var catBar      = document.getElementById('catBar');
-    var mobileCats  = document.getElementById('mobileCatsArea');
-    var sidebarTabs = document.querySelector('.sidebar-tabs');
-    var channelList = document.getElementById('channelList');
-    var sidebarSort = document.querySelector('.sidebar-sort');
-    if (isMobile) {
-      if (catBar)      catBar.style.setProperty('display','none','important');
-      if (sidebarTabs) sidebarTabs.style.setProperty('display','none','important');
-      if (channelList) channelList.style.setProperty('display','none','important');
-      if (sidebarSort) sidebarSort.style.setProperty('display','none','important');
-      if (mobileCats)  mobileCats.style.setProperty('display','flex','important');
-    } else {
-      if (catBar)      catBar.style.removeProperty('display');
-      if (sidebarTabs) sidebarTabs.style.removeProperty('display');
-      if (channelList) channelList.style.removeProperty('display');
-      if (sidebarSort) sidebarSort.style.removeProperty('display');
-      if (mobileCats)  mobileCats.style.setProperty('display','none','important');
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', check);
-  } else {
-    check();
-  }
-  window.addEventListener('load', check);
-  window.addEventListener('resize', check);
 })();
 </script>
 </body>
