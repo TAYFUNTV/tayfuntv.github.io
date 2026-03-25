@@ -292,11 +292,5 @@ https://saran-live.ercdn.net/fx/index.m3u8
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemayerli/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",BEIN MOVIES HD FAMILY
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/bsfamily/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",BONCUK TV
-http://104.238.23.221/BoncukTV/live/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",SUPER TURK TV
-http://75.119.144.48/SUPERTURK_TV_STREAM/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",KUZEYMAX TV
-http://75.119.144.48/KUZEYMAXHD_STREAM/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",PLAY TV
 https://ip100.radyotelekomtv.com:3784/stream/play.m3u8
