@@ -1,7 +1,7 @@
 {
   "name": "Tayfun TV",
   "short_name": "TayfunTV",
-  "start_url": "/tv/",
+  "start_url": "https://tayfuntv.github.io/tv/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
