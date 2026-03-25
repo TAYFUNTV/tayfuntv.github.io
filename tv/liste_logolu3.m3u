@@ -299,5 +299,7 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/bsfamily
 https://ip100.radyotelekomtv.com:3784/stream/play.m3u8
 #EXTINF:-1 group-title="SİNEMA",FILM SCREEN
 https://edge-e3.evrideo.tv/f2dcbecf-5af0-47db-a82e-032112050a23_1000027346_HLS/manifest.m3u8
-#EXTINF:-1 group-title="SİNEMA",FILM SCREEN
+#EXTINF:-1 group-title="SİNEMA",SINEMA 1001
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinema1001/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",SINEMA 1002
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinema1002/index.m3u8
