@@ -1962,13 +1962,8 @@ header {
   .channel-list  { display: none !important; }
   .sidebar-sort  { display: none !important; }
   .cat-bar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 6px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
-
+    display: none !important;
+  }
   #mobileCatsArea {
     display: flex !important;
     flex: 1 !important;
@@ -2181,12 +2176,8 @@ header {
   to   { opacity:1; transform:translateY(0); }
 }
   .cat-bar {
-  display: flex;
-  gap: 2px;
-  padding: 6px 6px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
+    display: none !important;
+  }
 }
 
 
@@ -4108,7 +4099,7 @@ function renderMobileCats(cat){
   const list = document.getElementById('channelListBottom');
   if(!list) return;
   list.style.animation = 'none';
-  list.innerHTML = allChannels.filter(c=>c.group===cat && !hiddenChannels.includes(c.url)).slice(0,40).map(ch=>{
+  list.innerHTML = allChannels.filter(c=>c.group===cat && !hiddenChannels.includes(c.url)).map(ch=>{
     const idx = allChannels.indexOf(ch);
     return `<div onclick="play(${idx})" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;flex:1;min-width:130px;max-width:calc(50% - 3px);"><div style="width:28px;height:28px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ch.logo?`<img src="${ch.logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='📺'">`:'📺'}</div><span style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ch.name}</span></div>`;
   }).join('');
@@ -4786,7 +4777,7 @@ function openMoviePlayer(url, title) {
 
   document.getElementById('moviePlayerTitle').textContent = title;
   modal.style.display = 'flex';
-  document.body.style.overflow = 'auto';
+  document.body.style.overflow = 'hidden';
 
   if (url && url.includes('vidmody.com')) {
     // vidmody — her zaman iframe ile aç
@@ -5393,7 +5384,7 @@ const MOB_TAB_KEYWORDS = {
   ulusal:   ['ulusal'],
   yerel:    ['yerel'],
   belgesel: ['belgesel'],
-  sinema:   ['sinema']
+  sinema:   ['sinema','cinema','film','filmler','sinema kanalları','sinema kanallari','turk sinema','türk sinema','movies']
 };
 
 var mobActiveTab = null;
@@ -5457,7 +5448,12 @@ function switchMobTab(tab, btn) {
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
   var matched = allChannels.filter(function(ch) {
     var g = (ch.group || '').trim().toLowerCase();
-    // SADECE grup adına tam eşleşme
+    // sinema için esnek eşleşme, diğerleri tam eşleşme
+    if (tab === 'sinema') {
+      return keywords.some(function(k){
+        return g === k.trim().toLowerCase() || g.includes(k.trim().toLowerCase()) || k.trim().toLowerCase().includes(g);
+      });
+    }
     return keywords.some(function(k){
       return g === k.trim().toLowerCase();
     });
@@ -5471,8 +5467,25 @@ function switchMobTab(tab, btn) {
   });
 
   if (!matched.length) {
-    cont.innerHTML = '<div class="mob-cat-empty"><div style="font-size:36px;">&#128219;</div><div>Bu kategoride kanal bulunamadi.</div></div>';
-    return;
+    // SİNEMA için akıllı fallback: playlist'teki tüm grup adlarını tara
+    if (tab === 'sinema') {
+      var sinemaKws = ['sinema','film','cinema','movie','dizi'];
+      matched = allChannels.filter(function(ch){
+        var g = (ch.group||'').toLowerCase();
+        return sinemaKws.some(function(k){ return g.includes(k); });
+      });
+      var seenUrls2 = new Set();
+      matched = matched.filter(function(ch){
+        if(seenUrls2.has(ch.url)) return false;
+        seenUrls2.add(ch.url);
+        return true;
+      });
+    }
+    if (!matched.length) {
+      cont.innerHTML = '<div class="mob-cat-empty"><div style="font-size:36px;">&#128219;</div><div>Bu kategoride kanal bulunamadi.</div></div>';
+      cont.style.overflowY = 'hidden';
+      return;
+    }
   }
 
   var items = matched.map(function(ch, i) {
@@ -5493,7 +5506,7 @@ function switchMobTab(tab, btn) {
 
   // APK WebView uyumlu scroll — CSS overflow WebView'da çalışmadığı için
   // container sabit yükseklikte tutulup içerik transform ile kaydırılır
-  cont.style.overflow = 'auto';
+  cont.style.overflow = 'hidden';
   cont.style.position = 'relative';
 
   // İç wrapper oluştur
@@ -7651,13 +7664,3 @@ document.addEventListener('keydown', e => {
   letter-spacing: .5px;
 }
 }
-
-<style>
-@media (max-width: 768px){
-  .channel-list{
-    display:none !important;
-    height:0 !important;
-    overflow:hidden !important;
-  }
-}
-</style>
