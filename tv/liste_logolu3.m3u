@@ -286,6 +286,8 @@ https://live.artidijitalmedya.com/artidijital_ciftcitv/ciftcitv/playlist.m3u8
 https://amg00090-blueantmedia-naturetime-samsungfr-yakbf.amagi.tv/playlist/amg00090-blueantmedia-naturetime-samsungfr/playlist.m3u8
 #EXTINF:-1 group-title="BELGESEL",TARIM TV
 https://content.tvkur.com/l/c7e1da7mm25p552d9u9g/index-1080p.m3u8
+#EXTINF:-1 group-title="BELGESEL",TARIM TV
+http://dygvideo.dygdigital.com/live/hls/tlctvdai?m3u8
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
@@ -293,8 +295,6 @@ https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
 https://saran-live.ercdn.net/fx/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",MAX TURK
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemayerli/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES HD FAMILY
-https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/bsfamily/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",PLAY TV
 https://ip100.radyotelekomtv.com:3784/stream/play.m3u8
 #EXTINF:-1 group-title="SİNEMA",FILM SCREEN
@@ -303,3 +303,13 @@ https://edge-e3.evrideo.tv/f2dcbecf-5af0-47db-a82e-032112050a23_1000027346_HLS/m
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinema1001/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA 1002
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinema1002/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES TURK HD
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsturk/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES STARS HD
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsstars/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES PREMIER HD
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bspremier1/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES FAMILY HD
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsfamily/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BEIN MOVIES FAMILY HD
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsfamily/index.m3u8
