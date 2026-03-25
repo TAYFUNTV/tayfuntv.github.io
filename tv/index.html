@@ -5379,12 +5379,17 @@ function switchMainTab(tab, btn){
 
 
 /* ─── MOBİL KATEGORİ SEKME SİSTEMİ ─── */
+// Türkçe büyük İ harfini doğru küçülten yardımcı fonksiyon
+function trLower(str) {
+  return (str || '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase();
+}
+
 const MOB_TAB_KEYWORDS = {
   spor:     ['spor','sport'],
   ulusal:   ['ulusal'],
   yerel:    ['yerel'],
   belgesel: ['belgesel'],
-  sinema:   ['sinema','cinema','film','filmler','sinema kanalları','sinema kanallari','turk sinema','türk sinema','movies']
+  sinema:   ['sinema','SİNEMA','cinema','film','filmler','sinema kanalları','sinema kanallari','turk sinema','türk sinema','movies']
 };
 
 var mobActiveTab = null;
@@ -5447,15 +5452,16 @@ function switchMobTab(tab, btn) {
 
   var keywords = MOB_TAB_KEYWORDS[tab] || [tab];
   var matched = allChannels.filter(function(ch) {
-    var g = (ch.group || '').trim().toLowerCase();
+    var g = trLower((ch.group || '').trim());
     // sinema için esnek eşleşme, diğerleri tam eşleşme
     if (tab === 'sinema') {
       return keywords.some(function(k){
-        return g === k.trim().toLowerCase() || g.includes(k.trim().toLowerCase()) || k.trim().toLowerCase().includes(g);
+        var kl = trLower(k.trim());
+        return g === kl || g.includes(kl) || kl.includes(g);
       });
     }
     return keywords.some(function(k){
-      return g === k.trim().toLowerCase();
+      return g === trLower(k.trim());
     });
   });
   // Tekrar edenleri kaldır (aynı URL'ye sahip kanallar)
@@ -5471,7 +5477,7 @@ function switchMobTab(tab, btn) {
     if (tab === 'sinema') {
       var sinemaKws = ['sinema','film','cinema','movie','dizi'];
       matched = allChannels.filter(function(ch){
-        var g = (ch.group||'').toLowerCase();
+        var g = trLower(ch.group||'');
         return sinemaKws.some(function(k){ return g.includes(k); });
       });
       var seenUrls2 = new Set();
