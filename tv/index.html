@@ -4786,7 +4786,7 @@ function openMoviePlayer(url, title) {
 
   document.getElementById('moviePlayerTitle').textContent = title;
   modal.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = 'auto';
 
   if (url && url.includes('vidmody.com')) {
     // vidmody — her zaman iframe ile aç
@@ -5493,7 +5493,7 @@ function switchMobTab(tab, btn) {
 
   // APK WebView uyumlu scroll — CSS overflow WebView'da çalışmadığı için
   // container sabit yükseklikte tutulup içerik transform ile kaydırılır
-  cont.style.overflow = 'hidden';
+  cont.style.overflow = 'auto';
   cont.style.position = 'relative';
 
   // İç wrapper oluştur
@@ -7651,3 +7651,13 @@ document.addEventListener('keydown', e => {
   letter-spacing: .5px;
 }
 }
+
+<style>
+@media (max-width: 768px){
+  .channel-list{
+    display:none !important;
+    height:0 !important;
+    overflow:hidden !important;
+  }
+}
+</style>
