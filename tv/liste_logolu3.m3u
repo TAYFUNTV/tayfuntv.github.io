@@ -340,4 +340,4 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/mvtur
 #EXTINF:-1 group-title="SİNEMA",DIZI FILM TV
 https://playlist.fasttvcdn.com/pl/rfrk9821hdy9dayo8wfyha/dizi-tv/playlist/0.m3u8
 #EXTINF:-1 group-title="SİNEMA",SABAN TV
-https://tv191.radyotelekom.com.tr:3996/stream/play.m3u8
+https://bstelevision.com/proxy.php?mode=proxy&url=https://tv191.radyotelekom.com.tr:3996/stream/play.m3u8
