@@ -339,5 +339,5 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinema2/
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/mvturk/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",DIZI FILM TV
 https://playlist.fasttvcdn.com/pl/rfrk9821hdy9dayo8wfyha/dizi-tv/playlist/0.m3u8
-#EXTINF:-1 group-title="SİNEMA",SABAN TV
-https://bstelevision.com/proxy.php?mode=proxy&url=http://162.212.179.33:80/gin-trn09/gt-yesilcam-tv3/playlist.m3u8
+#EXTINF:-1 group-title="SİNEMA",KUZEYMAX TV
+https://bstelevision.com/proxy.php?mode=proxy&url=http://75.119.144.48/KUZEYMAXHD_STREAM/index.m3u8
