@@ -66,6 +66,9 @@ https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/and
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivess2.m3u8
 #EXTINF:-1 group-title="SPOR",SPORSMART 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivesm1.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT HABER
+https://cdn.tecostream.xyz/Bein_Spor_Haber.m3u8
+
 ############ ULUSAL ############
 #EXTINF:-1 group-title="ULUSAL",TRT 1
 https://tv-trt1.medya.trt.com.tr/master_720.m3u8
