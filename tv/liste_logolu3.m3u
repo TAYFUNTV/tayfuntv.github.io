@@ -52,8 +52,6 @@ https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/and
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 5
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT HABER
-https://bstelevision.com/proxy.php?mode=proxy&url=https://cdn.tecostream.xyz/Bein_Spor_Haber.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 2
@@ -339,8 +337,6 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/bsaction
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/box1/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",BEIN BOX OFFICE 2
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/box2/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",BEIN BOX OFFICE 3
-https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/box2/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA AILE
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemaaile/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA AKSIYON
@@ -357,5 +353,5 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/mvtur
 https://playlist.fasttvcdn.com/pl/rfrk9821hdy9dayo8wfyha/dizi-tv/playlist/0.m3u8
 #EXTINF:-1 group-title="SİNEMA",KUZEYMAX TV
 https://bstelevision.com/proxy.php?mode=proxy&url=http://75.119.144.48/KUZEYMAXHD_STREAM/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",DIZI FILM TV
+#EXTINF:-1 group-title="SİNEMA",KEMAL SUNAL TV
 https://teknobaba.han686314.workers.dev/Kemal_Sunal_Tv.m3u8
