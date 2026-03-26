@@ -71,7 +71,7 @@ https://mss.ayakkabiparti.lol/smart2/index.m3u8
 #EXTINF:-1 group-title="SPOR",EUROSPORT 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivees1.m3u8
 #EXTINF:-1 group-title="SPOR",EUROSPORT 2
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivees2.m3u8
+https://bstelevision.com/proxy.php?mode=proxy&url=https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivees2.m3u8
 #EXTINF:-1 group-title="SPOR",FIGHT BOX HD
 https://bstelevision.com/proxy.php?mode=proxy&url=http://iptv.prosto.tv:7000/ch118/video.m3u8
 #EXTINF:-1 group-title="SPOR",DAZN CONBAT
