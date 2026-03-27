@@ -311,6 +311,8 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://mss.ayakkabiparti.lol/
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="BELGESEL",TLC TV
 https://stream-extractor.koprulu2.workers.dev/?url=https://www.tlctv.com.tr/canli-izle&ext=m3u8
+#EXTINF:-1 group-title="BELGESEL",DMAX TV
+https://stream-extractor.koprulu2.workers.dev/?url=https://www.dmax.com.tr/canli-izle&ext=m3u8
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
