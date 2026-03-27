@@ -40,8 +40,8 @@ https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/and
 https://tjktv-live.tjk.org/tjktv.m3u8
 #EXTINF:-1 group-title="SPOR",TJK TV 2
 https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8
-#EXTINF:-1 group-title="SPOR",TJK TV 2
-https://digidik-digidik-deeh.umitm0d.workers.dev/
+#EXTINF:-1 group-title="SPOR",SINEMA KOMEDI
+https://bstelevision.com/proxy.php?mode=proxy&url=https://digidik-digidik-deeh.umitm0d.workers.dev/
 #EXTINF:-1 group-title="SPOR",MTRSPT1
 https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 1
