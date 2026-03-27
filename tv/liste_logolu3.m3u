@@ -310,7 +310,7 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://mss.ayakkabiparti.lol/
 #EXTINF:-1 group-title="BELGESEL",EDSTAFFORD BELGESEL 7/24
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="SPOR",TLC TV
-https://bstelevision.com/proxy.php?mode=proxy&url=http://tv.dsmart-go.workers.dev/?ID=https://www.tlctv.com.tr/canli-izle
+https://bstelevision.com/proxy.php?mode=proxy&url=https://www.tlctv.com.tr/canli-izle
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
