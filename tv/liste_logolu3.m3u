@@ -355,5 +355,5 @@ https://playlist.fasttvcdn.com/pl/rfrk9821hdy9dayo8wfyha/dizi-tv/playlist/0.m3u8
 https://bstelevision.com/proxy.php?mode=proxy&url=http://75.119.144.48/KUZEYMAXHD_STREAM/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",KEMAL SUNAL TV
 https://teknobaba.han686314.workers.dev/Kemal_Sunal_Tv.m3u8
-#EXTINF:-1 group-title="SİNEMA",QuEN
-http://line.vueott.com:80/play/live.php?mac=00:1A:79:7F:B9:A9&stream=994137&extension=ts&play_token=IxQGxq11wC
+#EXTINF:-1 group-title="SİNEMA",KUZEYMAX TV
+https://bstelevision.com/proxy.php?mode=proxy&url=http://line.vueott.com:80/play/live.php?mac=00:1A:79:7F:B9:A9&stream=994137&extension=ts&play_token=IxQGxq11wC
