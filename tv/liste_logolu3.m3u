@@ -55,7 +55,7 @@ https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/and
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 5
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 1
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8
+https://bstelevision.com/proxy.php?mode=proxy&url=https://trn03.tulix.tv/gt-tivibuspor1/index.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 2
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets2.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 3
@@ -149,8 +149,7 @@ https://tatatam.trt1sultanfatihss.workers.dev/http://dogus.daioncdn.net/ntv/ntv_
 https://bstelevision.com/proxy.php?mode=proxy&url=https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8
 #EXTINF:-1 group-title="ULUSAL",SUPERTURK TV
 https://bstelevision.com/proxy.php?mode=proxy&url=http://75.119.144.48/SUPERTURK_TV_STREAM/index.m3u8
-#EXTINF:-1 group-title="ULUSAL",A HABER
-https://bstelevision.com/proxy.php?mode=proxy&url=https://streams.uzunmuhalefet.com/stream/b4f7a5e9-fcae-4258-83eb-cc37b6a68696.m3u8
+
 ############ YEREL ############
 #EXTINF:-1 group-title="YEREL",KANAL 3
 https://live.artidijitalmedya.com/artidijital_kanal3/kanal3/playlist.m3u8
