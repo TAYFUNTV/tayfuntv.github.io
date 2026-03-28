@@ -1233,6 +1233,23 @@ header {
   justify-content: space-between; gap: 14px;
   flex-shrink: 0;
 }
+
+/* Fullscreen'de ctrl-bar ve diğer üst elementleri gizle */
+:fullscreen .ctrl-bar,
+:-webkit-full-screen .ctrl-bar,
+:-moz-full-screen .ctrl-bar {
+  display: none !important;
+}
+:fullscreen .epg-sidebar,
+:-webkit-full-screen .epg-sidebar,
+:-moz-full-screen .epg-sidebar {
+  display: none !important;
+}
+:fullscreen .epg-ticker,
+:-webkit-full-screen .epg-ticker,
+:-moz-full-screen .epg-ticker {
+  display: none !important;
+}
 .np { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .np-logo {
   width: 34px; height: 34px; border-radius: 7px;
@@ -4224,9 +4241,12 @@ function play(idx){
     hls.on(Hls.Events.MANIFEST_PARSED, ()=>video.play().catch(()=>{}));
     hls.on(Hls.Events.ERROR, (e,d)=>{
       if(d.fatal){
-        showToast('⚠️ HLS hatası, direkt deneniyor...','warning');
         hls.destroy(); hls=null;
-        video.src = _url; video.play().catch(()=>{});
+        // Sessizce native video ile dene (bazı tarayıcılar m3u8 destekler)
+        video.src = _url;
+        video.play().catch(()=>{
+          showToast('⚠️ Stream yüklenemedi. Farklı bir link deneyin.','warning');
+        });
       }
     });
   } else if(video.canPlayType('application/vnd.apple.mpegurl')){
@@ -4336,10 +4356,25 @@ function prevCh(){ const l=getFiltered(); if(!l.length)return; const i=l.findInd
 function setVol(v){ video.volume=v/100; if(v>0) video.muted=false; document.getElementById('volIcon').textContent=v==0?'🔇':v<50?'🔉':'🔊'; }
 function openFS(){
   const el = document.getElementById('playerRatio');
+  const wrap = document.getElementById('playerWrap') || el;
+  const fsEl = wrap;
   if(document.fullscreenElement || document.webkitFullscreenElement){
     (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   } else {
-    (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+    (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen).call(fsEl);
+  }
+}
+
+// Fullscreen değişimini izle — ctrl-bar'ı gizle/göster
+document.addEventListener('fullscreenchange', handleFSChange);
+document.addEventListener('webkitfullscreenchange', handleFSChange);
+function handleFSChange(){
+  const ctrlBar = document.querySelector('.ctrl-bar');
+  if(!ctrlBar) return;
+  if(document.fullscreenElement || document.webkitFullscreenElement){
+    ctrlBar.style.setProperty('display','none','important');
+  } else {
+    ctrlBar.style.removeProperty('display');
   }
 }
 function changeQuality(v){ const b=document.getElementById('topQuality'); if(b) b.textContent=v==='auto'?'HD':v; showToast('🎬 Kalite: '+(v==='auto'?'Otomatik':v)); }
@@ -7094,7 +7129,7 @@ window.addEventListener('load', ()=>{
       document.getElementById('splash').style.display='none';
       showAgeWarning();
       document.getElementById('loginScreen').style.display='flex';
-      // Beni Hatırla — sadece alanları doldur, otomatik giriş yapma
+      // Beni Hatırla — otomatik giriş yap
       const rem = localStorage.getItem('cltv_remember');
       if(rem){
         try {
@@ -7102,6 +7137,20 @@ window.addEventListener('load', ()=>{
           document.getElementById('loginUser').value = username;
           document.getElementById('loginPass').value = pass;
           document.getElementById('rememberMe').checked = true;
+          // Otomatik giriş: admin mı yoksa kayıtlı kullanıcı mı kontrol et
+          function dec(a){return a.map(function(x){return String.fromCharCode(x^90);}).join('');}
+          const adminUser = dec([14,27,3,28,15,20,122,29,15,22,22,15]);
+          const adminPass = dec([107,104,105,107,104,105,46,14]);
+          const adminEmail = dec([59,62,55,51,52,26,46,59,35,60,47,52,46,44,116,57,53,55]);
+          if(username === adminUser && pass === adminPass){
+            loginSuccess({username: adminUser, email: adminEmail, avatar:'👑', role:'admin', approved:true});
+          } else {
+            const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+            const found = stored.find(u=>u.username===username && u.password===pass);
+            if(found && found.approved !== false){
+              loginSuccess(found);
+            }
+          }
         } catch(e){}
       }
     },500);
