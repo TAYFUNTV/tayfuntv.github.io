@@ -54,6 +54,8 @@ https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/and
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 5
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT HABER
+http://live.yt-hls.workers.dev/UCPe9vNjHF1kEExT5kHwc7aw.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets1.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 2
@@ -331,7 +333,8 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://mss.ayakkabiparti.lol/
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="BELGESEL",TLC TV
 http://schedule-statutory-latex-colored.trycloudflare.com/Tivizon.php?ID=tlc
-
+#EXTINF:-1 group-title="BELGESEL",DMAX TV
+http://schedule-statutory-latex-colored.trycloudflare.com/Tivizon.php?ID=dmax
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
