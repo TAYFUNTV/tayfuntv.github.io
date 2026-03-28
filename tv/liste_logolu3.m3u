@@ -331,7 +331,7 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://mss.ayakkabiparti.lol/
 #EXTINF:-1 group-title="BELGESEL",EDSTAFFORD BELGESEL 7/24
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="BELGESEL",TLC TV
-https://bstelevision.com/proxy.php?mode=proxy&url=https://dogus.daioncdn.net/tlc/tlc.m3u8?ce=3&app=1aca0aa1-06e3-41ff-a8e5-38d7df475469
+https://dogus.daioncdn.net/tlc/tlc.m3u8?ce=3&app=1aca0aa1-06e3-41ff-a8e5-38d7df475469
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
