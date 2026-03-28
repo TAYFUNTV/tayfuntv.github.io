@@ -44,6 +44,14 @@ https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8
 https://duhnet.hipodrom.com/S2/HLS_LIVE/mislitaynp/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",MTRSPT1
 https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 720P
+http://schedule-statutory-latex-colored.trycloudflare.com/vavo.php?ID=499485497f2a87372fca3
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 OZEL YAYIN
+http://schedule-statutory-latex-colored.trycloudflare.com/vavo.php?ID=14536923141c3ea015b82f
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 8K
+http://schedule-statutory-latex-colored.trycloudflare.com/vavo.php?ID=21134623980ed579742af1
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 4K
+http://schedule-statutory-latex-colored.trycloudflare.com/vavo.php?ID=1536730627473741d29b73
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs1.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 2
