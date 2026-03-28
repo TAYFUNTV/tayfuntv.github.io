@@ -329,8 +329,6 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/docubox/
 https://bstelevision.com/proxy.php?mode=proxy&url=https://mss.ayakkabiparti.lol/discs/index.m3u8
 #EXTINF:-1 group-title="BELGESEL",EDSTAFFORD BELGESEL 7/24
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
-#EXTINF:-1 group-title="BELGESEL",LOVE NATURE
-http://line.vueott.com:80/play/live.php?mac=00:1A:79:CD:39:BD&stream=913160&extension=ts&play_token=NngESxl3jy
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
@@ -390,4 +388,5 @@ https://catcast.ismailturret.workers.dev/fanatikmaxkorku.m3u8
 https://catcast.ismailturret.workers.dev/fanatikmaxyesilcam.m3u8
 #EXTINF:-1 group-title="SİNEMA",BIZIMKILER 7/24
 https://catcast.ismailturret.workers.dev/fanatikprimebizimkiler.m3u8
-
+#EXTINF:-1 group-title="SİNEMA",BONCUK TV
+https://bstelevision.com/proxy.php?mode=proxy&url=http://104.238.23.221/BoncukTV/live/index.m3u8
