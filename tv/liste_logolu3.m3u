@@ -301,6 +301,9 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/t
 http://canli.tvden.com.tr/hls/live.m3u8
 #EXTINF:-1 group-title="YEREL",TV 52
 https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/tv52/bant1/playlist.m3u8
+#EXTINF:-1 group-title="YEREL",BIR TV
+https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/birtv/bant1/playlist.m3u8
+
 ############ BELGESEL ############
 #EXTINF:-1 group-title="BELGESEL",NATIONAL GEOGRAPHIC
 https://saran-live.ercdn.net/natgeohd/index.m3u8
