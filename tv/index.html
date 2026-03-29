@@ -701,12 +701,13 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   border-right:1px solid rgba(232,55,61,.2);
   white-space:nowrap;
 }
-.sms-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
+.sms-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; position:relative; }
 .sms-ticker-track {
   display:flex; align-items:center; white-space:nowrap;
-  animation: smsTicker 60s linear infinite;
+  gap:0; font-size:0;
+  will-change: transform;
 }
-.sms-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
+.sms-ticker-track:hover { cursor:pointer; }
 .sms-ticker-label-btn {
   font-size:9px; font-weight:800; color:#ff6b6b;
   margin-right:6px; letter-spacing:.5px;
@@ -721,18 +722,21 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 }
 .sms-msg {
   font-size:12px; color:rgba(255,255,255,.96);
-  padding:0 28px; flex-shrink:0;
-  border-right:1px solid rgba(255,255,255,.12);
+  padding:0 24px; flex-shrink:0;
+  display:inline-flex; align-items:center;
   text-shadow: 0 1px 5px rgba(0,0,0,.7);
   letter-spacing:.2px;
+  white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,.08);
 }
 .sms-msg b { font-weight:800; }
 .sms-male   { color:#90caff; }
 .sms-female { color:#ffb3f0; }
 .sms-admin  { color:#ff8888; }
-@keyframes smsTicker {
+/* smsTicker — süre ve mesafe JS tarafından dinamik hesaplanır */
+@keyframes smsTickerPx {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(calc(-1 * var(--ticker-w, 9999px))); }
 }
 .radio-vol::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--accent); cursor:pointer; }
 
@@ -2637,14 +2641,133 @@ tr:last-child td{border:none;}
 /* RESPONSIVE */
 @media(max-width:900px){
   .admin-sidebar{width:60px;}
-  .sidebar-item span,.sidebar-item .si-badge,.sidebar-section{display:none;}
+  .sidebar-item span:not(.si-icon),.sidebar-item .si-badge,.sidebar-section{display:none;}
   .sidebar-item{justify-content:center;padding:12px;}
   .stats-row{grid-template-columns:1fr 1fr;}
 }
+
+/* ── MOBİL ADMIN PANEL ── */
 @media(max-width:600px){
-  .admin-main{padding:14px;}
-  .stats-row{grid-template-columns:1fr;}
-  .form-grid{grid-template-columns:1fr;}
+  /* Topbar küçült */
+  .admin-topbar{padding:8px 12px;}
+  .admin-logo{font-size:15px;letter-spacing:1px;}
+  .admin-logo-dot{width:6px;height:6px;}
+  .topbar-status,.topbar-time{display:none;}
+  .topbar-right{gap:6px;}
+  .topbar-btn{padding:5px 8px;font-size:10px;}
+
+  /* Layout: sidebar alta, yatay scroll */
+  .admin-body{flex-direction:column-reverse;}
+
+  /* Sidebar: alta yapış, yatay kaydır */
+  .admin-sidebar{
+    width:100% !important;
+    height:auto !important;
+    border-right:none !important;
+    border-top:1px solid var(--border) !important;
+    border-bottom:none !important;
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-shrink:0;
+    position:sticky;
+    bottom:0;
+    z-index:50;
+    background:var(--bg2);
+  }
+  .admin-sidebar::-webkit-scrollbar{display:none;}
+
+  /* sidebar-section başlıklarını gizle */
+  .sidebar-section{display:none !important;}
+
+  /* sidebar-bottom'u normal akışa al */
+  .sidebar-bottom{margin-top:0;padding:0;}
+
+  /* Tüm sidebar itemler yan yana */
+  .admin-sidebar > *,
+  .sidebar-bottom{
+    display:inline-flex !important;
+  }
+  .admin-sidebar{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:stretch;
+    padding:0 4px;
+    gap:2px;
+  }
+
+  /* Her sidebar-item: ikon üstte, yazı altta, dikey */
+  .sidebar-item{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:2px !important;
+    padding:6px 10px !important;
+    margin:4px 0 !important;
+    border-radius:8px !important;
+    min-width:58px !important;
+    flex-shrink:0 !important;
+    border:1px solid transparent !important;
+    white-space:nowrap;
+  }
+  .sidebar-item .si-icon{
+    font-size:18px !important;
+    width:auto !important;
+  }
+  /* Yazıları tekrar göster, küçük font */
+  .sidebar-item > span:not(.si-icon):not(.si-badge){
+    display:block !important;
+    font-size:9px !important;
+    font-weight:700 !important;
+    color:var(--muted) !important;
+    letter-spacing:0 !important;
+  }
+  .sidebar-item.active > span:not(.si-icon):not(.si-badge){
+    color:var(--accent) !important;
+  }
+  /* Badge küçük, ikon üstünde */
+  .sidebar-item .si-badge{
+    display:flex !important;
+    position:absolute;
+    top:2px; right:2px;
+    font-size:8px !important;
+    padding:1px 4px !important;
+    min-width:14px !important;
+  }
+  .sidebar-item{position:relative;}
+
+  /* Ana içerik alanı */
+  .admin-main{
+    padding:12px !important;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  /* Sayfa başlığı */
+  .page-header{flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .page-title{font-size:18px !important;letter-spacing:1px;}
+  .page-actions{flex-wrap:wrap;gap:6px;}
+  .page-actions .btn{font-size:10px;padding:6px 10px;}
+
+  /* İstatistik kartları */
+  .stats-row{grid-template-columns:1fr 1fr !important;gap:8px;margin-bottom:14px;}
+  .stat-card{padding:12px;}
+  .stat-icon{font-size:20px;margin-bottom:6px;}
+  .stat-num{font-size:24px;}
+  .stat-label{font-size:9px;}
+
+  /* Form grid */
+  .form-grid{grid-template-columns:1fr !important;}
+
+  /* Tablo yatay scroll */
+  .admin-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:500px;}
+
+  /* Settings grid */
+  .settings-grid{grid-template-columns:1fr !important;}
+
+  /* Alert */
+  .alert{font-size:11px;padding:8px 12px;}
 }
 
 /* ─── YD (YabancıDizi style) ─── */
@@ -2914,26 +3037,16 @@ tr:last-child td{border:none;}
     <div class="sms-ticker-wrap">
       <div class="sms-ticker-scroll">
         <div class="sms-ticker-track" id="smsTicker">
-          <span class="sms-msg">🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!</span>
-          <span class="sms-msg">❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!</span>
-          <span class="sms-msg">🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!</span>
-          <span class="sms-msg">👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!</span>
-          <span class="sms-msg">💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!</span>
-          <span class="sms-msg">🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?</span>
-          <span class="sms-msg">📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!</span>
-          <span class="sms-msg">💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!</span>
-          <span class="sms-msg">🌸 <b class="sms-female">Selin:</b> Harika bir platform!</span>
-          <span class="sms-msg">🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?</span>
-          <span class="sms-msg">🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!</span>
-          <span class="sms-msg">❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!</span>
-          <span class="sms-msg">🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!</span>
-          <span class="sms-msg">👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!</span>
-          <span class="sms-msg">💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!</span>
-          <span class="sms-msg">🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?</span>
-          <span class="sms-msg">📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!</span>
-          <span class="sms-msg">💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!</span>
-          <span class="sms-msg">🌸 <b class="sms-female">Selin:</b> Harika bir platform!</span>
-          <span class="sms-msg">🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?</span>
+          <span class="sms-msg" data-static>🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!</span>
+          <span class="sms-msg" data-static>❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!</span>
+          <span class="sms-msg" data-static>🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!</span>
+          <span class="sms-msg" data-static>👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!</span>
+          <span class="sms-msg" data-static>💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!</span>
+          <span class="sms-msg" data-static>🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?</span>
+          <span class="sms-msg" data-static>📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!</span>
+          <span class="sms-msg" data-static>💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!</span>
+          <span class="sms-msg" data-static>🌸 <b class="sms-female">Selin:</b> Harika bir platform!</span>
+          <span class="sms-msg" data-static>🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?</span>
         </div>
       </div>
     </div>
@@ -4027,19 +4140,95 @@ function setRadioVol(val){
   if(audio) audio.volume = val / 100;
 }
 
-// SMS Ticker'a yeni mesaj ekle (admin panelinden veya chat'ten çağrılabilir)
-function addSmsToTicker(name, msg){
-  const track = document.getElementById('smsTicker');
-  if(!track) return;
-  const emojis = ['🌟','❤️','🔥','💬','🎬','👑','💯','⭐','🎉','😊'];
-  const emoji = emojis[Math.floor(Math.random()*emojis.length)];
-  const item = `<span class="sms-msg">${emoji} <b>${name}:</b> ${msg}</span>`;
-  // İki kopyaya da ekle (sonsuz döngü için)
-  const items = track.querySelectorAll('.sms-msg');
-  const half = Math.floor(items.length / 2);
-  items[half-1]?.insertAdjacentHTML('afterend', item);
-  items[track.querySelectorAll('.sms-msg').length-1]?.insertAdjacentHTML('afterend', item);
+// SMS Ticker — CSS animasyon tabanlı, sonsuz döngü
+/* ── SMS TICKER MOTORU ── */
+(function(){
+  var SPEED = 60; // px/saniye
+
+  function getTrack(){ return document.getElementById('smsTicker'); }
+
+  function rebuildDOM(){
+    var t = getTrack(); if(!t) return;
+
+    // Statik mesaj HTML'lerini al
+    var msgs = [
+      '🌟 <b class="sms-male">Ahmet:</b> Harika yayın, devam edin!',
+      '❤️ <b class="sms-female">Ayşe:</b> Çok güzel bir kanal, bravo!',
+      '🔥 <b class="sms-male">Mehmet:</b> Game of Thrones efsaneydi!',
+      '👑 <b class="sms-admin">TAYFUN GULLU:</b> Yayınlarımıza hoş geldiniz!',
+      '💙 <b class="sms-female">Fatma:</b> Tayfun TV en iyisi!',
+      '🎬 <b class="sms-male">Ali:</b> Yeni diziler ne zaman gelecek?',
+      '📺 <b class="sms-female">Zeynep:</b> Canlı yayın süper!',
+      '💯 <b class="sms-male">Emre:</b> Her gün buradayım, teşekkürler!',
+      '🌸 <b class="sms-female">Selin:</b> Harika bir platform!',
+      '🎮 <b class="sms-male">Burak:</b> GOT 3. sezon ne zaman?'
+    ];
+
+    // Onaylı mesajları ekle
+    var approved = JSON.parse(localStorage.getItem('ttv_sms_approved')||'[]');
+    var emojis = ['🌟','❤️','🔥','💬','🎬','👑','💯','⭐','🎉','😊'];
+    approved.forEach(function(item, i){
+      msgs.push(emojis[i%emojis.length]+' <b class="'+(item.colorClass||'')+'">'+item.name+':</b> '+item.msg);
+    });
+
+    // 2 kopya HTML oluştur
+    var html = '';
+    for(var r=0; r<2; r++){
+      msgs.forEach(function(inner){
+        html += '<span class="sms-msg">' + inner + '</span>';
+      });
+    }
+
+    // Animasyonu durdur, içeriği yaz
+    t.style.animation = 'none';
+    t.style.transform = 'translateX(0)';
+    t.innerHTML = html;
+
+    // Genişliği ölç: span'ların offsetWidth toplamının yarısı = 1 kopya genişliği
+    // offsetWidth, overflow:hidden olan parent'tan etkilenmez
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        var spans = t.querySelectorAll('.sms-msg');
+        var halfCount = spans.length / 2;
+        var w = 0;
+        for(var i=0; i<halfCount; i++){ w += spans[i].offsetWidth; }
+        if(w <= 0){
+          // Fallback: mesaj sayısı × tahmini genişlik
+          w = msgs.length * 220;
+        }
+        var duration = w / SPEED;
+        // CSS değişkeni olarak kaydet, keyframe -50% yerine px kullanacak
+        t.style.setProperty('--ticker-w', w + 'px');
+        void t.offsetWidth; // reflow
+        t.style.animation = 'smsTickerPx ' + duration.toFixed(2) + 's linear infinite';
+      });
+    });
+  }
+
+  window.smsTickerAddMsg = function(name, msg, colorClass){
+    var approved = JSON.parse(localStorage.getItem('ttv_sms_approved')||'[]');
+    approved.push({ id: Date.now(), name: name, msg: msg, colorClass: colorClass||'' });
+    localStorage.setItem('ttv_sms_approved', JSON.stringify(approved));
+    rebuildDOM();
+  };
+
+  window.smsTickerRebuild = rebuildDOM;
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var t = getTrack(); if(!t) return;
+    t.addEventListener('mouseenter', function(){ t.style.animationPlayState = 'paused'; });
+    t.addEventListener('mouseleave', function(){ t.style.animationPlayState = 'running'; });
+    rebuildDOM();
+  });
+})();
+
+function addSmsToTicker(name, msg, colorClass){
+  // Motor içinde localStorage kaydı + DOM güncelleme yapılıyor
+  if(window.smsTickerAddMsg) window.smsTickerAddMsg(name, msg, colorClass);
+  renderApprovedSmsAdmin();
 }
+
+function loadApprovedSmsToTicker(){ /* Artık IIFE içinde DOMContentLoaded'da yapılıyor */ }
 
 function showAgeWarning(){
   document.getElementById('ageWarning').style.display = 'flex';
@@ -6448,6 +6637,18 @@ function closeAdminBackToSite(){
         <div id="smsApprovalList" style="display:flex;flex-direction:column;gap:10px;">
           <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">💬 Bekleyen SMS mesajı yok.</div>
         </div>
+
+        <!-- YAYINDAKI MESAJLAR -->
+        <div class="page-header" style="margin-top:32px;">
+          <div class="page-title" style="font-size:15px;">📺 Şu An Yayındaki Mesajlar</div>
+          <div class="page-actions">
+            <button class="btn btn-danger" onclick="clearAllApprovedSms()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">🗑 Tümünü Sil</button>
+          </div>
+        </div>
+        <div class="alert" style="background:rgba(39,174,96,.07);border:1px solid rgba(39,174,96,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2);margin-bottom:12px;">✅ Aşağıdaki mesajlar kayan yazıda yayınlanmaktadır. Tek tek veya tümünü silebilirsiniz.</div>
+        <div id="smsApprovedList" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">📭 Yayında mesaj yok.</div>
+        </div>
       </div>
 
       <div class="admin-page" id="page_settings">
@@ -7327,7 +7528,7 @@ function approveSms(id){
 
   // Ticker'a ekle
   const colorClass = item.color === 'male' ? 'sms-male' : item.color === 'female' ? 'sms-female' : '';
-  addSmsToTicker(`<span class="${colorClass}">${item.name}</span>`, item.msg);
+  addSmsToTicker(item.name, item.msg, colorClass);
 
   updateSmsPendingBadge();
   renderSmsApproval();
@@ -7358,8 +7559,53 @@ function clearAllPendingSms(){
 const _origShowPage = window.showPage;
 window.showPage = function(page, el){
   if(typeof _origShowPage === 'function') _origShowPage(page, el);
-  if(page === 'smsapproval') renderSmsApproval();
+  if(page === 'smsapproval') { renderSmsApproval(); renderApprovedSmsAdmin(); }
 };
+
+// Onaylanan mesajları admin panelinde listele
+function renderApprovedSmsAdmin(){
+  const approved = JSON.parse(localStorage.getItem('ttv_sms_approved') || '[]');
+  const list = document.getElementById('smsApprovedList');
+  if(!list) return;
+  if(!approved.length){
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px;">📭 Yayında mesaj yok.</div>';
+    return;
+  }
+  list.innerHTML = approved.map((item, idx) => `
+    <div style="background:var(--bg2);border:1px solid rgba(39,174,96,.2);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:14px;">
+      <div style="flex:1;min-width:0;">
+        <span style="font-size:12px;font-weight:700;color:${item.colorClass==='sms-male'?'#90caff':item.colorClass==='sms-female'?'#ffb3f0':'var(--text)'};">
+          ${item.colorClass==='sms-male'?'🔵':item.colorClass==='sms-female'?'🩷':'⚪'} ${item.name}
+        </span>
+        <span style="font-size:13px;color:var(--text2);margin-left:8px;">${item.msg}</span>
+      </div>
+      <button onclick="deleteApprovedSms(${item.id})" style="padding:6px 12px;background:rgba(232,55,61,.1);border:1px solid rgba(232,55,61,.25);border-radius:7px;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">🗑 Sil</button>
+    </div>
+  `).join('');
+}
+
+function deleteApprovedSms(id){
+  let approved = JSON.parse(localStorage.getItem('ttv_sms_approved') || '[]');
+  approved = approved.filter(x => x.id !== id);
+  localStorage.setItem('ttv_sms_approved', JSON.stringify(approved));
+  // Ticker'ı yenile
+  rebuildTicker();
+  renderApprovedSmsAdmin();
+  showToast('🗑 Mesaj kayan yazıdan silindi', 'warning');
+}
+
+function clearAllApprovedSms(){
+  if(!confirm('Yayındaki tüm SMS mesajları silinsin mi?')) return;
+  localStorage.removeItem('ttv_sms_approved');
+  rebuildTicker();
+  renderApprovedSmsAdmin();
+  showToast('🗑 Tüm yayın mesajları silindi', 'warning');
+}
+
+// Ticker'ı sıfırlayıp sadece onaylı mesajları tekrar yükle
+function rebuildTicker(){
+  if(window.smsTickerRebuild) window.smsTickerRebuild();
+}
 
 // Sayfa yüklenince badge güncelle
 document.addEventListener('DOMContentLoaded', updateSmsPendingBadge);
