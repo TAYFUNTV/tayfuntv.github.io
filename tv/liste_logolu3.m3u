@@ -44,16 +44,28 @@ https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8
 https://duhnet.hipodrom.com/S2/HLS_LIVE/mislitaynp/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",MTRSPT1
 https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 4K
+https://tinyurl.com/Fiat-linea-multijet/yula/ceydub1.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 1
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs1.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 2 4K
+https://tinyurl.com/Fiat-linea-multijet/yula/ceydub2.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 2
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs2.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 3 4K
+https://tinyurl.com/Fiat-linea-multijet/yula/ceydub3.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 3
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs3.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 4 4K
+https://tinyurl.com/Fiat-linea-multijet/yula/ceydub4.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 4
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8
+#EXTINF:-1 group-title="SPOR",BEIN SPORT 5 4K
+https://tinyurl.com/Fiat-linea-multijet/Emu/androstreamlivebs5.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORT 5
 https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8
+#EXTINF:-1 group-title="SPOR",TIVIBUSPOR 
+https://tinyurl.com/Fiat-linea-multijet/Emu/androstreamlivets.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 1
 https://bstelevision.com/proxy.php?mode=proxy&url=https://trn03.tulix.tv/gt-tivibuspor1/index.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 2
