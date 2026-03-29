@@ -707,6 +707,18 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   animation: smsTicker 60s linear infinite;
 }
 .sms-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
+.sms-ticker-label-btn {
+  font-size:9px; font-weight:800; color:#ff6b6b;
+  margin-right:6px; letter-spacing:.5px;
+  cursor:pointer; padding:2px 6px; border-radius:4px;
+  transition:all .2s; white-space:nowrap;
+  border:1px solid transparent;
+}
+.sms-ticker-label-btn:hover {
+  background:rgba(232,55,61,.15);
+  border-color:rgba(232,55,61,.3);
+  color:#fff;
+}
 .sms-msg {
   font-size:12px; color:rgba(255,255,255,.96);
   padding:0 28px; flex-shrink:0;
@@ -793,6 +805,57 @@ header {
   color: var(--text); font-size: 13px; width: 160px;
 }
 .search-bar input::placeholder { color: var(--muted); }
+
+/* SOSYAL MEDYA İKONLARI */
+.social-icons-wrap {
+  display: flex; align-items: center; gap: 6px;
+}
+.social-icon-btn {
+  position: relative;
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); transition: var(--transition);
+  text-decoration: none; flex-shrink: 0;
+}
+.social-icon-btn:hover { transform: translateY(-2px); }
+.social-icon-btn.instagram { background: rgba(193,53,132,.12); border-color: rgba(193,53,132,.25); }
+.social-icon-btn.instagram:hover { background: rgba(193,53,132,.25); color: #e1306c; }
+.social-icon-btn.twitter { background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.1); }
+.social-icon-btn.twitter:hover { background: rgba(29,161,242,.15); color: #1da1f2; }
+.social-icon-btn.facebook { background: rgba(24,119,242,.1); border-color: rgba(24,119,242,.25); }
+.social-icon-btn.facebook:hover { background: rgba(24,119,242,.25); color: #1877f2; }
+.social-icon-btn.sms-send-btn { background: rgba(232,55,61,.1); border-color: rgba(232,55,61,.25); color: var(--accent); }
+.social-icon-btn.sms-send-btn:hover { background: rgba(232,55,61,.25); color: #fff; }
+
+/* SMS ANA GÖNDER BUTONU */
+.sms-main-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(232,55,61,.2), rgba(232,55,61,.1));
+  border: 1px solid rgba(232,55,61,.4);
+  border-radius: 8px; padding: 7px 12px;
+  color: #ff6b6b; font-size: 10px; font-weight: 800;
+  letter-spacing: .6px; cursor: pointer;
+  transition: var(--transition); white-space: nowrap;
+  position: relative; flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+.sms-main-btn:hover {
+  background: linear-gradient(135deg, rgba(232,55,61,.35), rgba(232,55,61,.2));
+  border-color: var(--accent); color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(232,55,61,.3);
+}
+.social-badge {
+  position: absolute; top: -5px; right: -5px;
+  background: var(--accent); color: #fff;
+  font-size: 9px; font-weight: 800;
+  min-width: 16px; height: 16px;
+  border-radius: 8px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--bg);
+  animation: pulseDot 2s infinite;
+}
 .icon-btn {
   width: 34px; height: 34px; border-radius: 8px;
   background: var(--bg3); border: 1px solid var(--border);
@@ -1927,6 +1990,8 @@ header {
   /* Header mobil iyileştirme */
   .search-bar { flex: 1; max-width: 200px; }
   .search-bar input { width: 100%; }
+  .social-icons-wrap { display: none; }
+  .sms-main-btn span:last-of-type { display: none; } /* metni gizle, sadece ikon kalsın */
 
   /* TV layout: dikey yığın */
   .tv-layout {
@@ -2703,6 +2768,56 @@ tr:last-child td{border:none;}
 </div>
 
 <!-- CHAT KURAL UYARISI -->
+<!-- SMS GÖNDER MODAL -->
+<div id="smsModal" style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2100;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius2);width:100%;max-width:440px;box-shadow:var(--shadow);animation:fadeInUp .3s ease;overflow:hidden;">
+    <!-- Başlık -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(232,55,61,.15);border:1px solid rgba(232,55,61,.3);display:flex;align-items:center;justify-content:center;font-size:15px;">💬</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);">Kayan Yazıya Mesaj Gönder</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;">Mesajın admin onayından sonra yayınlanır</div>
+        </div>
+      </div>
+      <button onclick="closeSmsModal()" style="width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <!-- Form -->
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:6px;">İSMİNİZ</label>
+        <input id="smsNameInput" type="text" maxlength="30" placeholder="Adınızı yazın..." style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(232,55,61,.5)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:6px;">MESAJINIZ</label>
+        <textarea id="smsMsgInput" maxlength="120" placeholder="Mesajınızı yazın... (max 120 karakter)" rows="3" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:'DM Sans',sans-serif;resize:none;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(232,55,61,.5)'" onblur="this.style.borderColor='var(--border)'" oninput="document.getElementById('smsCharCount').textContent=this.value.length"></textarea>
+        <div style="text-align:right;font-size:10px;color:var(--muted);margin-top:4px;"><span id="smsCharCount">0</span>/120</div>
+      </div>
+      <!-- Cinsiyet seçimi — renk için -->
+      <div>
+        <label style="display:block;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:8px;">RENK SEÇİMİ</label>
+        <div style="display:flex;gap:8px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);flex:1;transition:all .2s;" id="smsColorM">
+            <input type="radio" name="smsColor" value="male" checked style="accent-color:var(--accent);"> <span style="font-size:12px;font-weight:600;color:#90caff;">🔵 Mavi</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);flex:1;transition:all .2s;" id="smsColorF">
+            <input type="radio" name="smsColor" value="female" style="accent-color:var(--accent);"> <span style="font-size:12px;font-weight:600;color:#ffb3f0;">🩷 Pembe</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);flex:1;transition:all .2s;" id="smsColorN">
+            <input type="radio" name="smsColor" value="neutral" style="accent-color:var(--accent);"> <span style="font-size:12px;font-weight:600;color:var(--text2);">⚪ Beyaz</span>
+          </label>
+        </div>
+      </div>
+      <div style="padding:10px 14px;background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);border-radius:8px;font-size:11px;color:var(--gold);display:flex;align-items:center;gap:8px;">
+        ⏳ Mesajınız admin onayından sonra kayan yazıda görünecektir.
+      </div>
+      <button onclick="submitSmsMessage()" style="width:100%;padding:12px;background:var(--accent);border:none;border-radius:9px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px;transition:all .2s;" onmouseover="this.style.background='var(--accent2)'" onmouseout="this.style.background='var(--accent)'">
+        📨 Mesaj Gönder
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="chatWarning" style="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:380px;width:100%;padding:28px 24px;text-align:center;animation:popIn .3s ease;">
     <div style="font-size:40px;margin-bottom:12px;">💬</div>
@@ -2793,7 +2908,7 @@ tr:last-child td{border:none;}
       <span class="radio-live-dot" id="radioLiveDot"></span>
       <span id="radioName" style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;margin-right:6px;">📻 CANLI RADYO</span>
       <span style="font-size:9px;color:rgba(255,255,255,.3);margin-right:6px;">|</span>
-      <span style="font-size:9px;font-weight:700;color:#ff6b6b;margin-right:6px;letter-spacing:.5px;">💬 SMS</span>
+      <span class="sms-ticker-label-btn" onclick="openSmsModal()" title="Mesaj göndermek için tıkla">💬 SMS</span>
     </div>
     <!-- SMS KAYAN YAZI -->
     <div class="sms-ticker-wrap">
@@ -2850,9 +2965,26 @@ tr:last-child td{border:none;}
       <button class="dev-btn" onclick="openAdminPanel()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">
         🛡️ <span>Admin Panel</span>
       </button>
-      <div class="search-bar">
-        <span style="font-size:13px;color:var(--muted)">🔍</span>
-        <input type="text" placeholder="Kanal ara..." onkeyup="liveSearch(this.value)" id="headerSearch">
+      <!-- SOSYAL MEDYA İKONLARI + SMS GÖNDER -->
+      <div class="social-icons-wrap">
+        <a id="instagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener" class="social-icon-btn instagram" title="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          <span class="social-badge" id="instaBadge" style="display:none;">0</span>
+        </a>
+        <a id="twitterLink" href="https://x.com/" target="_blank" rel="noopener" class="social-icon-btn twitter" title="Twitter / X">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.261 5.632L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          <span class="social-badge" id="twitterBadge" style="display:none;">0</span>
+        </a>
+        <a id="facebookLink" href="https://www.facebook.com/?locale=tr_TR" target="_blank" rel="noopener" class="social-icon-btn facebook" title="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <span class="social-badge" id="facebookBadge" style="display:none;">0</span>
+        </a>
+        <!-- SMS GÖNDER BUTONU -->
+        <button onclick="openSmsModal()" class="sms-main-btn" title="Kayan yazıya mesaj gönder" style="position:relative;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+          <span>SMS GÖNDER</span>
+          <span class="social-badge" id="smsPendingBadge" style="display:none;">0</span>
+        </button>
       </div>
       <div style="position:relative;">
         <button class="lang-btn" onclick="toggleDrop('langDrop')" id="langBtn">
@@ -3678,7 +3810,7 @@ function setLang(lang, el){
   if(navBtns[1]) navBtns[1].textContent = '🎬 ' + t('nav_movies');
   if(navBtns[2]) navBtns[2].textContent = '🔔 ' + t('nav_notifs');
   if(navBtns[3]) navBtns[3].textContent = '⚙️ ' + t('nav_settings');
-  document.getElementById('headerSearch').placeholder = t('search_ph');
+  if(document.getElementById('headerSearch')) document.getElementById('headerSearch').placeholder = t('search_ph');
   document.getElementById('idle_txt_el') && (document.getElementById('idle_txt_el').textContent = t('idle_txt'));
   if(!currentCh){
     document.getElementById('npTitle').textContent = t('no_channel');
@@ -5934,6 +6066,11 @@ function closeAdminBackToSite(){
       <div class="sidebar-item" onclick="showPage('roles',this)">
         <span class="si-icon">🛡️</span><span>Roller & İzinler</span>
       </div>
+      <div class="sidebar-section">SOSYAL</div>
+      <div class="sidebar-item" onclick="showPage('smsapproval',this)">
+        <span class="si-icon">💬</span><span>SMS Onay</span>
+        <span class="si-badge" id="smsPendingAdminBadge" style="display:none;">0</span>
+      </div>
       <div class="sidebar-section">ANALİTİK</div>
       <div class="sidebar-item" onclick="showPage('analytics',this)">
         <span class="si-icon">📈</span><span>İstatistikler</span>
@@ -6298,6 +6435,21 @@ function closeAdminBackToSite(){
       </div>
 
       <!-- SETTINGS -->
+      <!-- SMS ONAY SAYFASI -->
+      <div class="admin-page" id="page_smsapproval">
+        <div class="page-header">
+          <div class="page-title">💬 SMS Onay Kuyruğu</div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="renderSmsApproval()">🔄 Yenile</button>
+            <button class="btn btn-danger" onclick="clearAllPendingSms()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">🗑 Tümünü Reddet</button>
+          </div>
+        </div>
+        <div class="alert alert-info" style="margin-bottom:16px;">ℹ️ Kullanıcıların gönderdiği mesajlar burada bekler. Onayladığınızda kayan yazıya eklenir.</div>
+        <div id="smsApprovalList" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">💬 Bekleyen SMS mesajı yok.</div>
+        </div>
+      </div>
+
       <div class="admin-page" id="page_settings">
         <div class="page-header">
           <div class="page-title">⚙️ Sistem Ayarları</div>
@@ -6369,6 +6521,38 @@ function closeAdminBackToSite(){
                 <label>LOGO METNİ</label>
                 <input type="text" value="TAYFUN TV ULTRA" placeholder="Site logosu metni">
               </div>
+            </div>
+          </div>
+          <div class="card" style="grid-column:1/-1;">
+            <div class="card-title" style="margin-bottom:16px;">📱 Sosyal Medya Ayarları</div>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+              <div class="form-field">
+                <label>📸 INSTAGRAM URL</label>
+                <input type="text" id="smInstaUrl" placeholder="https://instagram.com/..." oninput="saveSocialSettings()" value="https://www.instagram.com/">
+              </div>
+              <div class="form-field">
+                <label>🐦 TWITTER/X URL</label>
+                <input type="text" id="smTwitterUrl" placeholder="https://twitter.com/..." oninput="saveSocialSettings()" value="https://x.com/">
+              </div>
+              <div class="form-field">
+                <label>📘 FACEBOOK URL</label>
+                <input type="text" id="smFbUrl" placeholder="https://facebook.com/..." oninput="saveSocialSettings()" value="https://www.facebook.com/?locale=tr_TR">
+              </div>
+              <div class="form-field">
+                <label>📸 INSTAGRAM BADGE (DM/Mesaj sayısı, 0 = gizle)</label>
+                <input type="number" id="smInstaBadge" min="0" max="99" value="0" oninput="saveSocialSettings()">
+              </div>
+              <div class="form-field">
+                <label>🐦 TWITTER BADGE (DM/Mesaj sayısı, 0 = gizle)</label>
+                <input type="number" id="smTwitterBadge" min="0" max="99" value="0" oninput="saveSocialSettings()">
+              </div>
+              <div class="form-field">
+                <label>📘 FACEBOOK BADGE (DM/Mesaj sayısı, 0 = gizle)</label>
+                <input type="number" id="smFbBadge" min="0" max="99" value="0" oninput="saveSocialSettings()">
+              </div>
+            </div>
+            <div style="margin-top:10px;padding:10px 14px;background:rgba(34,158,217,.08);border:1px solid rgba(34,158,217,.2);border-radius:8px;font-size:11px;color:var(--blue);">
+              ℹ️ Badge sayısını 0 yaparsanız ikon üzerindeki kırmızı sayaç gizlenir. URL boş bırakılırsa ikon gri görünür. Değişiklikler anında siteye yansır.
             </div>
           </div>
           <div class="card">
@@ -7053,7 +7237,192 @@ function restoreBackup(){ if(!backupData){showToast('Önce dosya seçin!','warni
 function renderBackupHistory(){ document.getElementById('backupHistory').innerHTML=backupHistory.length?backupHistory.map(b=>`<div class="log-item"><div class="log-icon" style="background:rgba(255,255,255,.04);">💾</div><div><div class="log-text">${b.items}</div><div class="log-time">${b.date} · ${b.size}</div></div></div>`).join(''):'<div style="color:var(--muted);font-size:12px;padding:10px;">Henüz yedek alınmamış.</div>'; }
 
 /* SETTINGS */
-function saveSettings(){ showToast('✅ Ayarlar kaydedildi','success'); addLog('system','system','⚙️ Ayarlar güncellendi','var(--green)'); }
+/* ── SMS MODAL & ONAY SİSTEMİ ── */
+
+function openSmsModal(){
+  // Kullanıcı adını otomatik doldur
+  const nameInput = document.getElementById('smsNameInput');
+  if(nameInput && currentUser?.username && !nameInput.value){
+    nameInput.value = currentUser.username;
+  }
+  document.getElementById('smsModal').style.display = 'flex';
+}
+function closeSmsModal(){
+  document.getElementById('smsModal').style.display = 'none';
+  document.getElementById('smsNameInput').value = '';
+  document.getElementById('smsMsgInput').value = '';
+  document.getElementById('smsCharCount').textContent = '0';
+  document.querySelector('input[name="smsColor"][value="male"]').checked = true;
+}
+
+function submitSmsMessage(){
+  const name = document.getElementById('smsNameInput').value.trim();
+  const msg  = document.getElementById('smsMsgInput').value.trim();
+  const color = document.querySelector('input[name="smsColor"]:checked')?.value || 'male';
+  if(!name){ showToast('⚠️ Lütfen isminizi yazın','warning'); return; }
+  if(!msg || msg.length < 2){ showToast('⚠️ Lütfen bir mesaj yazın','warning'); return; }
+
+  // Bekleyen mesajları localStorage'a ekle
+  const pending = JSON.parse(localStorage.getItem('ttv_sms_pending') || '[]');
+  pending.push({
+    id: Date.now(),
+    name,
+    msg,
+    color,
+    time: new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),
+    date: new Date().toLocaleDateString('tr-TR')
+  });
+  localStorage.setItem('ttv_sms_pending', JSON.stringify(pending));
+
+  // Admin badge güncelle
+  updateSmsPendingBadge();
+  closeSmsModal();
+  showToast('✅ Mesajınız gönderildi! Admin onayı bekleniyor.', 'success');
+}
+
+function updateSmsPendingBadge(){
+  const pending = JSON.parse(localStorage.getItem('ttv_sms_pending') || '[]');
+  const count = pending.length;
+  // Header'daki SMS butonu badge
+  const hb = document.getElementById('smsPendingBadge');
+  if(hb){ hb.textContent = count; hb.style.display = count > 0 ? 'flex' : 'none'; }
+  // Admin panel sidebar badge
+  const ab = document.getElementById('smsPendingAdminBadge');
+  if(ab){ ab.textContent = count; ab.style.display = count > 0 ? 'flex' : 'none'; }
+}
+
+function renderSmsApproval(){
+  const pending = JSON.parse(localStorage.getItem('ttv_sms_pending') || '[]');
+  const list = document.getElementById('smsApprovalList');
+  if(!list) return;
+  if(!pending.length){
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">💬 Bekleyen SMS mesajı yok.</div>';
+    return;
+  }
+  list.innerHTML = pending.map(item => `
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:14px;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:700;color:${item.color==='male'?'#90caff':item.color==='female'?'#ffb3f0':'var(--text)'};">
+            ${item.color==='male'?'🔵':'item.color'==='female'?'🩷':'⚪'} ${item.name}
+          </span>
+          <span style="font-size:10px;color:var(--muted);">${item.date} ${item.time}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.5;">${item.msg}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button onclick="approveSms(${item.id})" style="padding:7px 14px;background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.3);border-radius:7px;color:#2ecc71;font-size:11px;font-weight:700;cursor:pointer;">✅ Onayla</button>
+        <button onclick="rejectSms(${item.id})" style="padding:7px 14px;background:rgba(232,55,61,.1);border:1px solid rgba(232,55,61,.25);border-radius:7px;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;">❌ Reddet</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function approveSms(id){
+  let pending = JSON.parse(localStorage.getItem('ttv_sms_pending') || '[]');
+  const item = pending.find(x => x.id === id);
+  if(!item) return;
+  pending = pending.filter(x => x.id !== id);
+  localStorage.setItem('ttv_sms_pending', JSON.stringify(pending));
+
+  // Ticker'a ekle
+  const colorClass = item.color === 'male' ? 'sms-male' : item.color === 'female' ? 'sms-female' : '';
+  addSmsToTicker(`<span class="${colorClass}">${item.name}</span>`, item.msg);
+
+  updateSmsPendingBadge();
+  renderSmsApproval();
+  showToast(`✅ "${item.name}" mesajı yayınlandı`, 'success');
+  addLog('system','system',`💬 SMS onaylandı: ${item.name}`, 'var(--green)');
+}
+
+function rejectSms(id){
+  let pending = JSON.parse(localStorage.getItem('ttv_sms_pending') || '[]');
+  const item = pending.find(x => x.id === id);
+  pending = pending.filter(x => x.id !== id);
+  localStorage.setItem('ttv_sms_pending', JSON.stringify(pending));
+  updateSmsPendingBadge();
+  renderSmsApproval();
+  showToast('🗑 Mesaj reddedildi', 'warning');
+  if(item) addLog('system','system',`❌ SMS reddedildi: ${item.name}`, 'var(--accent)');
+}
+
+function clearAllPendingSms(){
+  if(!confirm('Tüm bekleyen SMS mesajları silinsin mi?')) return;
+  localStorage.removeItem('ttv_sms_pending');
+  updateSmsPendingBadge();
+  renderSmsApproval();
+  showToast('🗑 Tüm bekleyen mesajlar silindi', 'warning');
+}
+
+// showPage hook — SMS onay sayfası açılınca render et
+const _origShowPage = window.showPage;
+window.showPage = function(page, el){
+  if(typeof _origShowPage === 'function') _origShowPage(page, el);
+  if(page === 'smsapproval') renderSmsApproval();
+};
+
+// Sayfa yüklenince badge güncelle
+document.addEventListener('DOMContentLoaded', updateSmsPendingBadge);
+// ESC ile SMS modal kapat
+document.addEventListener('keydown', e => { if(e.key==='Escape' && document.getElementById('smsModal')?.style.display==='flex') closeSmsModal(); });
+
+/* ── SMS MODAL & ONAY SİSTEMİ SONU ── */
+
+function saveSettings(){ saveSocialSettings(); showToast('✅ Ayarlar kaydedildi','success'); addLog('system','system','⚙️ Ayarlar güncellendi','var(--green)'); }
+
+/* ── SOSYAL MEDYA AYARLARI ── */
+function saveSocialSettings(){
+  const data = {
+    instaUrl:    document.getElementById('smInstaUrl')?.value    || '',
+    twitterUrl:  document.getElementById('smTwitterUrl')?.value  || '',
+    fbUrl:       document.getElementById('smFbUrl')?.value       || '',
+    instaBadge:  parseInt(document.getElementById('smInstaBadge')?.value)  || 0,
+    twitterBadge:parseInt(document.getElementById('smTwitterBadge')?.value)|| 0,
+    fbBadge:     parseInt(document.getElementById('smFbBadge')?.value)     || 0,
+  };
+  localStorage.setItem('ttv_social', JSON.stringify(data));
+  applySocialSettings(data);
+}
+
+function applySocialSettings(data){
+  if(!data) return;
+  const il = document.getElementById('instagramLink');
+  const tl = document.getElementById('twitterLink');
+  const fl = document.getElementById('facebookLink');
+  if(il) il.href = data.instaUrl   || 'https://www.instagram.com/';
+  if(tl) tl.href = data.twitterUrl || 'https://x.com/';
+  if(fl) fl.href = data.fbUrl      || 'https://www.facebook.com/?locale=tr_TR';
+
+  // Badge'leri uygula
+  const ib = document.getElementById('instaBadge');
+  const tb = document.getElementById('twitterBadge');
+  const fb = document.getElementById('facebookBadge');
+  if(ib){ ib.textContent = data.instaBadge; ib.style.display = data.instaBadge > 0 ? 'flex' : 'none'; }
+  if(tb){ tb.textContent = data.twitterBadge; tb.style.display = data.twitterBadge > 0 ? 'flex' : 'none'; }
+  if(fb){ fb.textContent = data.fbBadge; fb.style.display = data.fbBadge > 0 ? 'flex' : 'none'; }
+}
+
+function loadSocialSettings(){
+  const raw = localStorage.getItem('ttv_social');
+  if(!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    applySocialSettings(data);
+    // Admin panel input'larını doldur
+    if(document.getElementById('smInstaUrl'))    document.getElementById('smInstaUrl').value    = data.instaUrl    || '';
+    if(document.getElementById('smTwitterUrl'))  document.getElementById('smTwitterUrl').value  = data.twitterUrl  || '';
+    if(document.getElementById('smFbUrl'))       document.getElementById('smFbUrl').value       = data.fbUrl       || '';
+    if(document.getElementById('smInstaBadge'))  document.getElementById('smInstaBadge').value  = data.instaBadge  || 0;
+    if(document.getElementById('smTwitterBadge'))document.getElementById('smTwitterBadge').value= data.twitterBadge|| 0;
+    if(document.getElementById('smFbBadge'))     document.getElementById('smFbBadge').value     = data.fbBadge     || 0;
+  } catch(e){}
+}
+
+// Sayfa yüklenince sosyal medya ayarlarını uygula
+document.addEventListener('DOMContentLoaded', loadSocialSettings);
+// Admin paneli her açıldığında input'ları güncelle
+const _origOpenAdmin = window.openAdminPanel;
+window.openAdminPanel = function(){ if(typeof _origOpenAdmin==='function') _origOpenAdmin(); loadSocialSettings(); };
 function refreshAll(){ loadM3UAdmin(); renderUsers(); renderDashboard(); showToast('🔄 Veriler yenilendi','info'); }
 
 /* UTILS */
