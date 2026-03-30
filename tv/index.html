@@ -2342,7 +2342,14 @@ tr:last-child td{border:none;}
             <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
             <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
           </div>
-          <div id="mobCatContent" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;"></div>
+          <div id="mobCatContent" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;">
+            <!-- Kategori pilleri -->
+            <div id="catBarMobile" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;flex-shrink:0;"></div>
+            <!-- Kanal listesi -->
+            <div id="channelListBottom" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;align-content:flex-start;"></div>
+            <!-- Chat alanı (chat sekmesinde gösterilir) -->
+            <div id="mobChatArea" style="display:none;flex:1;flex-direction:column;overflow:hidden;"></div>
+          </div>
         </div>
         <!-- DESKTOP KANAL LİSTESİ -->
         <div class="sidebar-tabs">
@@ -3153,13 +3160,64 @@ function buildCats(){
   if(mob) mob.innerHTML = groups.map((g,i)=>
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterMobileCat('${g.replace(/'/g,"\'")}',this)">${g}</button>`
   ).join('');
-  if(groups.length) renderMobileCats(groups[0]);
+  if(groups.length){
+    renderMobileCats(groups[0]);
+    // İlk mob-cat-tab butonunu aktif yap (chat hariç)
+    const firstMobBtn = document.querySelector('.mob-cat-tab:not([onclick*="chat"])');
+    if(firstMobBtn) switchMobTab(firstMobBtn.getAttribute('onclick').match(/'(\w+)'/)?.[1]||'', firstMobBtn);
+  }
 }
 
 function filterMobileCat(cat, el){
   document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>b.classList.remove('active'));
   if(el) el.classList.add('active');
   renderMobileCats(cat);
+}
+
+function switchMobTab(tab, btn){
+  document.querySelectorAll('.mob-cat-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const catBar  = document.getElementById('catBarMobile');
+  const chList  = document.getElementById('channelListBottom');
+  const chatArea= document.getElementById('mobChatArea');
+  const content = document.getElementById('mobCatContent');
+
+  if(tab === 'chat'){
+    content.classList.add('chat-mode');
+    if(catBar)  catBar.style.display  = 'none';
+    if(chList)  chList.style.display  = 'none';
+    if(chatArea){
+      chatArea.style.display = 'flex';
+      const chatBox = document.getElementById('chatBox');
+      if(chatBox && !chatArea.contains(chatBox)) chatArea.appendChild(chatBox);
+    }
+  } else {
+    content.classList.remove('chat-mode');
+    if(chatArea) chatArea.style.display = 'none';
+    if(catBar)  catBar.style.display  = 'flex';
+    if(chList)  chList.style.display  = 'flex';
+
+    const catMap = {
+      'spor'    : ['spor','sport'],
+      'ulusal'  : ['ulusal','milli','national','genel'],
+      'yerel'   : ['yerel','local','bölgesel'],
+      'belgesel': ['belgesel','documentary','doğa','bilim'],
+      'sinema'  : ['sinema','film','dizi','eğlence','movie']
+    };
+    const keywords = catMap[tab] || [tab];
+    const allGroups = [...new Set(allChannels.map(c=>c.group))];
+    const matched = allGroups.find(g =>
+      keywords.some(k => g.toLowerCase().includes(k))
+    ) || allGroups[0];
+
+    if(matched){
+      document.querySelectorAll('#catBarMobile .cat-pill').forEach(b=>{
+        b.classList.toggle('active', b.textContent.trim() === matched);
+      });
+      renderMobileCats(matched);
+    }
+  }
 }
 function renderMobileCats(cat){
   const list = document.getElementById('channelListBottom');
