@@ -398,29 +398,46 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 /* HABER KAYAN YAZI */
 .news-ticker-wrap {
   flex: 1; display:flex; align-items:center; gap:0;
-  overflow:hidden; border-left:1px solid rgba(232,55,61,.2);
-  border-right:1px solid rgba(232,55,61,.2);
-  margin: 0 4px; height:100%;
+  overflow:hidden; height:100%;
+  border-left:1px solid rgba(255,255,255,.07);
+  border-right:1px solid rgba(255,255,255,.07);
+  margin: 0 6px;
+  background: rgba(255,255,255,.02);
+  border-radius:4px;
 }
 .news-ticker-label {
-  background: linear-gradient(135deg, rgba(34,158,217,.3), rgba(34,158,217,.15));
-  color: #90caff; font-size:9px; font-weight:800;
-  letter-spacing:.8px; padding:0 10px; height:100%;
-  display:flex; align-items:center; flex-shrink:0;
-  border-right:1px solid rgba(34,158,217,.2);
+  display:flex; align-items:center; gap:5px; flex-shrink:0;
+  padding:0 14px; height:100%;
+  background: linear-gradient(90deg, rgba(232,55,61,.25) 0%, rgba(232,55,61,.08) 100%);
+  border-right:2px solid rgba(232,55,61,.5);
   white-space:nowrap;
+}
+.news-ticker-label-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+  animation: livePulse 1.2s ease-in-out infinite;
+  flex-shrink:0;
+}
+.news-ticker-label-text {
+  font-size:10px; font-weight:900; color:#fff;
+  letter-spacing:1.5px; text-transform:uppercase;
 }
 .news-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
 .news-ticker-track {
   display:flex; align-items:center; white-space:nowrap;
-  animation: newsTicker 60s linear infinite;
+  animation: newsTicker 55s linear infinite;
 }
 .news-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
 .news-item {
-  font-size:12px; color:rgba(255,255,255,.9);
-  padding:0 28px; flex-shrink:0;
-  border-right:1px solid rgba(255,255,255,.08);
-  letter-spacing:.2px;
+  font-size:13px; color:#e8eaf0; font-weight:700;
+  padding:0 32px; flex-shrink:0;
+  letter-spacing:.3px;
+  position:relative;
+}
+.news-item::after {
+  content:'◆';
+  position:absolute; right:0; top:50%; transform:translateY(-50%);
+  color:rgba(232,55,61,.5); font-size:7px;
 }
 @keyframes newsTicker {
   0%   { transform: translateX(0); }
@@ -1011,7 +1028,7 @@ header {
 }
 .epg-ticker-track:hover { animation-play-state: paused; }
 .epg-ticker-item {
-  font-size: 11px; color: var(--text2);
+  font-size: 11px; color: var(--text2); font-weight: 700;
   padding: 0 24px;
   border-right: 1px solid var(--border);
 }
@@ -1509,8 +1526,9 @@ header {
   .movie-thumb { height: 120px !important; }
 
   /* Radyo bar 768px */
-  .news-item { font-size: 9px; padding: 0 10px; }
-  .news-ticker-label { padding: 0 6px; font-size: 8px; }
+  .news-item { font-size: 11px; padding: 0 16px; }
+  .news-ticker-label { padding: 0 8px; }
+  .news-ticker-label-text { font-size: 8px; letter-spacing: 1px; }
   .news-ticker-wrap { flex: 1; }
   .radio-vol { width: 50px; }
 
@@ -2244,7 +2262,10 @@ tr:last-child td{border:none;}
     </div>
     <!-- HABER KAYAN YAZI -->
     <div class="news-ticker-wrap">
-      <div class="news-ticker-label">📰 HABERLER</div>
+      <div class="news-ticker-label">
+        <div class="news-ticker-label-dot"></div>
+        <span class="news-ticker-label-text">HABERLER</span>
+      </div>
       <div class="news-ticker-scroll">
         <div class="news-ticker-track" id="newsTicker">
           <span class="news-item">📺 Tayfun TV'ye hoş geldiniz! Canlı yayınlar kesintisiz devam ediyor.</span>
@@ -3681,6 +3702,63 @@ function clearChat(){
   showToast('🗑 Sohbet temizlendi', 'info');
 }
 // Temizle butonunu addEventListener ile bağla
+
+/* ============================================
+   TÜRKIYE GÜNDEM HABERLERİ - RSS FEED
+============================================ */
+const NEWS_FEEDS = [
+  'https://www.ntv.com.tr/son-dakika-haberleri.rss',
+  'https://www.sabah.com.tr/rss/anasayfa.xml',
+  'https://www.hurriyet.com.tr/rss/anasayfa'
+];
+
+async function fetchTurkeyNews(){
+  const ticker = document.getElementById('newsTicker');
+  if(!ticker) return;
+
+  for(const feedUrl of NEWS_FEEDS){
+    try{
+      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
+      const res = await fetch(proxy, {signal: AbortSignal.timeout(6000)});
+      if(!res.ok) continue;
+      const data = await res.json();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(data.contents, 'text/xml');
+      const items = xml.querySelectorAll('item');
+      if(!items.length) continue;
+
+      const titles = [];
+      items.forEach((item, i) => {
+        if(i >= 15) return;
+        const t = item.querySelector('title')?.textContent?.trim();
+        if(t && t.length > 5) titles.push(t);
+      });
+
+      if(titles.length){
+        // İki kopya koy (sonsuz kayan efekti için)
+        const html = [...titles, ...titles].map(t =>
+          `<span class="news-item">📰 ${t}</span>`
+        ).join('');
+        ticker.innerHTML = html;
+        // Haber sayısına göre animasyon hızını ayarla
+        const speed = Math.max(40, titles.length * 6);
+        ticker.style.animationDuration = speed + 's';
+        console.log('[News] ' + titles.length + ' haber yüklendi: ' + feedUrl);
+        return; // İlk başarılı feed yeter
+      }
+    } catch(e){
+      console.warn('[News] Feed hatası:', feedUrl, e.message);
+    }
+  }
+  console.warn('[News] Tüm feed\'ler başarısız, varsayılan haberler kalıyor.');
+}
+
+// Sayfa yüklenince çek, sonra her 10 dakikada yenile
+window.addEventListener('load', () => {
+  setTimeout(fetchTurkeyNews, 2500);
+  setInterval(fetchTurkeyNews, 10 * 60 * 1000);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('clearChatBtn');
   if(btn) btn.addEventListener('click', clearChat);
