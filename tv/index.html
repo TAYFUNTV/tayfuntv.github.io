@@ -2335,15 +2335,22 @@ tr:last-child td{border:none;}
         <!-- MOBİL KATEGORİ SEKME SİSTEMİ -->
         <div id="mobileCatsArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
           <div id="mobileCatTabs" style="display:flex;overflow-x:auto;gap:0;border-bottom:2px solid var(--border);flex-shrink:0;scrollbar-width:none;">
-            <button class="mob-cat-tab" onclick="switchMobTab('spor',this)">⚽ Spor</button>
-            <button class="mob-cat-tab" onclick="switchMobTab('ulusal',this)">📡 Ulusal</button>
-            <button class="mob-cat-tab" onclick="switchMobTab('yerel',this)">🏙️ Yerel</button>
-            <button class="mob-cat-tab" onclick="switchMobTab('belgesel',this)">🌍 Belgesel</button>
-            <button class="mob-cat-tab" onclick="switchMobTab('sinema',this)">🎬 Sinema</button>
+            <!-- M3U yüklenince buildCats() tarafından doldurulur -->
             <button class="mob-cat-tab" onclick="switchMobTab('chat',this)">💬 Chat</button>
           </div>
           <div id="mobCatContent" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;">
-            <div id="channelListBottom" style="display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;align-content:flex-start;"></div>
+            <div id="channelListBottom" style="display:flex;flex-direction:column;gap:0;padding:0;"></div>
+            <!-- Mobil chat alanı -->
+            <div id="mobChatWrap" style="display:none;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
+              <div id="mobChatMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
+                <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
+              </div>
+              <div style="display:flex;gap:4px;flex-shrink:0;">
+                <button onclick="toggleEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;">😊</button>
+                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:13px;outline:none;min-width:0;" onkeydown="if(event.key==='Enter')sendMobChat()">
+                <button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+              </div>
+            </div>
           </div>
         </div>
         <!-- DESKTOP KANAL LİSTESİ -->
@@ -3146,30 +3153,32 @@ function buildCats(){
     .map(c => (c.group || '').trim())
     .filter(g => g && !seen.has(g.toLowerCase()) && seen.add(g.toLowerCase()))
     .slice(0, 22);
+
+  // Desktop catBar
   document.getElementById('catBar').innerHTML = groups.map((g,i)=>
     `<button class="cat-pill ${i===0?'active':''}" onclick="filterCat('${g.replace(/'/g,"\\'")}',this)">${g}</button>`
   ).join('');
   if(groups.length) filterCat(groups[0], document.querySelector('.cat-pill'));
-  // Her mob sekmesini M3U gruplarıyla eşleştir
-  const catKeywords = {
-    'spor'    : ['spor','sport'],
-    'ulusal'  : ['ulusal','milli','national','genel','türkiye'],
-    'yerel'   : ['yerel','local','bölgesel'],
-    'belgesel': ['belgesel','documentary','doğa','bilim','tarih'],
-    'sinema'  : ['sinema','film','dizi','eğlence','movie','cinema']
-  };
-  document.querySelectorAll('.mob-cat-tab:not([onclick*="chat"])').forEach(btn => {
-    const tab = btn.getAttribute('onclick').match(/'(\w+)'/)?.[1];
-    if(!tab) return;
-    const keywords = catKeywords[tab] || [tab];
-    const matched = groups.find(g => keywords.some(k => g.toLowerCase().includes(k)));
-    if(matched) mobTabGroupMap[tab] = matched;
+
+  // Mobil sekme butonlarını M3U grup adlarından dinamik oluştur
+  const tabsDiv = document.getElementById('mobileCatTabs');
+  const chatBtn = tabsDiv.querySelector('[onclick*="chat"]');
+  // Önce eski dinamik butonları temizle
+  tabsDiv.querySelectorAll('.mob-cat-tab:not([onclick*="chat"])').forEach(b => b.remove());
+  // Grupları chat butonunun önüne ekle
+  groups.forEach((g, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mob-cat-tab' + (i === 0 ? ' active' : '');
+    btn.textContent = g;
+    btn.onclick = function(){ switchMobTab(g, this); };
+    tabsDiv.insertBefore(btn, chatBtn);
+    mobTabGroupMap[g] = g; // grup adı zaten gerçek ad
   });
 
-  // İlk sekmeyi aktif et
+  // İlk sekmeyi yükle
   if(groups.length){
-    const firstMobBtn = document.querySelector('.mob-cat-tab:not([onclick*="chat"])');
-    if(firstMobBtn) switchMobTab(firstMobBtn.getAttribute('onclick').match(/'(\w+)'/)?.[1]||'', firstMobBtn);
+    const firstBtn = tabsDiv.querySelector('.mob-cat-tab:not([onclick*="chat"])');
+    if(firstBtn) switchMobTab(groups[0], firstBtn);
   }
 }
 
@@ -3186,32 +3195,20 @@ function switchMobTab(tab, btn){
   document.querySelectorAll('.mob-cat-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
 
-  if(tab === 'chat'){
-    document.getElementById('mobCatContent').classList.add('chat-mode');
-    const chList = document.getElementById('channelListBottom');
-    if(chList) chList.style.display = 'none';
-    const content2 = document.getElementById('mobCatContent');
-    if(!content2.querySelector('#chatBoxSide')){
-      const epgInner = document.querySelector('.epg-sidebar > div[style*="flex-direction:column"]');
-      if(epgInner) content2.appendChild(epgInner);
-    }
-    const movedChat = content2.querySelector('div[style*="flex-direction:column"]');
-    if(movedChat) movedChat.style.display = 'flex';
-  } else {
-    document.getElementById('mobCatContent').classList.remove('chat-mode');
-    const chList = document.getElementById('channelListBottom');
-    if(chList) chList.style.display = 'flex';
-    const movedChat = document.getElementById('mobCatContent').querySelector('#chatBoxSide');
-    if(movedChat && movedChat.parentElement) movedChat.parentElement.style.display = 'none';
+  const chList   = document.getElementById('channelListBottom');
+  const chatWrap = document.getElementById('mobChatWrap');
 
-    // buildCats'te eşleştirilmiş gerçek grup adını kullan
-    const matched = mobTabGroupMap[tab];
-    if(matched){
-      renderMobileCats(matched);
-    } else {
-      const el = document.getElementById('channelListBottom');
-      if(el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">Bu kategoride kanal bulunamadı.</div>';
-    }
+  if(tab === 'chat'){
+    if(chList)   chList.style.display   = 'none';
+    if(chatWrap) chatWrap.style.display = 'flex';
+    // Masaüstü chatBoxSide mesajlarını mobil alana senkronize et
+    const sideBox = document.getElementById('chatBoxSide');
+    const mobBox  = document.getElementById('mobChatMessages');
+    if(sideBox && mobBox) mobBox.innerHTML = sideBox.innerHTML;
+  } else {
+    if(chatWrap) chatWrap.style.display = 'none';
+    if(chList)   chList.style.display   = 'flex';
+    renderMobileCats(tab);
   }
 }
 function renderMobileCats(cat){
