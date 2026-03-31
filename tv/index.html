@@ -1474,8 +1474,6 @@ header {
     touch-action: manipulation;
   }
   .login-tab { font-size: 13px; padding: 10px; min-height: 40px; }
-  .social-btn { min-height: 44px; font-size: 13px; }
-  .login-guest a { font-size: 13px; padding: 8px; display: inline-block; }
 
   /* Header mobil iyileştirme */
   .search-bar { flex: 1; max-width: 200px; }
@@ -2248,10 +2246,6 @@ tr:last-child td{border:none;}
         <a style="font-size:11px;color:var(--blue);cursor:pointer;" onclick="showToast('🔑 Şifre sıfırlama e-postası gönderildi!','info')">Şifremi unuttum?</a>
       </div>
       <button class="login-btn" onclick="doLogin()">GİRİŞ YAP</button>
-      <div class="login-divider">veya</div>
-      <div class="social-btns">
-        <button class="social-btn" onclick="guestLogin()">👤 Misafir Girişi</button>
-      </div>
     </div>
     <!-- REGISTER -->
     <div id="registerForm" style="display:none;">
@@ -2928,9 +2922,11 @@ function doRegister(){
   localStorage.setItem('cltv_users', JSON.stringify(stored));
   showLoginOk('✅ Hesabınız oluşturuldu! Admin onayından sonra giriş yapabilirsiniz.');
 }
-function guestLogin(){ loginSuccess({username:'Misafir', email:'guest@tayfuntv.com', avatar:'📺', guest:true}); }
+function guestLogin(){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); }
 function quickDemo(){ loginSuccess({username:'Demo User', email:'demo@canlitv.com', avatar:'🎬', demo:true}); }
 function loginSuccess(user){
+  // Misafir girişini tamamen engelle
+  if(user.guest || user.demo){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); return; }
   currentUser = user;
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
@@ -4773,8 +4769,8 @@ function closeAdminBackToSite(){
               <div class="toggle on" id="regToggle" onclick="this.classList.toggle('on')"></div>
             </div>
             <div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-              <div><div style="font-size:12px;font-weight:600;">Misafir Giriş</div><div style="font-size:10px;color:var(--muted);">Kayıtsız erişime izin ver</div></div>
-              <div class="toggle on" id="guestToggle" onclick="this.classList.toggle('on')"></div>
+              <div><div style="font-size:12px;font-weight:600;">Misafir Giriş</div><div style="font-size:10px;color:var(--accent);">⛔ Devre dışı — yalnızca kayıtlı kullanıcılar</div></div>
+              <div class="toggle" id="guestToggle" style="opacity:0.4;pointer-events:none;"></div>
             </div>
             <div class="setting-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
               <div><div style="font-size:12px;font-weight:600;">İki Faktörlü Doğrulama</div></div>
