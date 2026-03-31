@@ -2366,8 +2366,18 @@ tr:last-child td{border:none;}
               <div id="mobChatMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
                 <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
               </div>
+              <!-- Mobil Emoji Paneli -->
+              <div id="mobEmojiPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1e2530;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.6);">
+                <div style="display:flex;gap:5px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px;">
+                  <button onclick="setMobEmojiCat(0,this)" class="mecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Yüzler">😀</button>
+                  <button onclick="setMobEmojiCat(1,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Smiley Set">😊</button>
+                  <button onclick="setMobEmojiCat(2,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Eller & Kalpler">👍</button>
+                  <button onclick="setMobEmojiCat(3,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Semboller">🔥</button>
+                </div>
+                <div id="mobEmojiGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:140px;overflow-y:auto;"></div>
+              </div>
               <div style="display:flex;gap:4px;flex-shrink:0;">
-                <button onclick="toggleEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;">😊</button>
+                <button onclick="toggleMobEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;" title="Emoji">😊</button>
                 <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:13px;outline:none;min-width:0;" onkeydown="if(event.key==='Enter')sendMobChat()">
                 <button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
@@ -2521,9 +2531,10 @@ tr:last-child td{border:none;}
             <!-- Emoji Paneli -->
             <div id="emojiPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1e2530;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.6);">
               <div style="display:flex;gap:6px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px;">
-                <button onclick="setEmojiCat(0,this)" class="ecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">😀</button>
-                <button onclick="setEmojiCat(1,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">👍</button>
-                <button onclick="setEmojiCat(2,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;">🔥</button>
+                <button onclick="setEmojiCat(0,this)" class="ecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Yüzler">😀</button>
+                <button onclick="setEmojiCat(1,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Smiley Set">😊</button>
+                <button onclick="setEmojiCat(2,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Eller & Kalpler">👍</button>
+                <button onclick="setEmojiCat(3,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Semboller">🔥</button>
               </div>
               <div id="emojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:130px;overflow-y:auto;"></div>
             </div>
@@ -3706,51 +3717,80 @@ function clearChat(){
 /* ============================================
    TÜRKIYE GÜNDEM HABERLERİ - RSS FEED
 ============================================ */
-const NEWS_FEEDS = [
+// rss2json API ile Türkçe haber çekme (CORS sorunu olmaz)
+const NEWS_FEEDS_RSS2JSON = [
   'https://www.ntv.com.tr/son-dakika-haberleri.rss',
   'https://www.sabah.com.tr/rss/anasayfa.xml',
-  'https://www.hurriyet.com.tr/rss/anasayfa'
+  'https://www.hurriyet.com.tr/rss/anasayfa',
+  'https://www.haberturk.com/rss/anasayfa.xml',
 ];
 
-async function fetchTurkeyNews(){
-  const ticker = document.getElementById('newsTicker');
-  if(!ticker) return;
+// Statik yedek haberler (tüm kaynaklar başarısız olursa)
+const FALLBACK_NEWS = [
+  'Türkiye gündemini takip etmek için kanalı açık tutun',
+  'Canlı yayın devam ediyor — güncel haberler için bizi izlemeye devam edin',
+  'Ekonomi, spor ve dünyadan son dakika haberleri burada',
+  'Hava durumu, trafik ve yerel haberler için kanalımızı takip edin',
+  'Spor haberleri: Süper Lig maç sonuçları ve transfer gündemi',
+];
 
-  for(const feedUrl of NEWS_FEEDS){
+function applyNewsToTicker(titles){
+  const ticker = document.getElementById('newsTicker');
+  if(!ticker || !titles.length) return;
+  const html = [...titles, ...titles].map(t =>
+    `<span class="news-item">📰 ${t}</span>`
+  ).join('');
+  ticker.innerHTML = html;
+  ticker.style.animationDuration = Math.max(40, titles.length * 6) + 's';
+}
+
+async function fetchTurkeyNews(){
+  // 1. rss2json.com dene (CORS destekli ücretsiz API)
+  for(const feedUrl of NEWS_FEEDS_RSS2JSON){
     try{
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
-      const res = await fetch(proxy, {signal: AbortSignal.timeout(6000)});
+      const api = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&api_key=&count=15';
+      const res = await fetch(api);
       if(!res.ok) continue;
       const data = await res.json();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(data.contents, 'text/xml');
+      if(data.status !== 'ok' || !data.items?.length) continue;
+      const titles = data.items.slice(0,15).map(i => i.title?.trim()).filter(t => t && t.length > 5);
+      if(titles.length){
+        applyNewsToTicker(titles);
+        console.log('[News] ' + titles.length + ' haber yüklendi (rss2json): ' + feedUrl);
+        return;
+      }
+    } catch(e){ /* devam */ }
+  }
+
+  // 2. allorigins dene (signal olmadan)
+  for(const feedUrl of NEWS_FEEDS_RSS2JSON){
+    try{
+      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
+      const res = await fetch(proxy);
+      if(!res.ok) continue;
+      const data = await res.json();
+      const rawXml = data.contents || '';
+      if(!rawXml) continue;
+      const xml = new DOMParser().parseFromString(rawXml, 'text/xml');
       const items = xml.querySelectorAll('item');
       if(!items.length) continue;
-
       const titles = [];
       items.forEach((item, i) => {
         if(i >= 15) return;
         const t = item.querySelector('title')?.textContent?.trim();
         if(t && t.length > 5) titles.push(t);
       });
-
       if(titles.length){
-        // İki kopya koy (sonsuz kayan efekti için)
-        const html = [...titles, ...titles].map(t =>
-          `<span class="news-item">📰 ${t}</span>`
-        ).join('');
-        ticker.innerHTML = html;
-        // Haber sayısına göre animasyon hızını ayarla
-        const speed = Math.max(40, titles.length * 6);
-        ticker.style.animationDuration = speed + 's';
-        console.log('[News] ' + titles.length + ' haber yüklendi: ' + feedUrl);
-        return; // İlk başarılı feed yeter
+        applyNewsToTicker(titles);
+        console.log('[News] ' + titles.length + ' haber yüklendi (allorigins): ' + feedUrl);
+        return;
       }
-    } catch(e){
-      console.warn('[News] Feed hatası:', feedUrl, e.message);
-    }
+    } catch(e){ /* devam */ }
   }
-  console.warn('[News] Tüm feed\'ler başarısız, varsayılan haberler kalıyor.');
+
+  // 3. Statik yedek
+  console.info('[News] Canlı haber alınamadı, statik yedek gösteriliyor.');
+  applyNewsToTicker(FALLBACK_NEWS);
 }
 
 // Sayfa yüklenince çek, sonra her 10 dakikada yenile
@@ -3847,8 +3887,21 @@ const EMOJIS = [
   '🎬','📺','🍿','🎮','🎭','🎵','🎶','💬','👀','🤖','🐉','🦁','🦊','🐺','🌙',
 ];
 
+// Görseldeki özel Smiley Set (25 + ek popüler yüzler)
+const SMILEY_SET = [
+  '😍','😢','😜','😵','😘',
+  '😑','☺️','😏','😲','😂',
+  '😲','😡','😁','😎','🤕',
+  '😬','😳','🤓','😛','😖',
+  '😞','🐱','😉','😀','😁',
+  '🥰','🤩','😇','🥳','😆',
+  '😋','🤪','😝','🤑','🥸',
+  '🤭','😼','😽','🙀','😸',
+];
+
 const EMOJI_CATS = [
   EMOJIS.slice(0,30),   // Yüzler
+  SMILEY_SET,           // 😊 Smiley Set
   EMOJIS.slice(30,60),  // Eller & Kalpler
   EMOJIS.slice(60,90),  // Semboller
 ];
@@ -3881,6 +3934,50 @@ function toggleEmojiPanel(){
     panel.style.display = 'none';
   }
 }
+// ===== MOBİL EMOJİ PANELİ =====
+let currentMobEmojiCat = 0;
+
+function toggleMobEmojiPanel(){
+  const panel = document.getElementById('mobEmojiPanel');
+  if(!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen) renderMobEmojiGrid();
+}
+
+function setMobEmojiCat(idx, btn){
+  currentMobEmojiCat = idx;
+  document.querySelectorAll('.mecatbtn').forEach(b => { b.style.background='rgba(255,255,255,.08)'; });
+  btn.style.background = 'var(--accent)';
+  renderMobEmojiGrid();
+}
+
+function renderMobEmojiGrid(){
+  const grid = document.getElementById('mobEmojiGrid');
+  if(!grid) return;
+  const list = EMOJI_CATS[currentMobEmojiCat] || EMOJIS.slice(0,30);
+  grid.innerHTML = list.map(e =>
+    `<button onclick="insertMobEmoji('${e}')" style="background:rgba(255,255,255,.05);border:none;font-size:20px;cursor:pointer;padding:4px;border-radius:8px;line-height:1;transition:all .1s;font-family:Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif;" onmouseover="this.style.background='rgba(255,255,255,.15)';this.style.transform='scale(1.2)'" onmouseout="this.style.background='rgba(255,255,255,.05)';this.style.transform='scale(1)'">${e}</button>`
+  ).join('');
+}
+
+function insertMobEmoji(emoji){
+  const input = document.getElementById('mobChatInput');
+  if(!input) return;
+  const pos = input.selectionStart || input.value.length;
+  input.value = input.value.slice(0, pos) + emoji + input.value.slice(pos);
+  input.focus();
+  input.selectionStart = input.selectionEnd = pos + emoji.length;
+  document.getElementById('mobEmojiPanel').style.display = 'none';
+}
+
+// Mobil emoji panelini dışarı tıklayınca kapat
+document.addEventListener('click', function(e){
+  const ep = document.getElementById('mobEmojiPanel');
+  if(ep && ep.style.display !== 'none' && !ep.contains(e.target) && !e.target.closest('[onclick="toggleMobEmojiPanel()"]')) ep.style.display = 'none';
+});
+// ===== MOBİL EMOJİ PANELİ SONU =====
+
 function insertEmoji(emoji){
   const input = document.getElementById('chatInputSide');
   if(!input) return;
