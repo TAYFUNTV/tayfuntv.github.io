@@ -170,6 +170,34 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 .chat-msg-row.leaving {
   animation: chatMsgOut 0.5s ease forwards;
 }
+.chat-bubble {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px;
+  font-size: 13px; line-height: 1.4;
+}
+.chat-user {
+  font-weight: 700;
+  font-size: 13px;
+  color: #74c0fc;
+  flex-shrink: 0;
+}
+.chat-user::after {
+  content: ': ';
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+}
+.chat-user.admin {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255,215,0,0.5);
+}
+.chat-text {
+  font-size: 13px;
+  color: #e8e8e8;
+  word-break: break-word;
+}
+.chat-user.admin ~ .chat-text {
+  font-weight: 600;
+  color: #fff;
+}
 .chat-msg-text {
   font-size: 11px;
   color: #f5c842;
@@ -4007,7 +4035,8 @@ function sendMobChat(){
   const displayName = u.username || u.name || 'Misafir';
   const div = document.createElement('div');
   div.className = 'chat-msg-row';
-  div.innerHTML = `<div class="chat-avatar">${u.avatar||'😊'}</div><div class="chat-bubble"><span class="chat-user">${displayName}</span><span class="chat-text">${msg}</span></div>`;
+  const isAdmin = u.role === 'admin';
+  div.innerHTML = `<div class="chat-avatar">${u.avatar||'😊'}</div><div class="chat-bubble"><span class="chat-user${isAdmin?' admin':''}">${displayName}</span><span class="chat-text">${msg}</span></div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
   // Aynı zamanda chatBoxSide'a da ekle (senkron)
