@@ -4003,10 +4003,11 @@ function sendMobChat(){
   input.value = '';
   const box = document.getElementById('mobChatMessages');
   if(!box) return;
-  const u = currentUser || {name:'Misafir', avatar:'😊'};
+  const u = currentUser || {username:'Misafir', avatar:'😊'};
+  const displayName = u.username || u.name || 'Misafir';
   const div = document.createElement('div');
   div.className = 'chat-msg-row';
-  div.innerHTML = `<div class="chat-avatar">${u.avatar||'😊'}</div><div class="chat-bubble"><span class="chat-user">${u.name||'Misafir'}</span><span class="chat-text">${msg}</span></div>`;
+  div.innerHTML = `<div class="chat-avatar">${u.avatar||'😊'}</div><div class="chat-bubble"><span class="chat-user">${displayName}</span><span class="chat-text">${msg}</span></div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
   // Aynı zamanda chatBoxSide'a da ekle (senkron)
