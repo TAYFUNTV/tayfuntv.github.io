@@ -1605,6 +1605,10 @@ header {
   .stats-row { flex-wrap: wrap; }
   .stat-card { flex: 1 1 calc(50% - 8px); min-width: 120px; }
   .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Mobilde admin paneli butonu gizli */
+@media (max-width: 768px) {
+  .admin-panel-btn { display: none !important; }
+}
 }
 
 /* MOBİL KATEGORİ SEKME STİLLERİ */
@@ -2328,7 +2332,7 @@ tr:last-child td{border:none;}
       <a href="https://tayfungullu.carrd.co" target="_blank" rel="noopener" class="dev-btn">
         ✈️ <span>Developer'ı Görüntüle</span>
       </a>
-      <button class="dev-btn" onclick="openAdminPanel()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">
+      <button class="dev-btn admin-panel-btn" onclick="openAdminPanel()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">
         🛡️ <span>Admin Panel</span>
       </button>
       <div class="search-bar">
@@ -4265,6 +4269,11 @@ function closeMoviePlayer() {
 })();
 
 function openAdminPanel(){
+  // Mobil cihazlarda admin paneli devre dışı
+  if(window.innerWidth <= 768){
+    alert('Admin paneli yalnızca masaüstü cihazlarda kullanılabilir.');
+    return;
+  }
   document.getElementById('adminPanelWrapper').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   document.getElementById('adminLogin').style.display = 'flex';
