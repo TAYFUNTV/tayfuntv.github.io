@@ -613,8 +613,10 @@ header {
 }
 
 /* TAB CONTENTS */
-.tab-content { display: none; flex: 1; overflow: hidden; }
-.tab-content.active { display: flex; overflow: hidden; }
+.tab-content { display: none; overflow: hidden; }
+.tab-content.active { display: flex; flex: 1; overflow: hidden; }
+#settingsTabContent { flex-direction: column; }
+#settingsTabContent #settingsTab { flex: 1; overflow-y: auto; }
 
 /* TV LAYOUT */
 .tv-layout {
@@ -1185,7 +1187,7 @@ header {
 
 /* MOVIES TAB */
 /* SETTINGS TAB */
-#settingsTab { flex: 1; overflow-y: auto; padding: 20px 24px; }
+#settingsTab { flex: 1; overflow-y: auto; padding: 20px 24px; min-height: 0; }
 .profile-hero {
   background: linear-gradient(135deg, var(--bg2), var(--bg3));
   border: 1px solid var(--border); border-radius: var(--radius2);
@@ -2306,6 +2308,29 @@ tr:last-child td{border:none;}
     <div class="radio-right">
       <span style="font-size:10px;opacity:.5;flex-shrink:0;">🔊</span>
       <input type="range" id="radioVol" min="0" max="100" value="70" oninput="setRadioVol(this.value)" class="radio-vol">
+      <button onclick="openRadioSleep()" id="radioSleepBtn" title="Radyo Uyku Zamanlayıcısı" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;">⏱ Uyku</button>
+    </div>
+  </div>
+
+  <!-- RADYO UYKU ZAMANLAYICI MODAL -->
+  <div class="modal-overlay" id="radioSleepModal" style="z-index:500;">
+    <div class="modal" style="max-width:320px;">
+      <div class="modal-title">📻 RADYO UYKU ZAMANLAYICISI</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Seçilen süre sonunda radyo otomatik kapanacak.</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;">
+        <div class="t-opt" onclick="pickRadioSleep(15,this)">15 dk</div>
+        <div class="t-opt sel" onclick="pickRadioSleep(30,this)">30 dk</div>
+        <div class="t-opt" onclick="pickRadioSleep(45,this)">45 dk</div>
+        <div class="t-opt" onclick="pickRadioSleep(60,this)">1 saat</div>
+        <div class="t-opt" onclick="pickRadioSleep(90,this)">1.5 saat</div>
+        <div class="t-opt" onclick="pickRadioSleep(120,this)">2 saat</div>
+        <div class="t-opt" onclick="pickRadioSleep(0,this)" style="grid-column:span 2;">🚫 İptal Et</div>
+      </div>
+      <div class="t-cd" id="radioTimerCd" style="margin-bottom:14px;"></div>
+      <div class="modal-acts">
+        <button class="btn btn-s" onclick="closeRadioSleep()">Vazgeç</button>
+        <button class="btn btn-p" onclick="startRadioSleep()">Başlat</button>
+      </div>
     </div>
   </div>
 
@@ -2319,7 +2344,11 @@ tr:last-child td{border:none;}
     </div>
     <div class="header-center">
       <button class="nav-tab active" onclick="switchMainTab('live',this)">📺 CANLI</button>
-      <button class="nav-tab" onclick="switchMainTab('settings',this)">⚙️ AYARLAR</button>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid rgba(245,200,66,0.35);border-radius:8px;padding:5px 14px;max-width:420px;overflow:hidden;">
+        <span style="font-size:12px;flex-shrink:0;">💬</span>
+        <span style="font-size:10px;font-weight:900;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;flex-shrink:0;white-space:nowrap;">Günün Sözü:</span>
+        <span id="dailyQuote" style="font-size:12px;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-weight:600;text-shadow:0 0 10px rgba(245,200,66,0.25);">...</span>
+      </div>
     </div>
     <div class="header-right">
       <span id="ch-counter"></span>
@@ -2359,10 +2388,6 @@ tr:last-child td{border:none;}
             <div class="pd-email" id="pdEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0f687a6a7c7b4f6c6e6163667b79216c6062">[email&#160;protected]</a></div>
             <span class="pd-plan">PRO</span>
           </div>
-          <div class="drop-item" onclick="switchMainTab('settings',null);toggleDrop('profileDrop');">⚙️ Ayarlar</div>
-          <div class="drop-item" onclick="openFavs()">⭐ Favorilerim</div>
-          <div class="drop-item" onclick="showToast('📊 İzleme geçmişi yakında!','info')">📊 İzleme Geçmişi</div>
-          <div class="drop-item" onclick="showToast('💎 Premium üyelik yakında!','warning')">💎 Premium Yükselt</div>
           <div class="drop-divider"></div>
           <div class="drop-item danger" onclick="doLogout()">🚪 Çıkış Yap</div>
         </div>
@@ -2549,26 +2574,21 @@ tr:last-child td{border:none;}
             <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
             </div>
-
-            <!-- Emoji Paneli -->
-            <div id="emojiPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1e2530;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.6);">
-              <div style="display:flex;gap:6px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px;">
-                <button onclick="setEmojiCat(0,this)" class="ecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Yüzler">😀</button>
-                <button onclick="setEmojiCat(1,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Smiley Set">😊</button>
-                <button onclick="setEmojiCat(2,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Eller & Kalpler">👍</button>
-                <button onclick="setEmojiCat(3,this)" class="ecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:16px;cursor:pointer;line-height:1;" title="Semboller">🔥</button>
-              </div>
-              <div id="emojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;max-height:130px;overflow-y:auto;"></div>
-            </div>
-
             <!-- GIF Paneli -->
-            <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;z-index:100;">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Popüler GIF'ler</div>
-              <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:120px;overflow-y:auto;"></div>
+            <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
+                <button onclick="setGifCat('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+                <button onclick="setGifCat('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+                <button onclick="setGifCat('dans',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+                <button onclick="setGifCat('hayvan',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+                <button onclick="setGifCat('spor',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+                <button onclick="setGifCat('film',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+              </div>
+              <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
+            </div>
             </div>
 
             <div style="display:flex;gap:4px;flex-shrink:0;">
-              <button onclick="toggleEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;" title="Emoji">😊</button>
               <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:11px;outline:none;min-width:0;"
@@ -2861,6 +2881,52 @@ function setLang(lang, el){
   }
   showToast('🌍 Dil değiştirildi: ' + lang.toUpperCase(), 'info');
 }
+
+/* GÜNÜN SÖZÜ */
+(function(){
+  const SOZLER = [
+    "Başarı, her gün tekrarlanan küçük çabaların toplamıdır. — R. Collier",
+    "Hayatta en hakiki mürşit ilimdir. — Atatürk",
+    "Düşündüğün gibi yaşamazsan, yaşadığın gibi düşünmeye başlarsın. — Paul Bourget",
+    "Bugün yapabileceğini yarına bırakma. — Benjamin Franklin",
+    "Başarının sırrı, başlamaktır. — Mark Twain",
+    "Zorluklar insanı tanıtır, kolaylıklar değil. — Epiktetos",
+    "Hayal kurmak için yaş yoktur. — Walt Disney",
+    "İyi bir kitap yüz dost demektir. — Atatürk",
+    "Cesaret korku duymamak değil, korkuya rağmen ilerlemektir. — Nelson Mandela",
+    "Zaman, en değerli şeydir; çünkü geri gelmez. — Theophrastus",
+    "Başarı hazırlıkla fırsatın buluştuğu yerdir. — Seneca",
+    "Kendine inan, o zaman nasıl yaşayacağını bilirsin. — Goethe",
+    "Derin nehirler sessiz akar. — Shakespeare",
+    "Bilmek yetmez, uygulamak gerekir. — Goethe",
+    "Yarın değil, şimdi başla. — Johann Wolfgang von Goethe",
+    "Sabır acıdır ama meyvesi tatlıdır. — Jean-Jacques Rousseau",
+    "En büyük zafer kendine hâkim olmaktır. — Platon",
+    "Okumak, başkalarının gözüyle görmektir. — Montaigne",
+    "Vazgeçme, çünkü bıraktığın yerde kalmaz. — Konfüçyüs",
+    "Hayat kısa, sanat uzundur. — Hipokrat",
+    "İnsan kendi kaderinin mimarıdır. — Appius Claudius",
+    "Karanlığa lanet etmek yerine bir mum yak. — Konfüçyüs",
+    "Güçlü olmak değil, doğru olmak önemlidir. — Albert Camus",
+    "Her şey mümkündür, sadece inan. — Paulo Coelho",
+    "Değişim acı verir, ama büyüme acısız olmaz. — Carl Jung",
+    "Bilge insan, söyleyeceğini düşünür. — Aristoteles",
+    "Sevgi en büyük mucizedir. — Rumi",
+    "Korkma, başarısızlıktan değil; denemekten korkma. — Theodore Roosevelt",
+    "Gülümse, hayat güzeldir. — Charlie Chaplin",
+    "Kendin ol, diğer roller zaten dolu. — Oscar Wilde",
+    "Geleceği tahmin etmenin en iyi yolu onu yaratmaktır. — Peter Drucker",
+  ];
+  function setQuote(){
+    const el = document.getElementById('dailyQuote');
+    if(!el) return;
+    // Her gün farklı söz — tarihe göre index seç
+    const now = new Date();
+    const dayOfYear = Math.floor((now - new Date(now.getFullYear(),0,0)) / 86400000);
+    el.textContent = SOZLER[dayOfYear % SOZLER.length];
+  }
+  window.addEventListener('load', ()=>{ setTimeout(setQuote, 500); });
+})();
 
 /* AUTH */
 let currentUser = null;
@@ -3193,8 +3259,9 @@ function loadM3U(){
       buildCats();
       renderList();
       renderRelated();
-      const last = localStorage.getItem('cltv_last');
-      if(last){ const idx=allChannels.findIndex(c=>c.url===last); if(idx>=0) play(idx); }
+      // Kanal seçiniz ekranı aktif — otomatik oynatma devre dışı
+      document.getElementById('playerIdle').style.display = 'flex';
+      video.style.display = 'none';
     })
     .catch(()=>{
       document.getElementById('channelList').innerHTML =
@@ -3317,6 +3384,43 @@ function switchChTab(tab, btn){
   renderList();
 }
 
+function switchMainTab(tab, btn){
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+
+  const liveTab     = document.getElementById('liveTab');
+  const settingsTab = document.getElementById('settingsTabContent');
+
+  if(tab === 'settings'){
+    liveTab.style.display        = 'none';
+    settingsTab.style.display    = 'flex';
+    settingsTab.style.flex       = '1';
+    settingsTab.style.flexDirection = 'column';
+    settingsTab.style.overflow   = 'hidden';
+    settingsTab.style.minHeight  = '0';
+    const st = document.getElementById('settingsTab');
+    if(st) st.scrollTop = 0;
+    const sw = document.getElementById('statWatched');
+    const sf = document.getElementById('statFavs');
+    const sh = document.getElementById('statHours');
+    if(sw) sw.textContent = watchedCount;
+    if(sf) sf.textContent = favorites.length;
+    if(sh) sh.textContent = watchedHours + 'h';
+  } else {
+    settingsTab.style.display    = 'none';
+    liveTab.style.display        = 'flex';
+    liveTab.style.flex           = '1';
+    liveTab.style.overflow       = 'hidden';
+    liveTab.style.minHeight      = '0';
+  }
+
+  if(btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      if(t.getAttribute('onclick') && t.getAttribute('onclick').includes(tab)) t.classList.add('active');
+    });
+  }
+}
+
 function openFavs(){
   const btn = document.querySelectorAll('.tab-btn')[1];
   switchChTab('fav', btn);
@@ -3339,7 +3443,7 @@ function getFilteredList(){
   let list = [...allChannels];
   if(currentTab === 'fav')    list = list.filter(c=>favorites.includes(c.url));
   if(currentTab === 'recent') list = recentChannels.map(url=>allChannels.find(c=>c.url===url)).filter(Boolean);
-  if(currentCat)  list = list.filter(c=>c.group===currentCat);
+  if(currentCat && !searchQ)  list = list.filter(c=>c.group===currentCat);
   if(searchQ)     list = list.filter(c=>c.name.toLowerCase().includes(searchQ) || c.group.toLowerCase().includes(searchQ));
   if(sortAZ)      list.sort((a,b)=>a.name.localeCompare(b.name));
   else            list.sort((a,b)=>b.name.localeCompare(a.name));
@@ -3854,25 +3958,112 @@ function renderChat(){
   });
 }
 /* ─── GIF & TEPKİ ─── */
-const GIF_LIST = [
-  {url:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif', label:'Yavaş alkış'},
-  {url:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif', label:'Harika!'},
-  {url:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif', label:'Gülüyor'},
-  {url:'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif', label:'Şaşkın'},
-  {url:'https://media.giphy.com/media/xT9IgG50Lg7russom8/giphy.gif', label:'Hayır hayır'},
-  {url:'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif', label:'Evet evet!'},
-];
+const GIF_CATS = {
+  tepki: [
+    {url:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif', label:'Gülüyor'},
+    {url:'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif', label:'Şaşkın'},
+    {url:'https://media.giphy.com/media/xT9IgG50Lg7russom8/giphy.gif', label:'Hayır hayır'},
+    {url:'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif', label:'Evet evet!'},
+    {url:'https://media.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif', label:'Sıkıldım'},
+    {url:'https://media.giphy.com/media/3oEjHGr1Fhz0kyv8Ig/giphy.gif', label:'Sinirli'},
+    {url:'https://media.giphy.com/media/26gsccje7b4PnTlBu/giphy.gif', label:'Ağlıyor'},
+    {url:'https://media.giphy.com/media/l0MYGb1LuZ3n7dRnO/giphy.gif', label:'Gözleri açık'},
+    {url:'https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif', label:'Kızgın'},
+    {url:'https://media.giphy.com/media/1BXa2alBjrCXC/giphy.gif', label:'Kahkaha'},
+    {url:'https://media.giphy.com/media/3o6Zt6KHxJTbXCnSvu/giphy.gif', label:'Aşık'},
+    {url:'https://media.giphy.com/media/26n6WywJyh39n1pBu/giphy.gif', label:'Hayal kırıklığı'},
+  ],
+  kutlama: [
+    {url:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif', label:'Yavaş alkış'},
+    {url:'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif', label:'Harika!'},
+    {url:'https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif', label:'Tebrikler'},
+    {url:'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif', label:'Parti zamanı'},
+    {url:'https://media.giphy.com/media/3oKIPf3C7HqqYBVcCk/giphy.gif', label:'Konfeti'},
+    {url:'https://media.giphy.com/media/26gsjCZpPolPr3sBy/giphy.gif', label:'Bravo'},
+    {url:'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif', label:'Kutlama'},
+    {url:'https://media.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif', label:'Evet!'},
+    {url:'https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif', label:'Alkış'},
+    {url:'https://media.giphy.com/media/26u4lOMA8JKSnL9Uk/giphy.gif', label:'Şampanya'},
+  ],
+  dans: [
+    {url:'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif', label:'Dans'},
+    {url:'https://media.giphy.com/media/5xaOcLDE41PFjuNjkk/giphy.gif', label:'Disco'},
+    {url:'https://media.giphy.com/media/26FLdmIp6wJr91JAI/giphy.gif', label:'Bayrak'},
+    {url:'https://media.giphy.com/media/l0MYP6WAFnrQOXzhe/giphy.gif', label:'Ritim'},
+    {url:'https://media.giphy.com/media/3oEjHWpiVIOGXT5l9u/giphy.gif', label:'Sallıyor'},
+    {url:'https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif', label:'Salsa'},
+    {url:'https://media.giphy.com/media/l0MYEqEzwMWFCg8rm/giphy.gif', label:'Groov'},
+    {url:'https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif', label:'Hareket'},
+    {url:'https://media.giphy.com/media/26BRrSvJUa0crqw4E/giphy.gif', label:'Breakdance'},
+  ],
+  hayvan: [
+    {url:'https://media.giphy.com/media/ICOgUNjpvO0PC/giphy.gif', label:'Kedi'},
+    {url:'https://media.giphy.com/media/VbnUQpnihPSIgIXuZv/giphy.gif', label:'Kedi süpürge'},
+    {url:'https://media.giphy.com/media/jpbnoe3UIa8TU8LM13/giphy.gif', label:'Köpek yüzme'},
+    {url:'https://media.giphy.com/media/wW95fEq09hOI8/giphy.gif', label:'Köpek dans'},
+    {url:'https://media.giphy.com/media/EvYhaOBQgSNDi/giphy.gif', label:'Panda yuvarlanıyor'},
+    {url:'https://media.giphy.com/media/GeimqsH0TLDt4tScGw/giphy.gif', label:'Kedi bakıyor'},
+    {url:'https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif', label:'Köpek sevinç'},
+    {url:'https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif', label:'Kedi klavye'},
+    {url:'https://media.giphy.com/media/6BFHX7uRLkfGE/giphy.gif', label:'Hamster'},
+    {url:'https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif', label:'Kedi omuz'},
+    {url:'https://media.giphy.com/media/13HBDT4QSTpveU/giphy.gif', label:'Köpek uçak'},
+    {url:'https://media.giphy.com/media/H4uE6w9G1uK4M/giphy.gif', label:'Kurbağa'},
+  ],
+  spor: [
+    {url:'https://media.giphy.com/media/26tn33aiTi1jkl6H6/giphy.gif', label:'Gol'},
+    {url:'https://media.giphy.com/media/3oEjHGr1Fhz0kyv8Ig/giphy.gif', label:'Harika vuruş'},
+    {url:'https://media.giphy.com/media/l0HlPwMAzh13pcZ20/giphy.gif', label:'Koşuyor'},
+    {url:'https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif', label:'Zıplıyor'},
+    {url:'https://media.giphy.com/media/l0HlNaQ6gWfllcjDO/giphy.gif', label:'Güreş'},
+    {url:'https://media.giphy.com/media/3oEjI105rmEC22CJFK/giphy.gif', label:'Boks'},
+    {url:'https://media.giphy.com/media/26FxykLpuDxQucACI/giphy.gif', label:'Basketbol'},
+    {url:'https://media.giphy.com/media/3oriO4vAVlBfSrcSNy/giphy.gif', label:'Zafer'},
+    {url:'https://media.giphy.com/media/l0HlKrB02QY0f1mbm/giphy.gif', label:'Yüzme'},
+  ],
+  film: [
+    {url:'https://media.giphy.com/media/3o7TKF1fSIs1R19B8k/giphy.gif', label:'Film sahnesi'},
+    {url:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif', label:'Gülerek izliyor'},
+    {url:'https://media.giphy.com/media/ToMjGpx9F5ktZw8qPUQ/giphy.gif', label:'Sinema'},
+    {url:'https://media.giphy.com/media/26n7arEpZCNJKIXZ6/giphy.gif', label:'Patlıyor'},
+    {url:'https://media.giphy.com/media/xUPGcz2H1TXdCz4suY/giphy.gif', label:'Komik'},
+    {url:'https://media.giphy.com/media/3o6Zt8Gj5p4EzFXQYE/giphy.gif', label:'Korku'},
+    {url:'https://media.giphy.com/media/26BRrSvJUa0crqw4E/giphy.gif', label:'Aksiyon'},
+    {url:'https://media.giphy.com/media/l0HlMZrXA7CbDQ37i/giphy.gif', label:'Yönetmen'},
+    {url:'https://media.giphy.com/media/3oEjHWpiVIOGXT5l9u/giphy.gif', label:'Senaryo'},
+    {url:'https://media.giphy.com/media/26gsjCZpPolPr3sBy/giphy.gif', label:'Oscar'},
+  ],
+};
+
+let currentGifCat = 'tepki';
+
+function setGifCat(cat, el){
+  currentGifCat = cat;
+  document.querySelectorAll('.gif-cat-btn').forEach(b=>{
+    b.style.background = 'var(--bg3)';
+    b.style.border = '1px solid var(--border)';
+    b.style.color = 'var(--text2)';
+  });
+  el.style.background = 'var(--accent)';
+  el.style.border = 'none';
+  el.style.color = '#fff';
+  renderGifGrid();
+}
+
+function renderGifGrid(){
+  const list = GIF_CATS[currentGifCat] || [];
+  document.getElementById('gifGrid').innerHTML = list.map(g =>
+    `<img src="${g.url}" title="${g.label}" onclick="sendGif('${g.url}','${g.label}')"
+      style="width:100%;border-radius:6px;cursor:pointer;object-fit:cover;height:65px;transition:transform .15s;" 
+      onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
+      loading="lazy">`
+  ).join('');
+}
 
 function toggleGifPanel(){
   const gp = document.getElementById('gifPanel');
-  const ep = document.getElementById('emojiPanel');
-  ep.style.display = 'none';
   if(gp.style.display === 'none'){
-    const grid = document.getElementById('gifGrid');
-    grid.innerHTML = GIF_LIST.map(g =>
-      `<img src="${g.url}" title="${g.label}" onclick="sendGif('${g.url}','${g.label}')"
-        style="width:100%;border-radius:6px;cursor:pointer;object-fit:cover;height:60px;" loading="lazy">`
-    ).join('');
+    renderGifGrid();
     gp.style.display = 'block';
   } else {
     gp.style.display = 'none';
@@ -3896,6 +4087,181 @@ function sendReaction(emoji){
   const btn = event.target;
   btn.style.transform = 'scale(1.4)';
   setTimeout(() => btn.style.transform = 'scale(1)', 300);
+}
+
+
+/* ─── UYKU ZAMANLAYICISI ─── */
+let sleepMinutes = 30;
+let sleepInterval = null;
+let sleepEndTime = null;
+
+function openSleep(){
+  document.getElementById('sleepModal').classList.add('open');
+  updateTimerDisplay();
+}
+
+function closeSleep(){
+  document.getElementById('sleepModal').classList.remove('open');
+}
+
+function pickTimer(min, el){
+  sleepMinutes = min;
+  document.querySelectorAll('.t-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  updateTimerDisplay();
+}
+
+function setCustomTimer(){
+  const val = prompt('Kaç dakika? (1-300)');
+  const n = parseInt(val);
+  if(!n || n < 1 || n > 300){ showToast('Geçersiz değer', 'warning'); return; }
+  sleepMinutes = n;
+  document.querySelectorAll('.t-opt').forEach(o => o.classList.remove('sel'));
+  const customEl = document.getElementById('customTimerOpt');
+  customEl.textContent = n + ' dk';
+  customEl.classList.add('sel');
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay(){
+  const cd = document.getElementById('timerCd');
+  if(sleepMinutes === 0){
+    cd.textContent = sleepInterval ? 'Zamanlayıcı iptal edilecek' : '';
+  } else {
+    cd.textContent = sleepInterval
+      ? 'Aktif: ' + formatSleepTime(sleepEndTime - Date.now())
+      : sleepMinutes + ' dakika sonra durdurulacak';
+  }
+}
+
+function formatSleepTime(ms){
+  if(ms <= 0) return '00:00';
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if(h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function startSleep(){
+  clearInterval(sleepInterval);
+  sleepInterval = null;
+
+  if(sleepMinutes === 0){
+    showToast('⏱ Zamanlayıcı iptal edildi', 'info');
+    document.getElementById('timerCd').textContent = '';
+    closeSleep();
+    return;
+  }
+
+  sleepEndTime = Date.now() + sleepMinutes * 60 * 1000;
+
+  sleepInterval = setInterval(()=>{
+    const remaining = sleepEndTime - Date.now();
+    if(remaining <= 0){
+      clearInterval(sleepInterval);
+      sleepInterval = null;
+      // Videoyu durdur
+      const v = document.getElementById('video');
+      if(v){ v.pause(); v.src = ''; }
+      if(typeof hls !== 'undefined' && hls){ hls.destroy(); hls = null; }
+      showToast('😴 Uyku zamanlayıcısı devreye girdi. İyi geceler!', 'info');
+      document.getElementById('timerCd').textContent = '';
+      closeSleep();
+      return;
+    }
+    // Modal açıksa geri sayımı güncelle
+    if(document.getElementById('sleepModal').classList.contains('open')){
+      document.getElementById('timerCd').textContent = 'Kalan: ' + formatSleepTime(remaining);
+    }
+  }, 1000);
+
+  showToast('⏱ Zamanlayıcı başlatıldı: ' + sleepMinutes + ' dk', 'success');
+  closeSleep();
+}
+
+/* ─── RADYO UYKU ZAMANLAYICISI ─── */
+let radioSleepMinutes = 30;
+let radioSleepInterval = null;
+let radioSleepEndTime = null;
+
+function openRadioSleep(){
+  document.getElementById('radioSleepModal').classList.add('open');
+  updateRadioTimerDisplay();
+}
+
+function closeRadioSleep(){
+  document.getElementById('radioSleepModal').classList.remove('open');
+}
+
+function pickRadioSleep(min, el){
+  radioSleepMinutes = min;
+  document.querySelectorAll('#radioSleepModal .t-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  updateRadioTimerDisplay();
+}
+
+function updateRadioTimerDisplay(){
+  const cd = document.getElementById('radioTimerCd');
+  if(!cd) return;
+  if(radioSleepMinutes === 0){
+    cd.textContent = radioSleepInterval ? 'Zamanlayıcı iptal edilecek' : '';
+  } else {
+    cd.textContent = radioSleepInterval
+      ? 'Aktif — Kalan: ' + formatSleepTime(radioSleepEndTime - Date.now())
+      : radioSleepMinutes + ' dakika sonra radyo kapanacak';
+  }
+}
+
+function startRadioSleep(){
+  clearInterval(radioSleepInterval);
+  radioSleepInterval = null;
+
+  if(radioSleepMinutes === 0){
+    showToast('⏱ Radyo zamanlayıcısı iptal edildi', 'info');
+    document.getElementById('radioTimerCd').textContent = '';
+    document.getElementById('radioSleepBtn').style.color = 'rgba(255,255,255,.6)';
+    document.getElementById('radioSleepBtn').style.borderColor = 'rgba(255,255,255,.12)';
+    closeRadioSleep();
+    return;
+  }
+
+  radioSleepEndTime = Date.now() + radioSleepMinutes * 60 * 1000;
+
+  // Butonu aktif renge çevir
+  const btn = document.getElementById('radioSleepBtn');
+  btn.style.color = 'var(--gold)';
+  btn.style.borderColor = 'rgba(245,200,66,.4)';
+
+  radioSleepInterval = setInterval(()=>{
+    const remaining = radioSleepEndTime - Date.now();
+    if(remaining <= 0){
+      clearInterval(radioSleepInterval);
+      radioSleepInterval = null;
+      // Radyoyu durdur
+      const audio = document.getElementById('radioAudio');
+      if(audio){ audio.pause(); audio.src = ''; }
+      const playBtn = document.getElementById('radioPlayBtn');
+      if(playBtn){ playBtn.textContent = '▶'; playBtn.classList.remove('playing'); }
+      const liveDot = document.getElementById('radioLiveDot');
+      if(liveDot) liveDot.classList.remove('on');
+      document.getElementById('radioSleepBtn').style.color = 'rgba(255,255,255,.6)';
+      document.getElementById('radioSleepBtn').style.borderColor = 'rgba(255,255,255,.12)';
+      showToast('😴 Radyo uyku zamanlayıcısı devreye girdi. İyi geceler!', 'info');
+      return;
+    }
+    // Buton üzerinde kalan süreyi göster
+    const btn = document.getElementById('radioSleepBtn');
+    if(btn) btn.title = 'Kalan: ' + formatSleepTime(remaining);
+    // Modal açıksa geri sayımı güncelle
+    if(document.getElementById('radioSleepModal').classList.contains('open')){
+      document.getElementById('radioTimerCd').textContent = 'Kalan: ' + formatSleepTime(remaining);
+    }
+  }, 1000);
+
+  showToast('📻 Radyo zamanlayıcısı başlatıldı: ' + radioSleepMinutes + ' dk', 'success');
+  closeRadioSleep();
 }
 
 
