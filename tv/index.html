@@ -1713,7 +1713,9 @@ header {
   .radio-play-btn { width: 20px; height: 20px; font-size: 8px; }
   .radio-live-dot { display: none; }
   #radioName { font-size: 9px; }
-  .radio-right { display: none; }
+  .radio-right { display: flex; }
+  .radio-right .radio-vol { display: none; }
+  .radio-right span { display: none; }
 
   /* Filmler grid mobil */
   .movie-thumb { height: 100px !important; }
@@ -2313,7 +2315,7 @@ tr:last-child td{border:none;}
   </div>
 
   <!-- RADYO UYKU ZAMANLAYICI MODAL -->
-  <div class="modal-overlay" id="radioSleepModal" style="z-index:500;">
+  <div class="modal-overlay" id="radioSleepModal" style="z-index:1500;">
     <div class="modal" style="max-width:320px;">
       <div class="modal-title">📻 RADYO UYKU ZAMANLAYICISI</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Seçilen süre sonunda radyo otomatik kapanacak.</div>
@@ -2495,6 +2497,7 @@ tr:last-child td{border:none;}
                 <span class="ov-time" id="ovTime">CANLI</span>
                 <span class="ov-title" id="ovTitle"></span>
                 <button class="ov-btn" onclick="toggleMute()" id="muteOvBtn">🔊</button>
+                <button class="ov-btn" onclick="openSleep()" title="Uyku Zamanlayıcı">⏱</button>
                 <button class="ov-btn" onclick="togglePiP()" title="PiP">⧉</button>
                 <button class="ov-btn" onclick="openFS()">⛶</button>
               </div>
@@ -2778,7 +2781,7 @@ tr:last-child td{border:none;}
 </div><!-- /app -->
 
 <!-- SLEEP MODAL -->
-<div class="modal-overlay" id="sleepModal">
+<div class="modal-overlay" id="sleepModal" style="z-index:1500;">
   <div class="modal">
     <div class="modal-title">⏱ UYKU ZAMANLAYICISI</div>
     <div class="timer-opts">
