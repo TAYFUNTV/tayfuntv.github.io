@@ -2649,7 +2649,9 @@ tr:last-child td{border:none;}
               <span id="chatUserNameSide" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
             </div>
             <!-- Çevrimiçi kullanıcılar -->
-            <div id="onlineUsersBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;flex-shrink:0;min-height:22px;">
+            <div style="flex-shrink:0;margin-bottom:6px;">
+              <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:4px;padding:0 2px;">🟢 ÇEVRİMİÇİ KULLANICILAR</div>
+              <div id="onlineUsersBar" style="display:flex;flex-direction:column;gap:3px;max-height:110px;overflow-y:auto;"></div>
             </div>
             <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
@@ -4042,16 +4044,24 @@ function listenOnlineUsers(){
 function renderOnlineUsers(users){
   const bar = document.getElementById('onlineUsersBar');
   if(!bar) return;
-  if(!users.length){
-    bar.innerHTML = '';
-    return;
-  }
-  bar.innerHTML = '<span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.5px;align-self:center;">🟢 ÇEVRİMİÇİ:</span>'
-    + users.map(u => {
-        const color = (u.role === 'admin') ? '#ffd700' : '#74c0fc';
-        const icon  = (u.role === 'admin') ? '👑' : (u.avatar || '👤');
-        return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2px 8px 2px 5px;font-size:10px;font-weight:700;color:${color};">${icon} ${u.nick}</span>`;
-      }).join('');
+  if(!users.length){ bar.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:2px 4px;">— kimse yok</div>'; return; }
+  // Adminler önce, sonra alfabetik
+  users.sort((a,b) => {
+    if(a.role==='admin' && b.role!=='admin') return -1;
+    if(b.role==='admin' && a.role!=='admin') return 1;
+    return (a.nick||'').localeCompare(b.nick||'', 'tr');
+  });
+  bar.innerHTML = users.map(u => {
+    const isAdmin = u.role === 'admin';
+    const color   = isAdmin ? '#ffd700' : '#74c0fc';
+    const icon    = isAdmin ? '👑' : (u.avatar || '👤');
+    const badge   = isAdmin ? '<span style="font-size:8px;background:rgba(255,215,0,.15);color:#ffd700;border-radius:4px;padding:1px 4px;font-weight:800;margin-left:4px;">ADMİN</span>' : '';
+    return `<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:7px;">
+      <span style="font-size:13px;line-height:1;">${icon}</span>
+      <span style="font-size:11px;font-weight:700;color:${color};flex:1;">${u.nick}${badge}</span>
+      <span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;flex-shrink:0;box-shadow:0 0 5px rgba(46,204,113,.6);"></span>
+    </div>`;
+  }).join('');
 }
 // Temizle butonunu addEventListener ile bağla
 
