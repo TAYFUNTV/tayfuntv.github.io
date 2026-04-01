@@ -602,19 +602,33 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 .news-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
 .news-ticker-track {
   display:flex; align-items:center; white-space:nowrap;
-  animation: newsTicker 55s linear infinite;
+  animation: newsTicker 90s linear infinite;
 }
 .news-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
 .news-item {
-  font-size:13px; color:#e8eaf0; font-weight:700;
-  padding:0 32px; flex-shrink:0;
-  letter-spacing:.3px;
+  font-size:13px; color:#f0f0f0; font-weight:500;
+  padding:0 30px; flex-shrink:0;
+  letter-spacing:.2px;
   position:relative;
+  font-family:'DM Sans',sans-serif;
 }
 .news-item::after {
-  content:'◆';
+  content:'|';
   position:absolute; right:0; top:50%; transform:translateY(-50%);
-  color:rgba(232,55,61,.5); font-size:7px;
+  color:rgba(255,255,255,.2); font-size:12px; font-weight:300;
+}
+.news-breaking {
+  display:inline-block;
+  background:#e8373d;
+  color:#ffffff !important;
+  font-size:10px; font-weight:900;
+  padding:2px 7px;
+  margin-right:8px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  vertical-align:middle;
+  font-family:'DM Sans',sans-serif;
+  line-height:1.6;
 }
 @keyframes newsTicker {
   0%   { transform: translateX(0); }
@@ -2497,16 +2511,7 @@ tr:last-child td{border:none;}
     <div class="news-ticker-wrap">
       <div class="news-ticker-scroll">
         <div class="news-ticker-track" id="newsTicker">
-          <span class="news-item">📺 Tayfun TV'ye hoş geldiniz! Canlı yayınlar kesintisiz devam ediyor.</span>
-          <span class="news-item">🎬 Yeni içerikler yakında platformda yerini alacak!</span>
-          <span class="news-item">📡 HD kalitesinde kesintisiz yayın deneyimi için Tayfun TV'yi takip edin.</span>
-          <span class="news-item">🌟 Favori kanallarınızı kaydedin, istediğiniz zaman hızlıca ulaşın.</span>
-          <span class="news-item">⚡ Platformumuz 7/24 kesintisiz hizmet vermektedir.</span>
-          <span class="news-item">📺 Tayfun TV'ye hoş geldiniz! Canlı yayınlar kesintisiz devam ediyor.</span>
-          <span class="news-item">🎬 Yeni içerikler yakında platformda yerini alacak!</span>
-          <span class="news-item">📡 HD kalitesinde kesintisiz yayın deneyimi için Tayfun TV'yi takip edin.</span>
-          <span class="news-item">🌟 Favori kanallarınızı kaydedin, istediğiniz zaman hızlıca ulaşın.</span>
-          <span class="news-item">⚡ Platformumuz 7/24 kesintisiz hizmet vermektedir.</span>
+          <span class="news-item">⏳ Son dakika haberler yükleniyor...</span>
         </div>
       </div>
     </div>
@@ -4275,8 +4280,8 @@ function renderOnlineUsers(users){
 /* ============================================
    TÜRKIYE GÜNDEM HABERLERİ - RSS FEED
 ============================================ */
-// rss2json API ile Türkçe haber çekme (CORS sorunu olmaz)
-const NEWS_FEEDS_RSS2JSON = [
+// Türkçe haber RSS kaynakları
+const NEWS_FEEDS = [
   'https://www.ntv.com.tr/son-dakika-haberleri.rss',
   'https://www.sabah.com.tr/rss/anasayfa.xml',
   'https://www.hurriyet.com.tr/rss/anasayfa',
@@ -4292,69 +4297,81 @@ const FALLBACK_NEWS = [
   'Spor haberleri: Süper Lig maç sonuçları ve transfer gündemi',
 ];
 
+const BREAKING_KEYWORDS = ['son dakika','acil','flaş','flaş:','uyarı','deprem','yangın','kaza','saldırı','patlama'];
+
 function applyNewsToTicker(titles){
   const ticker = document.getElementById('newsTicker');
   if(!ticker || !titles.length) return;
-  const html = [...titles, ...titles].map(t =>
-    `<span class="news-item">📰 ${t}</span>`
-  ).join('');
+  const html = [...titles, ...titles].map(t => {
+    const isBreaking = BREAKING_KEYWORDS.some(k => t.toLowerCase().includes(k));
+    const badge = isBreaking ? `<span class="news-breaking">SON DAKİKA</span>` : '';
+    const style = isBreaking ? ' style="color:#e8373d;font-weight:700;"' : '';
+    return `<span class="news-item"${style}>${badge}${t}</span>`;
+  }).join('');
   ticker.innerHTML = html;
-  ticker.style.animationDuration = Math.max(40, titles.length * 6) + 's';
+  ticker.style.animationDuration = Math.max(90, titles.length * 8) + 's';
+}
+
+function parseRssXml(xmlStr){
+  try {
+    const xml = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const items = xml.querySelectorAll('item');
+    const titles = [];
+    items.forEach((item, i) => {
+      if(i >= 15) return;
+      const t = item.querySelector('title')?.textContent?.trim();
+      if(t && t.length > 5 && !t.includes('CDATA')) titles.push(t);
+    });
+    return titles;
+  } catch(e){ return []; }
+}
+
+async function tryFetch(url, timeout=8000){
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    return res;
+  } catch(e) { clearTimeout(tid); throw e; }
 }
 
 async function fetchTurkeyNews(){
-  // 1. rss2json.com dene (CORS destekli ücretsiz API)
-  for(const feedUrl of NEWS_FEEDS_RSS2JSON){
-    try{
-      const api = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl) + '&api_key=&count=15';
-      const res = await fetch(api);
-      if(!res.ok) continue;
-      const data = await res.json();
-      if(data.status !== 'ok' || !data.items?.length) continue;
-      const titles = data.items.slice(0,15).map(i => i.title?.trim()).filter(t => t && t.length > 5);
-      if(titles.length){
-        applyNewsToTicker(titles);
-        console.log('[News] ' + titles.length + ' haber yüklendi (rss2json): ' + feedUrl);
-        return;
-      }
-    } catch(e){ /* devam */ }
+  const proxyFns = [
+    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  ];
+
+  for(const feedUrl of NEWS_FEEDS){
+    for(const proxyFn of proxyFns){
+      try {
+        const res = await tryFetch(proxyFn(feedUrl));
+        if(!res.ok) continue;
+        const text = await res.text();
+        // allorigins JSON formatı
+        let xmlStr = text;
+        try { xmlStr = JSON.parse(text).contents || text; } catch(e){}
+        const titles = parseRssXml(xmlStr);
+        if(titles.length >= 3){
+          applyNewsToTicker(titles);
+          console.log('[News] ' + titles.length + ' haber yüklendi: ' + feedUrl);
+          return;
+        }
+      } catch(e){ /* devam */ }
+    }
   }
 
-  // 2. allorigins dene (signal olmadan)
-  for(const feedUrl of NEWS_FEEDS_RSS2JSON){
-    try{
-      const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
-      const res = await fetch(proxy);
-      if(!res.ok) continue;
-      const data = await res.json();
-      const rawXml = data.contents || '';
-      if(!rawXml) continue;
-      const xml = new DOMParser().parseFromString(rawXml, 'text/xml');
-      const items = xml.querySelectorAll('item');
-      if(!items.length) continue;
-      const titles = [];
-      items.forEach((item, i) => {
-        if(i >= 15) return;
-        const t = item.querySelector('title')?.textContent?.trim();
-        if(t && t.length > 5) titles.push(t);
-      });
-      if(titles.length){
-        applyNewsToTicker(titles);
-        console.log('[News] ' + titles.length + ' haber yüklendi (allorigins): ' + feedUrl);
-        return;
-      }
-    } catch(e){ /* devam */ }
-  }
-
-  // 3. Statik yedek
+  // Statik yedek
   console.info('[News] Canlı haber alınamadı, statik yedek gösteriliyor.');
   applyNewsToTicker(FALLBACK_NEWS);
 }
 
-// Sayfa yüklenince çek, sonra her 10 dakikada yenile
+// Sayfa yüklenince çek, sonra her 5 dakikada yenile
 window.addEventListener('load', () => {
-  setTimeout(fetchTurkeyNews, 2500);
-  setInterval(fetchTurkeyNews, 10 * 60 * 1000);
+  setTimeout(fetchTurkeyNews, 1500);
+  setInterval(fetchTurkeyNews, 5 * 60 * 1000);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
