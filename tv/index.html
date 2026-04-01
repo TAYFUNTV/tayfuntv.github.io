@@ -10,14 +10,9 @@
 <meta name="theme-color" content="#080b10">
 <title>TAYFUN TV </title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 // =============================================
-// FIREBASE YAPILANDIRMASI
-// Kendi Firebase projenizin bilgileriyle değiştirin:
-// https://console.firebase.google.com → Proje Ayarları → Uygulamanızın yapılandırması
+// FIREBASE — dinamik yükleme
 // =============================================
 const firebaseConfig = {
   apiKey:            "AIzaSyA5rJpgHPD9qoD4OlWkz_FQl833YkqMnGc",
@@ -31,25 +26,49 @@ const firebaseConfig = {
 
 let firebaseReady = false;
 let chatDbRef = null;
+let onlineRef = null;   // çevrimiçi kullanıcılar
+let myOnlineKey = null; // bu sekmenin Firebase anahtarı
 let firebaseApp = null;
 
-try {
-  firebaseApp = firebase.initializeApp(firebaseConfig);
-  chatDbRef = firebase.database().ref('tayfuntv_chat');
-  firebaseReady = true;
-  console.log('✅ Firebase bağlantısı kuruldu');
-
-  // Bağlantı durumunu izle
-  firebase.database().ref('.info/connected').on('value', snap => {
-    if(snap.val() === true){
-      console.log('🟢 Firebase gerçek zamanlı bağlantı aktif');
-    } else {
-      console.log('🔴 Firebase bağlantısı kesildi');
-    }
-  });
-} catch(e) {
-  console.warn('⚠️ Firebase başlatılamadı, yerel mod devrede:', e.message);
+function _startFirebase() {
+  try {
+    if (typeof firebase === 'undefined') throw new Error('firebase is not defined');
+    firebaseApp = (firebase.apps && firebase.apps.length > 0)
+      ? firebase.apps[0]
+      : firebase.initializeApp(firebaseConfig);
+    chatDbRef  = firebase.database().ref('tayfuntv_chat');
+    onlineRef  = firebase.database().ref('tayfuntv_online');
+    firebaseReady = true;
+    console.log('✅ Firebase bağlantısı kuruldu');
+    firebase.database().ref('.info/connected').on('value', snap => {
+      console.log(snap.val() ? '🟢 Firebase bağlı' : '🔴 Firebase bağlantısı kesildi');
+    });
+  } catch(e) {
+    console.warn('⚠️ Firebase başlatılamadı, yerel mod devrede:', e.message);
+  }
 }
+
+function _loadFirebase() {
+  return new Promise((resolve) => {
+    if (typeof firebase !== 'undefined') { resolve(); return; }
+    let loaded = 0;
+    const urls = [
+      'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js'
+    ];
+    urls.forEach(url => {
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = () => { if (++loaded === urls.length) resolve(); };
+      s.onerror = () => { if (++loaded === urls.length) resolve(); };
+      document.head.appendChild(s);
+    });
+  });
+}
+
+window.addEventListener('load', () => {
+  _loadFirebase().then(() => { _startFirebase(); });
+});
 </script>
 <script>
 (function(){
@@ -2629,6 +2648,9 @@ tr:last-child td{border:none;}
               <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;">GİRİŞ:</span>
               <span id="chatUserNameSide" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
             </div>
+            <!-- Çevrimiçi kullanıcılar -->
+            <div id="onlineUsersBar" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;flex-shrink:0;min-height:22px;">
+            </div>
             <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
             </div>
@@ -3070,6 +3092,8 @@ function loginSuccess(user){
   loadM3U();
   // Firebase chat dinleyicisini başlat (bir kez bağlan)
   initFirebaseChat();
+  // Çevrimiçi presence — Firebase'e bu kullanıcıyı yaz
+  registerOnlinePresence(user);
   // Chat kullanıcı badge'lerini güncelle
   ['chatUserNameSide','chatUserNameMain'].forEach(id=>{
     const el = document.getElementById(id);
@@ -3096,6 +3120,7 @@ function loginSuccess(user){
   }, 1500);
 }
 function doLogout(){
+  removeOnlinePresence();
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
@@ -3259,6 +3284,7 @@ function acceptChat(){
 }
 
 function doLogout(){
+  removeOnlinePresence();
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
@@ -3910,7 +3936,8 @@ let chatMessages = [];
 /* ── Firebase chat dinleyicisini başlat ── */
 function initFirebaseChat(){
   if(!firebaseReady || !chatDbRef) {
-    console.warn('Firebase hazır değil, chat dinleyici başlatılamadı');
+    console.warn('Firebase henüz hazır değil, 1sn sonra tekrar deneniyor...');
+    setTimeout(initFirebaseChat, 1000);
     return;
   }
   // Önceki dinleyiciyi temizle
@@ -3943,7 +3970,6 @@ function initFirebaseChat(){
   }, 3000);
 
   console.log('✅ Firebase chat dinleyici aktif');
-  // Sayfa açılınca eski mesajları temizle
   setTimeout(cleanOldMessages, 2000);
 }
 
@@ -3966,27 +3992,66 @@ function clearChat(){
 
 /* ── Mesaj gönderme yardımcısı ── */
 function pushChatMessage(msgObj){
-  // Her mesaja sunucu timestamp ekle (eski mesaj temizleme için)
   msgObj.ts = Date.now();
   if(firebaseReady && chatDbRef){
-    // Firebase'e yaz → listener otomatik renderChat tetikler
     chatDbRef.push(msgObj);
-    // Eski mesajları temizle (2 saatten eski)
     cleanOldMessages();
   } else {
-    // Firebase yoksa eski yerel mod
     chatMessages.push(msgObj);
     renderChat();
   }
 }
 
-// 2 saatten eski mesajları Firebase'den sil
 function cleanOldMessages(){
   if(!firebaseReady || !chatDbRef) return;
   const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
   chatDbRef.orderByChild('ts').endAt(twoHoursAgo).once('value', snapshot => {
     snapshot.forEach(child => { child.ref.remove(); });
   });
+}
+
+/* ── ÇEVRİMİÇİ PRESENCE ── */
+function registerOnlinePresence(user){
+  if(!firebaseReady || !onlineRef) return;
+  const entry = { nick: user.username, avatar: user.avatar || '👤', role: user.role || 'user', ts: Date.now() };
+  // push ile benzersiz anahtar al
+  const ref = onlineRef.push(entry);
+  myOnlineKey = ref.key;
+  // Sekme kapanınca / bağlantı kesilince otomatik sil
+  ref.onDisconnect().remove();
+  // Online listesini dinle
+  listenOnlineUsers();
+}
+
+function removeOnlinePresence(){
+  if(firebaseReady && onlineRef && myOnlineKey){
+    onlineRef.child(myOnlineKey).remove();
+    myOnlineKey = null;
+  }
+}
+
+function listenOnlineUsers(){
+  if(!firebaseReady || !onlineRef) return;
+  onlineRef.on('value', snapshot => {
+    const users = [];
+    snapshot.forEach(child => { users.push(child.val()); });
+    renderOnlineUsers(users);
+  });
+}
+
+function renderOnlineUsers(users){
+  const bar = document.getElementById('onlineUsersBar');
+  if(!bar) return;
+  if(!users.length){
+    bar.innerHTML = '';
+    return;
+  }
+  bar.innerHTML = '<span style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.5px;align-self:center;">🟢 ÇEVRİMİÇİ:</span>'
+    + users.map(u => {
+        const color = (u.role === 'admin') ? '#ffd700' : '#74c0fc';
+        const icon  = (u.role === 'admin') ? '👑' : (u.avatar || '👤');
+        return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2px 8px 2px 5px;font-size:10px;font-weight:700;color:${color};">${icon} ${u.nick}</span>`;
+      }).join('');
 }
 // Temizle butonunu addEventListener ile bağla
 
@@ -4093,7 +4158,6 @@ function getChatUserColor(username){
 function renderChat(){
   const boxes = [document.getElementById('chatBox'), document.getElementById('chatBoxSide')];
   const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
-  // Sadece son 2 saatin mesajlarını göster (ts yoksa göster)
   const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
   const visibleMsgs = chatMessages.filter(msg => !msg.ts || msg.ts > twoHoursAgo);
   boxes.forEach(box => {
