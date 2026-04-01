@@ -31,12 +31,22 @@ const firebaseConfig = {
 
 let firebaseReady = false;
 let chatDbRef = null;
+let firebaseApp = null;
 
 try {
-  firebase.initializeApp(firebaseConfig);
+  firebaseApp = firebase.initializeApp(firebaseConfig);
   chatDbRef = firebase.database().ref('tayfuntv_chat');
   firebaseReady = true;
   console.log('✅ Firebase bağlantısı kuruldu');
+
+  // Bağlantı durumunu izle
+  firebase.database().ref('.info/connected').on('value', snap => {
+    if(snap.val() === true){
+      console.log('🟢 Firebase gerçek zamanlı bağlantı aktif');
+    } else {
+      console.log('🔴 Firebase bağlantısı kesildi');
+    }
+  });
 } catch(e) {
   console.warn('⚠️ Firebase başlatılamadı, yerel mod devrede:', e.message);
 }
@@ -2593,7 +2603,15 @@ tr:last-child td{border:none;}
             <div id="chInfoContent"><div style="color:var(--muted);font-size:12px;">Bilgi için kanal seçin.</div></div>
           </div>
           <!-- CHAT (sağ panele taşındı) -->
-          <div class="btab-content" id="btab_chat" style="display:none;"><div id="chatBox"></div></div>
+          <div class="btab-content" id="btab_chat" style="display:none;">
+            <!-- Giriş yapan kullanıcı bilgisi -->
+            <div id="chatUserBadgeMain" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;margin-bottom:6px;">
+              <span id="chatUserAvatarMain" style="font-size:14px;">👤</span>
+              <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;">GİRİŞ:</span>
+              <span id="chatUserNameMain" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
+            </div>
+            <div id="chatBox"></div>
+          </div>
 
         </div>
         </div><!-- /bottom-area-wrap -->
@@ -2605,6 +2623,12 @@ tr:last-child td{border:none;}
             <button id="clearChatBtn" style="background:rgba(232,55,61,.15);border:1px solid rgba(232,55,61,.3);color:#ff6b6b;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:700;">🗑 Temizle</button>
           </div>
           <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
+            <!-- Giriş yapan kullanıcı bilgisi -->
+            <div id="chatUserBadgeSide" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;margin-bottom:6px;flex-shrink:0;">
+              <span id="chatUserAvatarSide" style="font-size:14px;">👤</span>
+              <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;">GİRİŞ:</span>
+              <span id="chatUserNameSide" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
+            </div>
             <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
             </div>
@@ -3046,6 +3070,22 @@ function loginSuccess(user){
   loadM3U();
   // Firebase chat dinleyicisini başlat (bir kez bağlan)
   initFirebaseChat();
+  // Chat kullanıcı badge'lerini güncelle
+  ['chatUserNameSide','chatUserNameMain'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = user.username;
+  });
+  ['chatUserAvatarSide','chatUserAvatarMain'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = user.avatar || '👤';
+  });
+  // Admin ise altın rengi yap
+  if(user.role === 'admin'){
+    ['chatUserNameSide','chatUserNameMain'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el){ el.style.color = '#ffd700'; el.textContent = '👑 ' + user.username; }
+    });
+  }
   setTimeout(()=>{
     // Admin girişini chat'e yaz
     if(user.role === 'admin' || user.username === _d(_un)){
@@ -3869,16 +3909,24 @@ let chatMessages = [];
 
 /* ── Firebase chat dinleyicisini başlat ── */
 function initFirebaseChat(){
-  if(!firebaseReady || !chatDbRef) return;
-
-  // Son 100 mesajı dinle — yeni mesaj gelince renderChat çalışır
+  if(!firebaseReady || !chatDbRef) {
+    console.warn('Firebase hazır değil, chat dinleyici başlatılamadı');
+    return;
+  }
+  // Önceki dinleyiciyi temizle
+  chatDbRef.off();
+  // Son 100 mesajı gerçek zamanlı dinle
   chatDbRef.limitToLast(100).on('value', snapshot => {
     chatMessages = [];
     snapshot.forEach(child => {
       chatMessages.push(child.val());
     });
+    console.log('📨 Firebase güncellendi, mesaj sayısı:', chatMessages.length);
     renderChat();
+  }, err => {
+    console.error('Firebase dinleme hatası:', err);
   });
+  console.log('✅ Firebase chat dinleyici aktif');
 }
 
 function clearChat(){
