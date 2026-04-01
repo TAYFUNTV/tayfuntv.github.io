@@ -2649,7 +2649,7 @@ tr:last-child td{border:none;}
             <div style="display:flex;gap:4px;flex-shrink:0;">
               <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
-                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:11px;outline:none;min-width:0;"
+                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#ffffff;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
               <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
@@ -3943,6 +3943,8 @@ function initFirebaseChat(){
   }, 3000);
 
   console.log('✅ Firebase chat dinleyici aktif');
+  // Sayfa açılınca eski mesajları temizle
+  setTimeout(cleanOldMessages, 2000);
 }
 
 function clearChat(){
@@ -3964,14 +3966,27 @@ function clearChat(){
 
 /* ── Mesaj gönderme yardımcısı ── */
 function pushChatMessage(msgObj){
+  // Her mesaja sunucu timestamp ekle (eski mesaj temizleme için)
+  msgObj.ts = Date.now();
   if(firebaseReady && chatDbRef){
     // Firebase'e yaz → listener otomatik renderChat tetikler
     chatDbRef.push(msgObj);
+    // Eski mesajları temizle (2 saatten eski)
+    cleanOldMessages();
   } else {
     // Firebase yoksa eski yerel mod
     chatMessages.push(msgObj);
     renderChat();
   }
+}
+
+// 2 saatten eski mesajları Firebase'den sil
+function cleanOldMessages(){
+  if(!firebaseReady || !chatDbRef) return;
+  const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+  chatDbRef.orderByChild('ts').endAt(twoHoursAgo).once('value', snapshot => {
+    snapshot.forEach(child => { child.ref.remove(); });
+  });
 }
 // Temizle butonunu addEventListener ile bağla
 
@@ -4078,10 +4093,13 @@ function getChatUserColor(username){
 function renderChat(){
   const boxes = [document.getElementById('chatBox'), document.getElementById('chatBoxSide')];
   const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
+  // Sadece son 2 saatin mesajlarını göster (ts yoksa göster)
+  const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+  const visibleMsgs = chatMessages.filter(msg => !msg.ts || msg.ts > twoHoursAgo);
   boxes.forEach(box => {
     if(!box) return;
-    if(!chatMessages.length){ box.innerHTML = empty; return; }
-    box.innerHTML = chatMessages.map(msg=>`
+    if(!visibleMsgs.length){ box.innerHTML = empty; return; }
+    box.innerHTML = visibleMsgs.map(msg=>`
       <div style="display:flex;gap:6px;align-items:flex-start;">
         <span style="font-size:11px;font-weight:700;flex-shrink:0;color:${getChatUserColor(msg.u)}">${msg.u}</span>
         <span style="font-size:11px;color:var(--text2);flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
@@ -4522,19 +4540,11 @@ function sendMobChat(){
   const msg = input.value.trim();
   if(!msg) return;
   input.value = '';
-  const box = document.getElementById('mobChatMessages');
-  if(!box) return;
-  const u = currentUser || {username:'Misafir', avatar:'😊'};
+  const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
-  const div = document.createElement('div');
-  div.className = 'chat-msg-row';
-  const isAdmin = u.role === 'admin';
-  div.innerHTML = `<div class="chat-avatar">${u.avatar||'😊'}</div><div class="chat-bubble"><span class="chat-user${isAdmin?' admin':''}">${displayName}</span><span class="chat-text">${msg}</span></div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-  // Aynı zamanda chatBoxSide'a da ekle (senkron)
-  const side = document.getElementById('chatBoxSide');
-  if(side){ const d2=div.cloneNode(true); side.appendChild(d2); side.scrollTop=side.scrollHeight; }
+  const now = new Date();
+  const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  pushChatMessage({u: displayName, m: msg, t: t2});
 }
 
 function sendChatSide(){
