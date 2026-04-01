@@ -38,11 +38,11 @@ function _startFirebase() {
       : firebase.initializeApp(firebaseConfig);
     chatDbRef  = firebase.database().ref('tayfuntv_chat');
     onlineRef  = firebase.database().ref('tayfuntv_online');
-    firebaseReady = true;
     window.usersDbRef = firebase.database().ref('tayfuntv_users');
+    firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
-    // Admin paneli açıksa kullanıcı listesini güncelle
-    if(typeof adminLoggedIn !== 'undefined' && adminLoggedIn){ renderUsers(); }
+    // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
+    _migrateLocalUsersToFirebase();
     firebase.database().ref('.info/connected').on('value', snap => {
       console.log(snap.val() ? '🟢 Firebase bağlı' : '🔴 Firebase bağlantısı kesildi');
     });
@@ -67,6 +67,92 @@ function _loadFirebase() {
       document.head.appendChild(s);
     });
   });
+}
+
+// ─────────────────────────────────────────────
+// FIREBASE KULLANICI SİSTEMİ - TÜM CİHAZLAR
+// ─────────────────────────────────────────────
+
+// localStorage kullanıcılarını Firebase'e bir kez migrate et
+function _migrateLocalUsersToFirebase(){
+  if(!window.usersDbRef) return;
+  const localUsers = JSON.parse(localStorage.getItem('cltv_users') || '[]');
+  if(!localUsers.length) return;
+  localUsers.forEach(u => {
+    if(!u.username) return;
+    const key = u.username.replace(/[.#$\/\[\]]/g, '_');
+    // önce var mı bak, yoksa yaz
+    window.usersDbRef.child(key).once('value', snap => {
+      if(!snap.exists()){
+        window.usersDbRef.child(key).set({
+          ...u,
+          migratedAt: Date.now()
+        });
+        console.log('🔄 Migrate:', u.username);
+      }
+    });
+  });
+}
+
+// Firebase'den tüm kullanıcıları getir, callback ile döndür
+function _fbGetUsers(cb){
+  if(!window.usersDbRef){
+    cb(JSON.parse(localStorage.getItem('cltv_users')||'[]'));
+    return;
+  }
+  window.usersDbRef.once('value', snap => {
+    const users = [];
+    snap.forEach(child => { const v = child.val(); if(v && v.username) users.push(v); });
+    // localStorage ile birleştir (geçiş dönemi güvenliği)
+    const local = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+    local.forEach(u => { if(u.username && !users.find(m=>m.username===u.username)) users.push(u); });
+    // localStorage güncelle
+    localStorage.setItem('cltv_users', JSON.stringify(users));
+    cb(users);
+  }, err => {
+    console.warn('Firebase okuma hatası, localStorage kullanılıyor:', err);
+    cb(JSON.parse(localStorage.getItem('cltv_users')||'[]'));
+  });
+}
+
+// Kullanıcıyı Firebase + localStorage'a kaydet
+function _fbSaveUser(key, userObj){
+  // localStorage
+  const local = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+  const li = local.findIndex(u=>u.username===userObj.username);
+  if(li>=0) local[li] = {...local[li], ...userObj};
+  else local.push(userObj);
+  localStorage.setItem('cltv_users', JSON.stringify(local));
+  // Firebase
+  if(window.usersDbRef){
+    return window.usersDbRef.child(key).set(userObj);
+  }
+  return Promise.resolve();
+}
+
+// Kullanıcıyı Firebase + localStorage'da güncelle (partial)
+function _fbUpdateUser(key, updates){
+  // localStorage
+  const local = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+  const li = local.findIndex(u => {
+    const k = u.username.replace(/[.#$\/\[\]]/g,'_');
+    return k === key;
+  });
+  if(li>=0){ local[li] = {...local[li], ...updates}; localStorage.setItem('cltv_users', JSON.stringify(local)); }
+  // Firebase
+  if(window.usersDbRef) return window.usersDbRef.child(key).update(updates);
+  return Promise.resolve();
+}
+
+// Kullanıcıyı Firebase + localStorage'dan sil
+function _fbDeleteUser(username){
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  // localStorage
+  const local = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+  const filtered = local.filter(u=>u.username!==username);
+  localStorage.setItem('cltv_users', JSON.stringify(filtered));
+  // Firebase
+  if(window.usersDbRef) window.usersDbRef.child(key).remove();
 }
 
 window.addEventListener('load', () => {
@@ -2245,51 +2331,58 @@ tr:last-child td{border:none;}
 
 
 
-/* ── MOBİL ADMİN PANELİ ── */
+/* ── MOBİL ADMİN PANELİ RESPONSIVE ── */
 @media (max-width: 768px) {
-  .admin-topbar {
-    padding: 8px 12px;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .admin-logo { font-size: 14px; }
+  .admin-topbar { padding: 8px 10px; flex-wrap: wrap; gap: 6px; }
+  .admin-logo { font-size: 13px; gap: 6px; }
   .topbar-right { gap: 4px; }
-  .topbar-btn { font-size: 10px; padding: 5px 8px; }
-  .admin-body { flex-direction: column; overflow: auto; }
+  .topbar-btn { font-size: 9px; padding: 5px 7px; letter-spacing: 0; }
+  .topbar-status { display: none; }
+  .topbar-time { font-size: 10px; }
+  .admin-body { flex-direction: column !important; height: auto; overflow: visible; }
   .admin-sidebar {
     width: 100% !important;
     flex-direction: row !important;
-    flex-wrap: wrap;
-    padding: 6px;
-    gap: 4px;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 6px 6px 0 !important;
     border-right: none !important;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    flex-shrink: 0;
+    border-bottom: 1px solid var(--border) !important;
+    flex-shrink: 0 !important;
+    gap: 3px !important;
+    align-items: flex-start !important;
   }
-  .sidebar-section { display: none; }
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-section { display: none !important; }
   .sidebar-item {
-    flex: 0 0 auto;
-    flex-direction: column;
-    padding: 6px 10px;
-    gap: 3px;
-    font-size: 9px;
-    border-radius: 8px;
-    min-width: 54px;
-    text-align: center;
+    flex-direction: column !important;
+    padding: 7px 10px !important;
+    gap: 3px !important;
+    font-size: 9px !important;
+    min-width: 52px !important;
+    max-width: 70px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
-  .si-icon { font-size: 16px; }
-  .si-badge { position: static; margin-top: 2px; }
-  .admin-content { overflow-y: auto; flex: 1; }
-  .admin-page { padding: 12px !important; }
+  .si-icon { font-size: 18px !important; }
+  .si-badge { position: static !important; font-size: 8px !important; margin-top: 1px !important; }
+  .admin-content { overflow-y: auto !important; flex: 1 !important; height: calc(100vh - 130px) !important; }
+  .admin-page { padding: 10px !important; }
   .stat-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  .stat-card { padding: 12px !important; }
-  .table-wrap { overflow-x: auto; }
-  .admin-table th, .admin-table td { font-size: 10px; padding: 6px 8px; white-space: nowrap; }
-  .btn-xs { padding: 3px 6px; font-size: 9px; }
+  .stat-card { padding: 10px !important; }
+  .stat-value { font-size: 22px !important; }
+  .table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .admin-table { min-width: 600px; }
+  .admin-table th, .admin-table td { font-size: 10px !important; padding: 5px 7px !important; }
+  .btn-xs { padding: 3px 5px !important; font-size: 9px !important; }
   .form-grid { grid-template-columns: 1fr !important; }
-  .modal { width: 95vw !important; max-width: 95vw !important; padding: 16px !important; }
-  .topbar-status { display: none; }
+  .modal { width: 94vw !important; max-width: 94vw !important; max-height: 88vh !important; overflow-y: auto !important; padding: 14px !important; }
+  .admin-login-box { width: 90vw !important; max-width: 340px !important; padding: 20px !important; }
+  .section-header { flex-wrap: wrap; gap: 6px; }
+  .section-header .btn { font-size: 10px; padding: 6px 10px; }
 }
 </style>
 </head>
@@ -3101,35 +3194,25 @@ function doLogin(){
     loginSuccess({username: adminUser, email: adminEmail, avatar:'👑', role:'admin', approved:true});
     return;
   }
-  // Firebase'den giriş kontrolü (cihazlar arası paylaşımlı)
-  function checkLogin(usersArr){
-    const found = usersArr.find(u=>u.username===user && u.password===pass);
-    if(!found){ showLoginErr('Kullanıcı adı veya şifre hatalı.'); return; }
-    if(found.approved === false){ showLoginErr('⏳ Hesabınız henüz onaylanmadı. Lütfen admin onayını bekleyin.'); return; }
-    if(remember){ localStorage.setItem('cltv_remember', JSON.stringify({username:user, pass})); }
-    else { localStorage.removeItem('cltv_remember'); }
-    loginSuccess(found);
+  function tryLogin(){
+    _fbGetUsers(users => {
+      const found = users.find(u=>u.username===user && u.password===pass);
+      if(!found){ showLoginErr('Kullanıcı adı veya şifre hatalı.'); return; }
+      if(found.approved === false){ showLoginErr('⏳ Hesabınız henüz onaylanmadı. Lütfen admin onayını bekleyin.'); return; }
+      if(remember){ localStorage.setItem('cltv_remember', JSON.stringify({username:user, pass})); }
+      else { localStorage.removeItem('cltv_remember'); }
+      loginSuccess(found);
+    });
   }
 
-  if(window.usersDbRef){
-    window.usersDbRef.once('value', snap => {
-      const usersArr = [];
-      snap.forEach(child => { usersArr.push(child.val()); });
-      // Firebase boşsa localStorage'a bak (eski kayıtlar)
-      if(!usersArr.length){
-        const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-        checkLogin(stored);
-      } else {
-        // Firebase + localStorage birleştir (geçiş dönemi)
-        const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-        const merged = [...usersArr];
-        stored.forEach(u=>{ if(!merged.find(m=>m.username===u.username)) merged.push(u); });
-        checkLogin(merged);
-      }
-    });
-  } else {
-    const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-    checkLogin(stored);
+  if(window.usersDbRef){ tryLogin(); }
+  else {
+    let waited = 0;
+    const wait = setInterval(()=>{
+      waited += 300;
+      if(window.usersDbRef){ clearInterval(wait); tryLogin(); }
+      else if(waited >= 3000){ clearInterval(wait); tryLogin(); } // _fbGetUsers localStorage fallback kullanır
+    }, 300);
   }
 }
 function doRegister(){
@@ -3138,31 +3221,37 @@ function doRegister(){
   const pass  = document.getElementById('regPass').value;
   if(!user||!email||!pass){ showLoginErr('Tüm alanları doldurun.'); return; }
   if(pass.length < 6){ showLoginErr('Şifre en az 6 karakter olmalı.'); return; }
-
-  const newUser = {username:user, email, password:pass, avatar:selectedAvatar, approved:false, status:'pending', createdAt: Date.now()};
   const key = user.replace(/[.#$\/\[\]]/g,'_');
+  const newUser = {username:user, email, password:pass, avatar:selectedAvatar, approved:false, status:'pending', createdAt:Date.now()};
 
-  // Firebase'e kaydet (cihazlar arası paylaşımlı)
-  function saveToFirebase(){
-    window.usersDbRef.orderByChild('username').equalTo(user).once('value', snap => {
-      if(snap.exists()){ showLoginErr('Bu kullanıcı adı alınmış.'); return; }
-      window.usersDbRef.child(key).set(newUser).then(()=>{
-        // localStorage'a da yaz (offline fallback)
-        const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-        if(!stored.find(u=>u.username===user)){ stored.push(newUser); localStorage.setItem('cltv_users', JSON.stringify(stored)); }
+  function doSave(){
+    _fbGetUsers(users => {
+      if(users.find(u=>u.username===user)){ showLoginErr('Bu kullanıcı adı alınmış.'); return; }
+      _fbSaveUser(key, newUser).then(()=>{
         showLoginOk('✅ Hesabınız oluşturuldu! Admin onayından sonra giriş yapabilirsiniz.');
-      }).catch(e=>{ showLoginErr('Kayıt hatası: ' + e.message); });
+      }).catch(e=>{
+        showLoginErr('Kayıt hatası: ' + (e&&e.message||'Bilinmeyen hata'));
+      });
     });
   }
 
-  if(window.usersDbRef){ saveToFirebase(); }
+  // Firebase hazır değilse bekle (max 3sn)
+  if(window.usersDbRef){ doSave(); }
   else {
-    // Firebase henüz hazır değil — localStorage fallback
-    const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-    if(stored.find(u=>u.username===user)){ showLoginErr('Bu kullanıcı adı alınmış.'); return; }
-    stored.push(newUser);
-    localStorage.setItem('cltv_users', JSON.stringify(stored));
-    showLoginOk('✅ Hesabınız oluşturuldu! Admin onayından sonra giriş yapabilirsiniz.');
+    let waited = 0;
+    const wait = setInterval(()=>{
+      waited += 300;
+      if(window.usersDbRef){ clearInterval(wait); doSave(); }
+      else if(waited >= 3000){
+        clearInterval(wait);
+        // Tamamen offline — sadece localStorage
+        const stored = JSON.parse(localStorage.getItem('cltv_users')||'[]');
+        if(stored.find(u=>u.username===user)){ showLoginErr('Bu kullanıcı adı alınmış.'); return; }
+        stored.push(newUser);
+        localStorage.setItem('cltv_users', JSON.stringify(stored));
+        showLoginOk('✅ Hesabınız oluşturuldu! (Çevrimdışı mod — admin elle onaylamalı)');
+      }
+    }, 300);
   }
 }
 function guestLogin(){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); }
@@ -5713,26 +5802,29 @@ function initAdmin(){
   renderLogs();
   renderBackupHistory();
   renderAnalytics();
-  // Firebase kullanıcı değişikliklerini gerçek zamanlı dinle
-  if(window.usersDbRef){
+
+  // Firebase gerçek zamanlı kullanıcı dinleyicisi — yeni kayıt anında görünsün
+  function startUserListener(){
+    if(!window.usersDbRef){ setTimeout(startUserListener, 1000); return; }
     window.usersDbRef.on('value', snap => {
-      const fbUsers = [];
-      snap.forEach(child => { fbUsers.push(child.val()); });
-      allUsers = fbUsers;
+      const users = [];
+      snap.forEach(child => { const v=child.val(); if(v&&v.username) users.push(v); });
+      allUsers = users;
       // localStorage güncelle
-      const localUsers = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-      const merged = [...fbUsers];
-      localUsers.forEach(u=>{ if(!merged.find(m=>m.username===u.username)) merged.push(u); });
-      localStorage.setItem('cltv_users', JSON.stringify(merged));
-      const admins = [{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...merged];
-      document.getElementById('stat_users').textContent = admins.length;
-      document.getElementById('userBadge').textContent  = admins.length;
-      const pending = merged.filter(u=>u.approved===false).length;
+      localStorage.setItem('cltv_users', JSON.stringify(users));
+      const admins = [{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...users];
+      if(document.getElementById('stat_users')) document.getElementById('stat_users').textContent = admins.length;
+      const pending = users.filter(u=>u.approved===false).length;
       const badge = document.getElementById('userBadge');
-      if(badge){ badge.style.background = pending>0 ? 'var(--gold)' : ''; badge.title = pending>0 ? pending+' onay bekliyor' : ''; }
+      if(badge){
+        badge.textContent = admins.length;
+        badge.style.background = pending>0 ? 'var(--gold)' : '';
+        badge.title = pending>0 ? pending+' onay bekliyor!' : '';
+      }
       renderUserTable(admins);
     });
   }
+  startUserListener();
 }
 
 function updateClock(){
@@ -5899,34 +5991,18 @@ function getUsers(){ return JSON.parse(localStorage.getItem('cltv_users')||'[]')
 function saveUsers(u){ localStorage.setItem('cltv_users',JSON.stringify(u)); }
 let allUsers = [];
 
-// Firebase'den kullanıcıları çek + localStorage ile birleştir
-function getFirebaseUsers(cb){
-  if(window.usersDbRef){
-    window.usersDbRef.once('value', snap => {
-      const fbUsers = [];
-      snap.forEach(child => { fbUsers.push(child.val()); });
-      const localUsers = JSON.parse(localStorage.getItem('cltv_users')||'[]');
-      const merged = [...fbUsers];
-      localUsers.forEach(u=>{ if(!merged.find(m=>m.username===u.username)) merged.push(u); });
-      // localStorage'ı Firebase ile güncelle
-      localStorage.setItem('cltv_users', JSON.stringify(merged));
-      cb(merged);
-    });
-  } else {
-    cb(getUsers());
-  }
-}
-
 function renderUsers(){
-  getFirebaseUsers(users => {
+  _fbGetUsers(users => {
     allUsers = users;
     const admins = [{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',plan:'pro',status:'active',approved:true},...users];
     document.getElementById('stat_users').textContent = admins.length;
-    document.getElementById('userBadge').textContent  = admins.length;
-    // Onay bekleyen kullanıcı sayısını dashboard'a yansıt
     const pending = users.filter(u=>u.approved===false).length;
     const badge = document.getElementById('userBadge');
-    if(badge && pending > 0){ badge.style.background='var(--gold)'; badge.title=pending+' onay bekliyor'; }
+    if(badge){
+      badge.textContent = admins.length;
+      badge.style.background = pending>0 ? 'var(--gold)' : '';
+      badge.title = pending>0 ? pending+' onay bekliyor!' : '';
+    }
     renderUserTable(admins);
   });
 }
@@ -5961,31 +6037,17 @@ function renderUserTable(list){
 }
 function approveUser(idx, name){
   const key = name.replace(/[.#$\/\[\]]/g,'_');
-  // Firebase'e yaz
-  if(window.usersDbRef){
-    window.usersDbRef.child(key).update({approved:true, status:'active'}).then(()=>{
-      showToast('✅ ' + name + ' onaylandı, giriş yapabilir.', 'success');
-      addLog('user','user','✅ Kullanıcı onaylandı: '+name,'var(--green)');
-      renderUsers();
-    }).catch(()=>{
-      // Firebase yazma başarısız, localStorage fallback
-      const users = getUsers();
-      const ui = users.findIndex(u => u.username === name);
-      if(ui >= 0){ users[ui].approved = true; users[ui].status = 'active'; saveUsers(users); }
-      renderUsers();
-      showToast('✅ ' + name + ' onaylandı (yerel)', 'success');
-    });
-  } else {
-    const users = getUsers();
-    const ui = users.findIndex(u => u.username === name);
-    if(ui >= 0){ users[ui].approved = true; users[ui].status = 'active'; saveUsers(users); }
-    renderUsers();
-    showToast('✅ ' + name + ' onaylandı.', 'success');
+  _fbUpdateUser(key, {approved:true, status:'active'}).then(()=>{
+    showToast('✅ ' + name + ' onaylandı, giriş yapabilir.', 'success');
     addLog('user','user','✅ Kullanıcı onaylandı: '+name,'var(--green)');
-  }
+    renderUsers();
+  }).catch(()=>{
+    showToast('✅ ' + name + ' onaylandı.', 'success');
+    renderUsers();
+  });
 }
-function filterUsers(q){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
-function filterUsersByRole(role){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
+function filterUsers(q){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...allUsers]; renderUserTable(q?all.filter(u=>u.username.toLowerCase().includes(q.toLowerCase())||u.email?.toLowerCase().includes(q.toLowerCase())):all); }
+function filterUsersByRole(role){ const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...allUsers]; renderUserTable(role?all.filter(u=>(u.role||'user')===role):all); }
 function openAddUser(){ editingUserIdx=null; document.getElementById('userModalTitle').textContent='👤 Kullanıcı Ekle'; ['uUsername','uEmail','uPassword','uAvatar'].forEach(id=>document.getElementById(id).value=''); openModal('userModal'); }
 function editUser(idx){ editingUserIdx=idx; const all=[{username:_d(_un),email:_d(_em),avatar:'👑',role:'admin',status:'active',approved:true},...getUsers()]; const u=all[idx]; document.getElementById('userModalTitle').textContent='✏️ Kullanıcı Düzenle'; document.getElementById('uUsername').value=u.username; document.getElementById('uEmail').value=u.email||''; document.getElementById('uAvatar').value=u.avatar||''; document.getElementById('uRole').value=u.role||'user'; openModal('userModal'); }
 function saveUser(){
@@ -5995,22 +6057,18 @@ function saveUser(){
   const role=document.getElementById('uRole').value;
   const avatar=document.getElementById('uAvatar').value||'👤';
   if(!username){ showToast('Kullanıcı adı zorunlu!','warning'); return; }
-  const users=getUsers();
   const key=username.replace(/[.#$\/\[\]]/g,'_');
   if(editingUserIdx===null){
-    const newU={username,email,password:pass,role,avatar,status:'active',approved:true};
-    users.push(newU); saveUsers(users);
-    if(window.usersDbRef) window.usersDbRef.child(key).set(newU);
-    showToast('✅ Kullanıcı eklendi','success'); addLog('user','user','➕ Yeni kullanıcı: '+username,'var(--green)');
+    const newU={username,email,password:pass,role,avatar,status:'active',approved:true,createdAt:Date.now()};
+    _fbSaveUser(key,newU).then(()=>{ showToast('✅ Kullanıcı eklendi','success'); addLog('user','user','➕ Yeni kullanıcı: '+username,'var(--green)'); renderUsers(); closeModal('userModal'); });
   } else {
-    if(editingUserIdx>0){ const idx=editingUserIdx-1; users[idx]={...users[idx],username,email,role,avatar}; saveUsers(users);
-      if(window.usersDbRef) window.usersDbRef.child(key).update({username,email,role,avatar}); }
-    showToast('✅ Kullanıcı güncellendi','success');
+    const updates={username,email,role,avatar};
+    if(pass) updates.password=pass;
+    _fbUpdateUser(key,updates).then(()=>{ showToast('✅ Kullanıcı güncellendi','success'); renderUsers(); closeModal('userModal'); });
   }
-  renderUsers(); closeModal('userModal');
 }
 function banUser(idx, name){ if(!confirm(name+' kullanıcısını yasaklamak istiyor musunuz?')) return; showToast('⛔ '+name+' yasaklandı','warning'); addLog('user','user','⛔ Kullanıcı yasaklandı: '+name,'var(--accent)'); }
-function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name===_d(_un)){ showToast('Admin silinemez!','warning'); return; } const users=getUsers(); const ri=users.findIndex(u=>u.username===name); if(ri>=0){ users.splice(ri,1); saveUsers(users); } if(window.usersDbRef){ const key=name.replace(/[.#$\/\[\]]/g,'_'); window.usersDbRef.child(key).remove(); } renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
+function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name===_d(_un)){ showToast('Admin silinemez!','warning'); return; } _fbDeleteUser(name); renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
 function exportUsers(){ const data=JSON.stringify([{username:_d(_un),email:_d(_em),role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
 
 /* M3U LIST */
