@@ -4369,7 +4369,7 @@ function renderChat(){
     if(!visibleMsgs.length){ box.innerHTML = empty; return; }
     box.innerHTML = visibleMsgs.map(msg=>`
       <div style="display:flex;gap:6px;align-items:flex-start;">
-        <span style="font-size:11px;font-weight:700;flex-shrink:0;color:${getChatUserColor(msg.u)}">${msg.u}</span>
+        <span class="chat-user" style="color:${getChatUserColor(msg.u)}">${msg.u}</span>
         <span style="font-size:11px;color:var(--text2);flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
       </div>`).join('');
