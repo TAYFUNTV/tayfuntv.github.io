@@ -10,6 +10,37 @@
 <meta name="theme-color" content="#080b10">
 <title>TAYFUN TV </title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// =============================================
+// FIREBASE YAPILANDIRMASI
+// Kendi Firebase projenizin bilgileriyle değiştirin:
+// https://console.firebase.google.com → Proje Ayarları → Uygulamanızın yapılandırması
+// =============================================
+const firebaseConfig = {
+  apiKey:            "AIzaSyA5rJpgHPD9qoD4OlWkz_FQl833YkqMnGc",
+  authDomain:        "tayfuntv-23b17.firebaseapp.com",
+  databaseURL:       "https://tayfuntv-23b17-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "tayfuntv-23b17",
+  storageBucket:     "tayfuntv-23b17.firebasestorage.app",
+  messagingSenderId: "465686036405",
+  appId:             "1:465686036405:web:3e977fd0eed4de6cdd63fc"
+};
+
+let firebaseReady = false;
+let chatDbRef = null;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  chatDbRef = firebase.database().ref('tayfuntv_chat');
+  firebaseReady = true;
+  console.log('✅ Firebase bağlantısı kuruldu');
+} catch(e) {
+  console.warn('⚠️ Firebase başlatılamadı, yerel mod devrede:', e.message);
+}
+</script>
 <script>
 (function(){
   function _d(a){return a.map(function(x){return String.fromCharCode(x^90);}).join('');}
@@ -3013,13 +3044,14 @@ function loginSuccess(user){
   document.getElementById('settingsEmail').textContent= user.email;
   initRadioBar();
   loadM3U();
+  // Firebase chat dinleyicisini başlat (bir kez bağlan)
+  initFirebaseChat();
   setTimeout(()=>{
     // Admin girişini chat'e yaz
     if(user.role === 'admin' || user.username === _d(_un)){
       const now = new Date();
       const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      chatMessages.push({u:'🔴 SİSTEM', m:`👑 Admin "${user.username}" giriş yaptı.`, t:t2});
-      renderChat();
+      pushChatMessage({u:'🔴 SİSTEM', m:`👑 Admin "${user.username}" giriş yaptı.`, t:t2});
     }
   }, 1500);
 }
@@ -3834,14 +3866,48 @@ function renderChInfo(ch){
 
 /* CHAT */
 let chatMessages = [];
+
+/* ── Firebase chat dinleyicisini başlat ── */
+function initFirebaseChat(){
+  if(!firebaseReady || !chatDbRef) return;
+
+  // Son 100 mesajı dinle — yeni mesaj gelince renderChat çalışır
+  chatDbRef.limitToLast(100).on('value', snapshot => {
+    chatMessages = [];
+    snapshot.forEach(child => {
+      chatMessages.push(child.val());
+    });
+    renderChat();
+  });
+}
+
 function clearChat(){
-  chatMessages.length = 0;
-  const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
-  const b1 = document.getElementById('chatBox');
-  const b2 = document.getElementById('chatBoxSide');
-  if(b1) b1.innerHTML = empty;
-  if(b2) b2.innerHTML = empty;
-  showToast('🗑 Sohbet temizlendi', 'info');
+  if(firebaseReady && chatDbRef){
+    // Firebase'deki mesajları sil
+    chatDbRef.remove().then(()=>{
+      showToast('🗑 Sohbet temizlendi', 'info');
+    });
+  } else {
+    chatMessages.length = 0;
+    const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
+    const b1 = document.getElementById('chatBox');
+    const b2 = document.getElementById('chatBoxSide');
+    if(b1) b1.innerHTML = empty;
+    if(b2) b2.innerHTML = empty;
+    showToast('🗑 Sohbet temizlendi', 'info');
+  }
+}
+
+/* ── Mesaj gönderme yardımcısı ── */
+function pushChatMessage(msgObj){
+  if(firebaseReady && chatDbRef){
+    // Firebase'e yaz → listener otomatik renderChat tetikler
+    chatDbRef.push(msgObj);
+  } else {
+    // Firebase yoksa eski yerel mod
+    chatMessages.push(msgObj);
+    renderChat();
+  }
 }
 // Temizle butonunu addEventListener ile bağla
 
@@ -4076,16 +4142,14 @@ function toggleGifPanel(){
 function sendGif(url, label){
   const now = new Date();
   const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  chatMessages.push({u: currentUser?.username||'Sen', m:`🎞️ GIF: ${label} <img src="${url}" style="max-width:120px;border-radius:6px;display:block;margin-top:4px;">`, t:t2, isHtml:true});
+  pushChatMessage({u: currentUser?.username||'Sen', m:`🎞️ GIF: ${label} <img src="${url}" style="max-width:120px;border-radius:6px;display:block;margin-top:4px;">`, t:t2, isHtml:true});
   document.getElementById('gifPanel').style.display = 'none';
-  renderChat();
 }
 
 function sendReaction(emoji){
   const now = new Date();
   const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  chatMessages.push({u: currentUser?.username||'Sen', m: emoji + ' tepki verdi', t:t2});
-  renderChat();
+  pushChatMessage({u: currentUser?.username||'Sen', m: emoji + ' tepki verdi', t:t2});
   // Animasyon
   const btn = event.target;
   btn.style.transform = 'scale(1.4)';
@@ -4423,9 +4487,8 @@ function sendChatSide(){
   if(!val) return;
   const now = new Date();
   const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  chatMessages.push({u: currentUser?.username||'Sen', m:val, t:t2});
+  pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
-  renderChat();
 }
 function sendChat(){
   const input = document.getElementById('chatInput');
@@ -4433,9 +4496,8 @@ function sendChat(){
   if(!val) return;
   const now = new Date();
   const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  chatMessages.push({u: currentUser?.username||'Sen', m:val, t:t2});
+  pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
-  renderChat();
 }
 document.getElementById('btab_chat').addEventListener('click', ()=>setTimeout(renderChat,50));
 
