@@ -2549,10 +2549,24 @@ tr:last-child td{border:none;}
     </div>
     <div class="header-center">
       <button class="nav-tab active" onclick="switchMainTab('live',this)">📺 CANLI</button>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid rgba(245,200,66,0.35);border-radius:8px;padding:5px 14px;max-width:420px;overflow:hidden;">
-        <span style="font-size:12px;flex-shrink:0;">💬</span>
-        <span style="font-size:10px;font-weight:900;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;flex-shrink:0;white-space:nowrap;">Günün Sözü:</span>
-        <span id="dailyQuote" style="font-size:12px;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-weight:600;text-shadow:0 0 10px rgba(245,200,66,0.25);">...</span>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid rgba(245,200,66,0.35);border-radius:8px;padding:5px 14px;overflow:hidden;">
+        <span style="font-size:12px;flex-shrink:0;">🔮</span>
+        <span style="font-size:10px;font-weight:900;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;flex-shrink:0;white-space:nowrap;">Günlük Burç:</span>
+        <select id="burcSelect" style="background:transparent;border:none;color:#ffffff;font-size:11px;font-weight:600;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          <option value="/koc.asp" style="background:#0e1318;">Koç</option>
+          <option value="/boga.asp" style="background:#0e1318;">Boğa</option>
+          <option value="/ikizler.asp" style="background:#0e1318;">İkizler</option>
+          <option value="/yengec.asp" style="background:#0e1318;">Yengeç</option>
+          <option value="/aslan.asp" style="background:#0e1318;">Aslan</option>
+          <option value="/basak.asp" style="background:#0e1318;">Başak</option>
+          <option value="/terazi.asp" style="background:#0e1318;">Terazi</option>
+          <option value="/akrep.asp" style="background:#0e1318;">Akrep</option>
+          <option value="/yay.asp" style="background:#0e1318;">Yay</option>
+          <option value="/oglak.asp" style="background:#0e1318;">Oğlak</option>
+          <option value="/kova.asp" style="background:#0e1318;">Kova</option>
+          <option value="/balik.asp" style="background:#0e1318;">Balık</option>
+        </select>
+        <button onclick="window.open('https://www.astroloji.org/yildizfali'+document.getElementById('burcSelect').value,'','width=530,height=450,status=no,toolbar=no,menubar=no,scrollbars=1,resizable=no')" style="background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.4);border-radius:6px;color:var(--gold);font-size:10px;font-weight:700;padding:2px 8px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Göster</button>
       </div>
     </div>
     <div class="header-right">
@@ -3379,55 +3393,63 @@ function toggleRadio(){
 }
 
 var _radioUrls = [
-  'https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio',
-  'https://listen.powerapp.com.tr/powerfm/mpeg/icecast.audio',
-  'https://radio-stream.trt.net.tr/trtfm/chunklist.m3u8',
-  'https://stream.zeno.fm/0r0xa792kwzuv'
+  'https://moondigitaledge.radyotvonline.net/palnostalji/playlist.m3u8'
 ];
 var _radioUrlIdx = 0;
+var _radioHls = null;
 
 function startRadio(){
   const audio = document.getElementById('radioAudio');
   const btn   = document.getElementById('radioPlayBtn');
   const eq    = document.getElementById('eqBars');
   const dot   = document.getElementById('radioLiveDot');
+  const url   = _radioUrls[0];
 
   radioLoading = true;
   btn.textContent = '⏳';
   btn.classList.remove('playing');
 
-  function tryUrl(idx){
-    if(idx >= _radioUrls.length){
-      radioPlaying = false;
-      radioLoading = false;
-      btn.textContent = '▶';
-      btn.classList.remove('playing');
-      if(eq) eq.classList.remove('playing');
-      dot.classList.remove('on');
-      showToast('📻 Radyo bağlanamadı', 'warning');
-      return;
-    }
-    audio.src = _radioUrls[idx];
-    audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
-    audio.load();
-    audio.play().then(function(){
-      // Yüklenirken stopRadio çağrıldıysa dur
-      if(!radioLoading){ audio.pause(); audio.src=''; return; }
-      _radioUrlIdx = idx;
-      radioPlaying = true;
-      radioLoading = false;
-      btn.textContent = '⏹';
-      btn.classList.add('playing');
-      if(eq) eq.classList.add('playing');
-      dot.classList.add('on');
-      document.getElementById('radioName').textContent = '📻 CANLI RADYO';
-    }).catch(function(){
-      if(!radioLoading) return;
-      tryUrl(idx + 1);
-    });
+  function onSuccess(){
+    if(!radioLoading){ audio.pause(); audio.src=''; return; }
+    radioPlaying = true;
+    radioLoading = false;
+    btn.textContent = '⏹';
+    btn.classList.add('playing');
+    if(eq) eq.classList.add('playing');
+    dot.classList.add('on');
   }
 
-  tryUrl(0);
+  function onFail(){
+    radioPlaying = false;
+    radioLoading = false;
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    if(eq) eq.classList.remove('playing');
+    dot.classList.remove('on');
+    showToast('📻 Radyo bağlanamadı', 'warning');
+  }
+
+  if(_radioHls){ _radioHls.destroy(); _radioHls = null; }
+
+  if(typeof Hls !== 'undefined' && Hls.isSupported()){
+    _radioHls = new Hls();
+    _radioHls.loadSource(url);
+    _radioHls.attachMedia(audio);
+    _radioHls.on(Hls.Events.MANIFEST_PARSED, function(){
+      audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
+      audio.play().then(onSuccess).catch(onFail);
+    });
+    _radioHls.on(Hls.Events.ERROR, function(e, data){
+      if(data.fatal) onFail();
+    });
+  } else if(audio.canPlayType('application/vnd.apple.mpegurl')){
+    audio.src = url;
+    audio.volume = (document.getElementById('radioVol')?.value || 70) / 100;
+    audio.load();
+    audio.play().then(onSuccess).catch(onFail);
+  } else {
+    onFail();
+  }
 }
 
 function stopRadio(){
@@ -3435,6 +3457,7 @@ function stopRadio(){
   const btn   = document.getElementById('radioPlayBtn');
   const eq    = document.getElementById('eqBars');
   const dot   = document.getElementById('radioLiveDot');
+  if(_radioHls){ _radioHls.destroy(); _radioHls = null; }
   audio.pause();
   audio.src = '';
   radioPlaying = false;
