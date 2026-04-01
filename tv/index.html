@@ -3915,7 +3915,8 @@ function initFirebaseChat(){
   }
   // Önceki dinleyiciyi temizle
   chatDbRef.off();
-  // Son 100 mesajı gerçek zamanlı dinle
+
+  // Gerçek zamanlı dinleyici
   chatDbRef.limitToLast(100).on('value', snapshot => {
     chatMessages = [];
     snapshot.forEach(child => {
@@ -3926,6 +3927,21 @@ function initFirebaseChat(){
   }, err => {
     console.error('Firebase dinleme hatası:', err);
   });
+
+  // Mobil için yedek: her 3 saniyede bir zorla güncelle
+  if(window._chatPollInterval) clearInterval(window._chatPollInterval);
+  window._chatPollInterval = setInterval(()=>{
+    chatDbRef.limitToLast(100).once('value', snapshot => {
+      const msgs = [];
+      snapshot.forEach(child => { msgs.push(child.val()); });
+      // Sadece değişiklik varsa güncelle
+      if(JSON.stringify(msgs) !== JSON.stringify(chatMessages)){
+        chatMessages = msgs;
+        renderChat();
+      }
+    });
+  }, 3000);
+
   console.log('✅ Firebase chat dinleyici aktif');
 }
 
