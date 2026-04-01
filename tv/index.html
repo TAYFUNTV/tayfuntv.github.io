@@ -330,9 +330,9 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   flex-shrink: 0;
 }
 .chat-user::after {
-  content: ': ';
-  color: rgba(255,255,255,0.4);
-  font-weight: 400;
+  content: ' : ';
+  color: #e8373d;
+  font-weight: 700;
 }
 .chat-user.admin {
   color: #ffd700;
@@ -4118,6 +4118,9 @@ function renderChInfo(ch){
 let chatMessages = [];
 
 /* ── Firebase chat dinleyicisini başlat ── */
+// Kullanıcının giriş yaptığı zaman damgası — sadece bu andan sonraki mesajlar gösterilir
+let _chatSessionStart = Date.now();
+
 function initFirebaseChat(){
   if(!firebaseReady || !chatDbRef) {
     console.warn('Firebase henüz hazır değil, 1sn sonra tekrar deneniyor...');
@@ -4126,6 +4129,9 @@ function initFirebaseChat(){
   }
   // Önceki dinleyiciyi temizle
   chatDbRef.off();
+  // Giriş anını kaydet — bu andan önceki mesajlar gösterilmez
+  _chatSessionStart = Date.now();
+  chatMessages = [];
 
   // Gerçek zamanlı dinleyici
   chatDbRef.limitToLast(100).on('value', snapshot => {
@@ -4145,7 +4151,6 @@ function initFirebaseChat(){
     chatDbRef.limitToLast(100).once('value', snapshot => {
       const msgs = [];
       snapshot.forEach(child => { msgs.push(child.val()); });
-      // Sadece değişiklik varsa güncelle
       if(JSON.stringify(msgs) !== JSON.stringify(chatMessages)){
         chatMessages = msgs;
         renderChat();
@@ -4154,7 +4159,6 @@ function initFirebaseChat(){
   }, 3000);
 
   console.log('✅ Firebase chat dinleyici aktif');
-  setTimeout(cleanOldMessages, 2000);
 }
 
 function clearChat(){
@@ -4358,8 +4362,8 @@ function renderChat(){
     document.getElementById('mobChatMessages')
   ];
   const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
-  const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
-  const visibleMsgs = chatMessages.filter(msg => !msg.ts || msg.ts > twoHoursAgo);
+  // Sadece bu oturumda (giriş yapıldıktan sonra) gelen mesajları göster
+  const visibleMsgs = chatMessages.filter(msg => !msg.ts || msg.ts >= _chatSessionStart);
   boxes.forEach(box => {
     if(!box) return;
     if(!visibleMsgs.length){ box.innerHTML = empty; return; }
