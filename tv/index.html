@@ -2618,7 +2618,7 @@ tr:last-child td{border:none;}
               <!-- Mobil çevrimiçi kullanıcılar -->
               <div style="flex-shrink:0;margin-bottom:6px;">
                 <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:4px;padding:0 2px;">🟢 ÇEVRİMİÇİ KULLANICILAR</div>
-                <div id="mobOnlineUsersBar" style="display:flex;flex-direction:column;gap:3px;max-height:100px;overflow-y:auto;"></div>
+                <div id="mobOnlineUsersBar" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
               </div>
               <div id="mobChatMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
                 <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
@@ -2771,12 +2771,9 @@ tr:last-child td{border:none;}
           </div>
           <!-- CHAT (sağ panele taşındı) -->
           <div class="btab-content" id="btab_chat" style="display:none;">
-            <!-- Giriş yapan kullanıcı bilgisi -->
-            <div id="chatUserBadgeMain" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;margin-bottom:6px;">
-              <span id="chatUserAvatarMain" style="font-size:14px;">👤</span>
-              <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;">GİRİŞ:</span>
-              <span id="chatUserNameMain" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
-            </div>
+            <!-- kullanıcı badge kaldırıldı, online listede görünüyor -->
+            <span id="chatUserAvatarMain" style="display:none;"></span>
+            <span id="chatUserNameMain" style="display:none;"></span>
             <div id="chatBox"></div>
           </div>
 
@@ -2790,16 +2787,13 @@ tr:last-child td{border:none;}
             <button id="clearChatBtn" style="background:rgba(232,55,61,.15);border:1px solid rgba(232,55,61,.3);color:#ff6b6b;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer;font-weight:700;">🗑 Temizle</button>
           </div>
           <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
-            <!-- Giriş yapan kullanıcı bilgisi -->
-            <div id="chatUserBadgeSide" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;margin-bottom:6px;flex-shrink:0;">
-              <span id="chatUserAvatarSide" style="font-size:14px;">👤</span>
-              <span style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;">GİRİŞ:</span>
-              <span id="chatUserNameSide" style="font-size:11px;font-weight:700;color:#74c0fc;">—</span>
-            </div>
+            <!-- kullanıcı badge kaldırıldı, online listede görünüyor -->
+            <span id="chatUserAvatarSide" style="display:none;"></span>
+            <span id="chatUserNameSide" style="display:none;"></span>
             <!-- Çevrimiçi kullanıcılar -->
             <div style="flex-shrink:0;margin-bottom:6px;">
               <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:4px;padding:0 2px;">🟢 ÇEVRİMİÇİ KULLANICILAR</div>
-              <div id="onlineUsersBar" style="display:flex;flex-direction:column;gap:3px;max-height:110px;overflow-y:auto;"></div>
+              <div id="onlineUsersBar" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
             </div>
             <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
@@ -3296,14 +3290,7 @@ function loginSuccess(user){
       if(el){ el.style.color = '#ffd700'; el.textContent = '👑 ' + user.username; }
     });
   }
-  setTimeout(()=>{
-    // Admin girişini chat'e yaz
-    if(user.role === 'admin' || user.username === _d(_un)){
-      const now = new Date();
-      const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      pushChatMessage({u:'🔴 SİSTEM', m:`👑 Admin "${user.username}" giriş yaptı.`, t:t2});
-    }
-  }, 1500);
+  // Admin giriş bildirimi kaldırıldı — online listede zaten görünüyor
 }
 function doLogout(){
   removeOnlinePresence();
@@ -4232,26 +4219,33 @@ function renderOnlineUsers(users){
     document.getElementById('onlineUsersBar'),
     document.getElementById('mobOnlineUsersBar')
   ];
-  const emptyHtml = '<div style="font-size:10px;color:var(--muted);padding:2px 4px;">— kimse yok</div>';
-  if(!users.length){ bars.forEach(b=>{ if(b) b.innerHTML = emptyHtml; }); return; }
   // Adminler önce, sonra alfabetik
   users.sort((a,b) => {
     if(a.role==='admin' && b.role!=='admin') return -1;
     if(b.role==='admin' && a.role!=='admin') return 1;
     return (a.nick||'').localeCompare(b.nick||'', 'tr');
   });
-  const html = users.map(u => {
+  // Kompakt yatay şerit: avatar + isim yan yana
+  const emptyHtml = '<span style="font-size:10px;color:var(--muted);">— kimse yok</span>';
+  const html = users.length ? users.map(u => {
     const isAdmin = u.role === 'admin';
-    const color   = isAdmin ? '#ffd700' : '#74c0fc';
-    const icon    = isAdmin ? '👑' : (u.avatar || '👤');
-    const badge   = isAdmin ? '<span style="font-size:8px;background:rgba(255,215,0,.15);color:#ffd700;border-radius:4px;padding:1px 4px;font-weight:800;margin-left:4px;">ADMİN</span>' : '';
-    return `<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:7px;">
-      <span style="font-size:13px;line-height:1;">${icon}</span>
-      <span style="font-size:11px;font-weight:700;color:${color};flex:1;">${u.nick}${badge}</span>
-      <span style="width:7px;height:7px;border-radius:50%;background:#2ecc71;flex-shrink:0;box-shadow:0 0 5px rgba(46,204,113,.6);"></span>
-    </div>`;
-  }).join('');
-  bars.forEach(b=>{ if(b) b.innerHTML = html; });
+    const color = isAdmin ? '#ffd700' : '#74c0fc';
+    const icon  = isAdmin ? '👑' : (u.avatar || '👤');
+    return `<span title="${u.nick}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;">
+      <span style="font-size:12px;line-height:1;">${icon}</span>
+      <span style="font-size:10px;font-weight:700;color:${color};">${u.nick}</span>
+      <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;"></span>
+    </span>`;
+  }).join('') : emptyHtml;
+  bars.forEach(b=>{
+    if(!b) return;
+    b.style.flexDirection = 'row';
+    b.style.flexWrap = 'wrap';
+    b.style.gap = '4px';
+    b.style.maxHeight = '';
+    b.style.overflowY = '';
+    b.innerHTML = html;
+  });
 }
 // Temizle butonunu addEventListener ile bağla
 
