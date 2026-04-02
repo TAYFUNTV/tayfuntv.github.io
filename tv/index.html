@@ -4666,7 +4666,8 @@ function renderOnlineUsers(users){
     const isMuted = _isMuted(u.nick);
     const clickable = isAdminViewer && !isAdminUser;
     const safeNick = (u.nick||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    const clickAttr = clickable ? `onclick="openModMenu(event,'${safeNick}')" style="cursor:pointer;"` : '';
+    const encodedNick = encodeURIComponent(u.nick||'');
+    const clickAttr = clickable ? `onclick="openModMenu(event,'${safeNick}')" data-mod-user="${encodedNick}" style="cursor:pointer;"` : '';
     return `<span 
       title="${u.nick}${clickable?' — yönet için tıkla':''}"
       ${clickAttr}
