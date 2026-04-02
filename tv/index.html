@@ -3472,25 +3472,27 @@ function loginSuccess(user){
   if(user.guest || user.demo){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); return; }
   // Ban kontrolü — admin hariç
   if(user.role !== 'admin'){
+    const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
     const checkBan = () => {
       if(window.bannedDbRef){
-        const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
         window.bannedDbRef.child(key).once('value', snap => {
           if(snap.exists()){
             const banData = snap.val();
             document.getElementById('loginScreen').style.display = 'none';
-            const banScreen = document.getElementById('banScreen');
-            banScreen.style.display = 'flex';
+            document.getElementById('banScreen').style.display = 'flex';
             document.getElementById('banReason').textContent =
               'Ban nedeni: ' + (banData.reason || 'Belirtilmedi');
           } else {
             _doLoginSuccess(user);
           }
+        }, err => {
+          // Firebase okuma hatası — yine de giriş yaptır
+          console.warn('Ban kontrol hatası, giriş izin veriliyor:', err);
+          _doLoginSuccess(user);
         });
       } else {
         // Firebase yoksa localStorage ban kontrolü
         const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
-        const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
         if(bans[key]){
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('banScreen').style.display = 'flex';
@@ -3500,8 +3502,25 @@ function loginSuccess(user){
         }
       }
     };
-    // Firebase hazır değilse kısa bekle
-    if(firebaseReady){ checkBan(); } else { setTimeout(checkBan, 1500); }
+    // bannedDbRef hazır olana kadar bekle, max 3sn sonra direkt giriş yaptır
+    if(window.bannedDbRef){
+      checkBan();
+    } else if(firebaseReady){
+      // Firebase hazır ama bannedDbRef henüz atanmadı — 500ms bekle
+      setTimeout(() => {
+        if(window.bannedDbRef){ checkBan(); } else { _doLoginSuccess(user); }
+      }, 500);
+    } else {
+      // Firebase hiç hazır değil — localStorage ile kontrol et
+      const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+      if(bans[key]){
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('banScreen').style.display = 'flex';
+        document.getElementById('banReason').textContent = 'Ban nedeni: ' + (bans[key].reason || 'Belirtilmedi');
+      } else {
+        _doLoginSuccess(user);
+      }
+    }
     return;
   }
   _doLoginSuccess(user);
