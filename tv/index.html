@@ -2892,7 +2892,7 @@ tr:last-child td{border:none;}
                   <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="mobColorPaletteDot"></span>
                 </button>
                 <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
-                <button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+                <button id="mobSendBtn" onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
             </div>
           </div>
@@ -3098,7 +3098,7 @@ tr:last-child td{border:none;}
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
-              <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+              <button id="sendChatBtnSide" onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
           </div>
         </div>
@@ -4649,16 +4649,16 @@ function renderOnlineUsers(users){
     const color = isAdminUser ? '#ffd700' : '#74c0fc';
     const icon  = isAdminUser ? '👑' : (u.avatar || '👤');
     const isMuted = _isMuted(u.nick);
-    // Admin başka kullanıcıya tıklayabilsin
     const clickable = isAdminViewer && !isAdminUser;
-    const safeNick = encodeURIComponent(u.nick||'');
+    const safeNick = (u.nick||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const clickAttr = clickable ? `onclick="openModMenu(event,'${safeNick}')" style="cursor:pointer;"` : '';
     return `<span 
-      title="${u.nick}${clickable?' — yönet':''}"
-      ${clickable ? `data-mod-user="${safeNick}" style="cursor:pointer;"` : ''}
-      style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid ${clickable?'rgba(232,55,61,.3)':'rgba(255,255,255,0.08)'};border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;${clickable?'cursor:pointer;':''}">
-      <span style="font-size:12px;line-height:1;">${icon}</span>
-      <span style="font-size:10px;font-weight:700;color:${isMuted?'#5a6478':color};">${u.nick}${isMuted?' 🔇':''}</span>
-      <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;"></span>
+      title="${u.nick}${clickable?' — yönet için tıkla':''}"
+      ${clickAttr}
+      style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid ${clickable?'rgba(232,55,61,.4)':'rgba(255,255,255,0.08)'};border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;${clickable?'cursor:pointer;transition:border-color .2s;':''}">
+      <span style="font-size:12px;line-height:1;pointer-events:none;">${icon}</span>
+      <span style="font-size:10px;font-weight:700;color:${isMuted?'#5a6478':color};pointer-events:none;">${u.nick}${isMuted?' 🔇':''}</span>
+      <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;pointer-events:none;"></span>
     </span>`;
   }).join('') : emptyHtml;
   bars.forEach(b=>{
@@ -5312,6 +5312,13 @@ function _isMuted(username){
   return !!local[key];
 }
 
+/* ── Online listeden mod menüsü aç (direkt onclick) ── */
+function openModMenu(e, username){
+  e.stopPropagation();
+  if(!currentUser || currentUser.role !== 'admin') return;
+  openCtxMenu(username, '', e.clientX, e.clientY);
+}
+
 /* ── Context menüyü aç ── */
 function openCtxMenu(username, fbKey, x, y){
   if(!currentUser || currentUser.role !== 'admin') return;
@@ -5490,8 +5497,12 @@ function _applyKickOrBan(data, ref){
 }
 
 function _listenKick(){
-  if(!firebaseReady || !currentUser || _kickListenerAttached) return;
+  if(!currentUser || _kickListenerAttached) return;
   if(currentUser.role === 'admin') return;
+  if(!firebaseReady || typeof firebase === 'undefined'){
+    setTimeout(_listenKick, 1000);
+    return;
+  }
   _kickListenerAttached = true;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
   const kickRef = firebase.database().ref('tayfuntv_kicks/' + key);
@@ -5550,24 +5561,38 @@ function _startMutePoll(){
 }
 
 /* ── Muted dinleyici — Firebase gerçek zamanlı ── */
+function _applyMuteUI(muted){
+  ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = muted;
+    el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
+    el.style.opacity = muted ? '.4' : '1';
+    el.style.pointerEvents = muted ? 'none' : '';
+  });
+  // Gönder butonlarını da kilitle
+  ['sendChatBtnSide','mobSendBtn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = muted;
+    el.style.opacity = muted ? '.3' : '1';
+    el.style.pointerEvents = muted ? 'none' : '';
+  });
+}
+
 function _initMutedListener(){
-  if(!window.mutedDbRef) return;
+  if(!window.mutedDbRef){
+    setTimeout(_initMutedListener, 1000);
+    return;
+  }
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
     renderChat();
     if(typeof _lastOnlineUsers !== 'undefined') renderOnlineUsers(_lastOnlineUsers);
-    // Eğer bu kullanıcı susturulduysa input'u disable et
     if(currentUser && currentUser.role !== 'admin'){
       const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-      const muted = !!window._mutedSet[key];
-      ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
-        const el = document.getElementById(id);
-        if(!el) return;
-        el.disabled = muted;
-        el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
-        el.style.opacity = muted ? '.4' : '1';
-      });
+      _applyMuteUI(!!window._mutedSet[key]);
     }
   });
 }
@@ -5656,7 +5681,6 @@ function sendMobChat(){
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
-  // Admin değilse kural uyarısı göster
   if(!(currentUser && currentUser.role === 'admin')){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
       document.getElementById('chatWarning').style.display = 'flex';
@@ -5665,14 +5689,25 @@ function sendMobChat(){
   }
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
-  // Susturulmuş kullanıcı mesaj gönderemesin
-  const _muteKey2 = displayName.replace(/[.#$\/\[\]]/g,'_');
-  const _isMutedNow2 = !!(window._mutedSet && window._mutedSet[_muteKey2]) || _isMuted(displayName);
-  if(_isMutedNow2){
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-    input.value = '';
+  const muteKey = displayName.replace(/[.#$\/\[\]]/g,'_');
+  // Anlık Firebase kontrolü — en güvenilir yöntem
+  if(window.mutedDbRef && firebaseReady){
+    window.mutedDbRef.child(muteKey).once('value', snap => {
+      if(snap.exists()){
+        showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+        input.value = '';
+        if(typeof _applyMuteUI === 'function') _applyMuteUI(true);
+        return;
+      }
+      input.value = '';
+      const now2 = new Date();
+      const t2 = String(now2.getHours()).padStart(2,'0') + ':' + String(now2.getMinutes()).padStart(2,'0');
+      pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor || null});
+    });
     return;
   }
+  // Firebase hazır değilse local kontrol
+  if(_isMuted(displayName)){ showToast('🔇 Susturuldunuz','warning'); input.value=''; return; }
   input.value = '';
   const now = new Date();
   const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
