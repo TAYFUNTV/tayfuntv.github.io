@@ -540,63 +540,78 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 #radioBar {
   display: flex; align-items: center; gap: 12px;
   height: 42px; padding: 0 16px;
-  background: linear-gradient(90deg, #0a0c10 0%, #0f1520 30%, #111827 70%, #0a0c10 100%);
-  border-bottom: 1px solid rgba(232,55,61,.3);
+  background: #000000;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   position: relative; overflow: hidden; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 #radioBar::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(232,55,61,.07) 50%, transparent 100%);
-  animation: radioShimmer 5s linear infinite;
+  content: none;
 }
 @keyframes radioShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
 .radio-left { display:flex; align-items:center; gap:8px; flex-shrink:0; z-index:1; }
 .radio-play-btn {
   width:24px; height:24px; border-radius:50%;
-  background:var(--accent); border:none; color:#fff;
+  background: linear-gradient(135deg,#cc0000,#ff2222); border:none; color:#fff;
   font-size:9px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition:all .2s; flex-shrink:0; box-shadow:0 0 8px rgba(232,55,61,.4);
+  transition:all .2s; flex-shrink:0; box-shadow:0 0 8px rgba(200,0,0,0.5);
 }
-.radio-play-btn:hover { transform:scale(1.15); }
-.radio-play-btn.playing { background:#2ecc71; box-shadow:0 0 8px rgba(46,204,113,.4); }
+.radio-play-btn:hover { transform:scale(1.15); box-shadow:0 0 14px rgba(200,0,0,0.8); }
+.radio-play-btn.playing { background: linear-gradient(135deg,#059669,#10b981); box-shadow:0 0 10px rgba(16,185,129,.5); }
 .radio-live-dot {
-  width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0;
-  animation: livePulse 1.2s ease-in-out infinite;
+  width:7px; height:7px; border-radius:50%;
+  background: #ff4444; flex-shrink:0;
+  animation: radioLivePulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(255,68,68,0.8);
 }
-.radio-live-dot.on { background:#2ecc71; }
+.radio-live-dot.on { background:#34d399; box-shadow:0 0 6px rgba(52,211,153,.8); }
+@keyframes radioLivePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(0.7);} }
 @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.2} }
-#radioName { animation: livePulse 1.5s ease-in-out infinite; }
+#radioName {
+  background: linear-gradient(90deg, #ff0080, #ff8c00, #ffe600, #00ff88, #00cfff, #ff0080);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: labelShine 2s linear infinite;
+  font-weight: 900 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 10px;
+}
 
 .radio-right { display:flex; align-items:center; gap:6px; flex-shrink:0; z-index:1; }
 .radio-vol {
-  width:60px; height:3px; accent-color:var(--accent); cursor:pointer;
-  -webkit-appearance:none; background:rgba(255,255,255,.15); border-radius:2px; outline:none;
+  width:60px; height:3px; accent-color:#cc0000; cursor:pointer;
+  -webkit-appearance:none; background:rgba(255,255,255,.2); border-radius:2px; outline:none;
 }
 /* HABER KAYAN YAZI */
 .news-ticker-wrap {
   flex: 1; display:flex; align-items:center; gap:0;
   overflow:hidden; height:100%;
-  border-left:1px solid rgba(255,255,255,.07);
-  border-right:1px solid rgba(255,255,255,.07);
+  border-left:1px solid rgba(255,255,255,0.1);
+  border-right:1px solid rgba(255,255,255,0.1);
   margin: 0 6px;
-  background: rgba(255,255,255,.02);
+  background: #000000;
   border-radius:4px;
 }
 .news-ticker-label {
   display:flex; align-items:center; gap:5px; flex-shrink:0;
   padding:0 14px; height:100%;
-  background: transparent;
-  border-right:1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,0.6);
+  border-right:1px solid rgba(255,255,255,0.1);
   white-space:nowrap;
 }
 .news-ticker-label-dot {
   width:6px; height:6px; border-radius:50%;
-  background:var(--accent);
-  animation: livePulse 1.2s ease-in-out infinite;
+  background:#ff4444;
+  box-shadow: 0 0 6px rgba(255,68,68,.7);
+  animation: radioLivePulse 1.2s ease-in-out infinite;
   flex-shrink:0;
 }
 .news-ticker-label-text {
-  font-size:10px; font-weight:900; color:#fff;
+  font-size:10px; font-weight:900;
+  color: #ffffff;
   letter-spacing:1.5px; text-transform:uppercase;
 }
 .news-ticker-scroll { flex:1; overflow:hidden; height:100%; display:flex; align-items:center; }
@@ -606,29 +621,48 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 }
 .news-ticker-track:hover { animation-play-state:paused; cursor:pointer; }
 .news-item {
-  font-size:13px; color:#f0f0f0; font-weight:500;
-  padding:0 30px; flex-shrink:0;
-  letter-spacing:.2px;
+  font-size:15px; color:#cccccc; font-weight:400;
+  padding:0 36px; flex-shrink:0;
+  letter-spacing:.3px;
   position:relative;
   font-family:'DM Sans',sans-serif;
+  text-shadow:none;
 }
 .news-item::after {
-  content:'|';
+  content:'✦';
   position:absolute; right:0; top:50%; transform:translateY(-50%);
-  color:rgba(255,255,255,.2); font-size:12px; font-weight:300;
+  color:rgba(255,255,255,.2); font-size:10px;
+}
+.news-item-title {
+  font-weight:800;
+  color:#f5c842;
+  font-size:15px;
+  margin-right:6px;
+}
+.news-item-body {
+  font-weight:400;
+  color:#cccccc;
+  font-size:15px;
 }
 .news-breaking {
   display:inline-block;
-  background:#e8373d;
+  background: #cc0000;
   color:#ffffff !important;
   font-size:10px; font-weight:900;
-  padding:2px 7px;
+  padding:2px 8px;
   margin-right:8px;
   letter-spacing:1.5px;
   text-transform:uppercase;
   vertical-align:middle;
   font-family:'DM Sans',sans-serif;
   line-height:1.6;
+  border-radius:4px;
+  box-shadow:0 0 10px rgba(200,0,0,.6);
+  animation: breakingPulse 1.5s ease-in-out infinite;
+}
+@keyframes breakingPulse {
+  0%,100% { background:#cc0000; box-shadow:0 0 8px rgba(200,0,0,.5); }
+  50%      { background:#ff0000; box-shadow:0 0 16px rgba(255,0,0,.8); }
 }
 @keyframes newsTicker {
   0%   { transform: translateX(0); }
@@ -2529,7 +2563,7 @@ tr:last-child td{border:none;}
     <div class="radio-left">
       <button id="radioPlayBtn" class="radio-play-btn" onclick="toggleRadio()">▶</button>
       <span class="radio-live-dot" id="radioLiveDot"></span>
-      <span id="radioName" style="font-size:10px;font-weight:700;color:var(--text);white-space:nowrap;margin-right:6px;">📻 CANLI RADYO</span>
+      <span id="radioName" style="font-size:10px;white-space:nowrap;margin-right:6px;">📻 CANLI RADYO</span>
       <span style="font-size:9px;color:rgba(255,255,255,.3);margin-right:6px;">|</span>
     </div>
     <!-- HABER KAYAN YAZI -->
@@ -2683,9 +2717,47 @@ tr:last-child td{border:none;}
                 </div>
                 <div id="mobEmojiGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:140px;overflow-y:auto;"></div>
               </div>
+              <!-- Mobil GIF Paneli -->
+              <div id="mobGifPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
+                  <button onclick="setMobGifCat('tepki',this)" class="mob-gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+                  <button onclick="setMobGifCat('kutlama',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+                  <button onclick="setMobGifCat('dans',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+                  <button onclick="setMobGifCat('hayvan',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+                  <button onclick="setMobGifCat('spor',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+                  <button onclick="setMobGifCat('film',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+                </div>
+                <div id="mobGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
+              </div>
+              <!-- Mobil Renk Paleti Paneli -->
+              <div id="mobColorPalettePanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:201;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+                <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:8px;">🎨 YAZI RENGİ SEÇ</div>
+                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;">
+                  <button onclick="setMobChatColor('#e8eaf0',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
+                  <button onclick="setMobChatColor('#74c0fc',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
+                  <button onclick="setMobChatColor('#f5c842',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
+                  <button onclick="setMobChatColor('#e8373d',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
+                  <button onclick="setMobChatColor('#2ecc71',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
+                  <button onclick="setMobChatColor('#a855f7',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
+                  <button onclick="setMobChatColor('#fb923c',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
+                  <button onclick="setMobChatColor('#f472b6',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
+                  <button onclick="setMobChatColor('#22d3ee',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
+                  <button onclick="setMobChatColor('#a3e635',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
+                  <button onclick="setMobChatColor('#fbbf24',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
+                  <button onclick="setMobChatColor('#ff6b6b',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
+                  <button onclick="setMobChatColor('#818cf8',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
+                  <button onclick="setMobChatColor('#34d399',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
+                  <button onclick="setMobChatColor('#e879f9',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
+                  <button onclick="setMobChatColor('#94a3b8',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
+                </div>
+              </div>
               <div style="display:flex;gap:4px;flex-shrink:0;">
                 <button onclick="toggleMobEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;" title="Emoji">😊</button>
-                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#ffffff;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
+                <button onclick="toggleMobGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
+                <button id="mobColorPaletteBtn" onclick="toggleMobColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk Paleti">
+                  <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="mobColorPaletteDot"></span>
+                </button>
+                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
                 <button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
             </div>
@@ -2860,12 +2932,37 @@ tr:last-child td{border:none;}
               </div>
               <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
             </div>
+            <!-- Renk Paleti Paneli (Desktop) -->
+            <div id="colorPalettePanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:101;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+              <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:8px;">🎨 YAZI RENGİ SEÇ</div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;">
+                <button onclick="setChatColor('#e8eaf0',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
+                <button onclick="setChatColor('#74c0fc',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
+                <button onclick="setChatColor('#f5c842',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
+                <button onclick="setChatColor('#e8373d',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
+                <button onclick="setChatColor('#2ecc71',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
+                <button onclick="setChatColor('#a855f7',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
+                <button onclick="setChatColor('#fb923c',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
+                <button onclick="setChatColor('#f472b6',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
+                <button onclick="setChatColor('#22d3ee',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
+                <button onclick="setChatColor('#a3e635',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
+                <button onclick="setChatColor('#fbbf24',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
+                <button onclick="setChatColor('#ff6b6b',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
+                <button onclick="setChatColor('#818cf8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
+                <button onclick="setChatColor('#34d399',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
+                <button onclick="setChatColor('#e879f9',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
+                <button onclick="setChatColor('#94a3b8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
+              </div>
+            </div>
             </div>
 
             <div style="display:flex;gap:4px;flex-shrink:0;">
               <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
+              <button id="colorPaletteBtn" onclick="toggleColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;position:relative;" title="Renk Paleti">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="colorPaletteDot"></span>
+              </button>
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
-                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#ffffff;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
+                style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
               <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
@@ -4336,8 +4433,24 @@ function applyNewsToTicker(titles){
   const html = [...titles, ...titles].map(t => {
     const isBreaking = BREAKING_KEYWORDS.some(k => t.toLowerCase().includes(k));
     const badge = isBreaking ? `<span class="news-breaking">SON DAKİKA</span>` : '';
-    const style = isBreaking ? ' style="color:#e8373d;font-weight:700;"' : '';
-    return `<span class="news-item"${style}>${badge}${t}</span>`;
+    // Başlık / içerik ayrımı: ":" veya "–" veya ilk 3-4 kelime başlık sayılır
+    let titlePart = '', bodyPart = t;
+    const sepIdx = t.search(/[:–-]/);
+    if(sepIdx > 4 && sepIdx < 60){
+      titlePart = t.slice(0, sepIdx + 1).trim();
+      bodyPart  = t.slice(sepIdx + 1).trim();
+    } else {
+      const words = t.split(' ');
+      if(words.length > 4){
+        titlePart = words.slice(0, 3).join(' ');
+        bodyPart  = words.slice(3).join(' ');
+      }
+    }
+    const inner = titlePart
+      ? `<span class="news-item-title">${titlePart}</span><span class="news-item-body">${bodyPart}</span>`
+      : `<span class="news-item-body">${bodyPart}</span>`;
+    const breakingStyle = isBreaking ? ' style="color:#ff6666;"' : '';
+    return `<span class="news-item"${breakingStyle}>${badge}${inner}</span>`;
   }).join('');
   ticker.innerHTML = html;
   ticker.style.animationDuration = Math.max(90, titles.length * 8) + 's';
@@ -4435,7 +4548,7 @@ function renderChat(){
     box.innerHTML = visibleMsgs.map(msg=>`
       <div style="display:flex;gap:6px;align-items:flex-start;">
         <span class="chat-user" style="color:${getChatUserColor(msg.u)}">${msg.u}</span>
-        <span style="font-size:11px;color:var(--text2);flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
+        <span style="font-size:11px;color:${msg.c||'var(--text2)'};flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
       </div>`).join('');
     box.scrollTop = box.scrollHeight;
@@ -4877,7 +4990,7 @@ function sendMobChat(){
   const displayName = u.username || u.name || 'Misafir';
   const now = new Date();
   const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  pushChatMessage({u: displayName, m: msg, t: t2});
+  pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor || null});
 }
 
 function sendChatSide(){
@@ -4894,7 +5007,7 @@ function sendChatSide(){
   if(!val) return;
   const now = new Date();
   const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
+  pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2, c: window._chatColor || null});
   input.value = '';
 }
 function sendChat(){
@@ -4906,6 +5019,109 @@ function sendChat(){
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
 }
+
+// ===== RENK PALETİ (DESKTOP) =====
+window._chatColor = '#e8eaf0';
+function toggleColorPalette(){
+  const gp = document.getElementById('gifPanel');
+  const ep = document.getElementById('emojiPanel');
+  const cp = document.getElementById('colorPalettePanel');
+  if(gp) gp.style.display = 'none';
+  if(ep) ep.style.display = 'none';
+  cp.style.display = cp.style.display === 'none' ? 'block' : 'none';
+}
+function setChatColor(color, btn){
+  window._chatColor = color;
+  // input rengini güncelle
+  const input = document.getElementById('chatInputSide');
+  if(input) input.style.color = color;
+  // dot güncelle
+  const dot = document.getElementById('colorPaletteDot');
+  if(dot) dot.style.background = color;
+  // seçili butonu işaretle
+  document.querySelectorAll('.color-swatch-btn').forEach(b => b.style.border = '2px solid transparent');
+  if(btn) btn.style.border = '2px solid #fff';
+  // paneli kapat
+  document.getElementById('colorPalettePanel').style.display = 'none';
+}
+
+// ===== RENK PALETİ (MOBİL) =====
+window._mobChatColor = '#e8eaf0';
+function toggleMobColorPalette(){
+  const ep = document.getElementById('mobEmojiPanel');
+  const gp = document.getElementById('mobGifPanel');
+  const cp = document.getElementById('mobColorPalettePanel');
+  if(ep) ep.style.display = 'none';
+  if(gp) gp.style.display = 'none';
+  cp.style.display = cp.style.display === 'none' ? 'block' : 'none';
+}
+function setMobChatColor(color, btn){
+  window._mobChatColor = color;
+  const input = document.getElementById('mobChatInput');
+  if(input) input.style.color = color;
+  const dot = document.getElementById('mobColorPaletteDot');
+  if(dot) dot.style.background = color;
+  document.querySelectorAll('.mob-color-swatch').forEach(b => b.style.border = '2px solid transparent');
+  if(btn) btn.style.border = '2px solid #fff';
+  document.getElementById('mobColorPalettePanel').style.display = 'none';
+}
+
+// ===== MOBİL GIF PANELİ =====
+let _mobGifCat = 'tepki';
+const _mobGifData = {
+  tepki:    [{l:'😂 LOL',u:'https://media.giphy.com/media/ZqlvCTNHpqrio/giphy.gif'},{l:'🤣 Kahkaha',u:'https://media.giphy.com/media/3o7aTskHEUdgCQAXde/giphy.gif'},{l:'😎 Harika',u:'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif'}],
+  kutlama:  [{l:'🎉 Parti',u:'https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif'},{l:'🥳 Kutlama',u:'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif'},{l:'🎊 Konfeti',u:'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif'}],
+  dans:     [{l:'💃 Dans',u:'https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif'},{l:'🕺 Breakdance',u:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif'},{l:'🎵 Müzik',u:'https://media.giphy.com/media/5n67EasiMSwWc/giphy.gif'}],
+  hayvan:   [{l:'🐶 Köpek',u:'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif'},{l:'🐱 Kedi',u:'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif'},{l:'🐼 Panda',u:'https://media.giphy.com/media/EatwJZRUIv41G/giphy.gif'}],
+  spor:     [{l:'⚽ Gol',u:'https://media.giphy.com/media/26tPghhkRON21k0iY/giphy.gif'},{l:'🏀 Basket',u:'https://media.giphy.com/media/l0HlFZ3pBnVEEEbWU/giphy.gif'},{l:'🎯 Şut',u:'https://media.giphy.com/media/3o7TKzF87QBXS/giphy.gif'}],
+  film:     [{l:'🎬 Sahne',u:'https://media.giphy.com/media/3oEjHI8WJv4x6UPD68/giphy.gif'},{l:'🎥 Kamera',u:'https://media.giphy.com/media/l0HlCCeBhe3ubOZSo/giphy.gif'},{l:'⭐ Yıldız',u:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'}]
+};
+function toggleMobGifPanel(){
+  const ep = document.getElementById('mobEmojiPanel');
+  const cp = document.getElementById('mobColorPalettePanel');
+  const gp = document.getElementById('mobGifPanel');
+  if(ep) ep.style.display = 'none';
+  if(cp) cp.style.display = 'none';
+  const isOpen = gp.style.display !== 'none';
+  gp.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen) renderMobGifGrid();
+}
+function setMobGifCat(cat, btn){
+  _mobGifCat = cat;
+  document.querySelectorAll('.mob-gif-cat-btn').forEach(b => {
+    b.style.background = 'rgba(255,255,255,.08)';
+    b.style.color = 'var(--text2)';
+    b.style.border = '1px solid rgba(255,255,255,.1)';
+  });
+  if(btn){ btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.border = 'none'; }
+  renderMobGifGrid();
+}
+function renderMobGifGrid(){
+  const grid = document.getElementById('mobGifGrid');
+  if(!grid) return;
+  const items = _mobGifData[_mobGifCat] || [];
+  grid.innerHTML = items.map(g => `
+    <div onclick="sendMobGif('${g.u}','${g.l}')" style="cursor:pointer;border-radius:8px;overflow:hidden;aspect-ratio:1;background:#0d111a;position:relative;">
+      <img src="${g.u}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);font-size:8px;color:#fff;padding:2px 3px;font-weight:700;">${g.l}</div>
+    </div>`).join('');
+}
+function sendMobGif(url, label){
+  const now = new Date();
+  const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const u = currentUser || {username:'Misafir'};
+  pushChatMessage({u: u.username||'Misafir', m:`🎞️ GIF: ${label} <img src="${url}" style="max-width:120px;border-radius:6px;display:block;margin-top:4px;">`, t:t2, isHtml:true});
+  document.getElementById('mobGifPanel').style.display = 'none';
+}
+// Mobil panel dışına tıklayınca kapat (GIF + Renk Paleti)
+document.addEventListener('click', function(e){
+  const mgp = document.getElementById('mobGifPanel');
+  const mcp = document.getElementById('mobColorPalettePanel');
+  const cpp = document.getElementById('colorPalettePanel');
+  if(mgp && mgp.style.display!=='none' && !mgp.contains(e.target) && !e.target.closest('[onclick="toggleMobGifPanel()"]')) mgp.style.display='none';
+  if(mcp && mcp.style.display!=='none' && !mcp.contains(e.target) && !e.target.closest('[onclick="toggleMobColorPalette()"]')) mcp.style.display='none';
+  if(cpp && cpp.style.display!=='none' && !cpp.contains(e.target) && !e.target.closest('[onclick="toggleColorPalette()"]')) cpp.style.display='none';
+});
 document.getElementById('btab_chat').addEventListener('click', ()=>setTimeout(renderChat,50));
 
 /* MOVIE PLAYER */
