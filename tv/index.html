@@ -38,7 +38,8 @@ function _startFirebase() {
       : firebase.initializeApp(firebaseConfig);
     chatDbRef  = firebase.database().ref('tayfuntv_chat');
     onlineRef  = firebase.database().ref('tayfuntv_online');
-    window.usersDbRef = firebase.database().ref('tayfuntv_users');
+    window.usersDbRef  = firebase.database().ref('tayfuntv_users');
+    window.bannedDbRef = firebase.database().ref('tayfuntv_banned');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
     // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
@@ -353,6 +354,54 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   flex: 1;
   text-shadow: 0 0 8px rgba(245,200,66,0.2);
 }
+/* ── ADMIN MOD MENÜSÜ ── */
+.chat-mod-menu {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  gap: 3px;
+  z-index: 99;
+}
+.chat-msg-row:hover .chat-mod-menu { display: flex; }
+.mod-btn {
+  background: rgba(30,34,48,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.mod-btn:hover { background: rgba(255,255,255,.12); }
+.mod-btn.mute  { color: #f5c842; }
+.mod-btn.ban   { color: #ff6b6b; }
+.mod-btn.delmsg{ color: #94a3b8; }
+/* susturulmuş kullanıcı etiketi */
+.chat-muted-badge {
+  font-size: 9px;
+  background: rgba(245,200,66,.15);
+  color: #f5c842;
+  border-radius: 4px;
+  padding: 0 4px;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+/* ban uyarı ekranı */
+#banScreen {
+  position: fixed; inset: 0; background: rgba(0,0,0,.93);
+  z-index: 9999; display: none; align-items: center;
+  justify-content: center; flex-direction: column; gap: 12px;
+  text-align: center; padding: 30px;
+}
+#banScreen .ban-icon { font-size: 56px; }
+#banScreen .ban-title { font-size: 20px; font-weight: 800; color: #ff6b6b; }
+#banScreen .ban-sub   { font-size: 13px; color: #94a3b8; max-width: 320px; }
+.chat-msg-row { position: relative; }
+.chat-msg-row.is-muted .chat-msg-text { opacity: .45; font-style: italic; }
+.chat-msg-row.is-muted .chat-user { color: #5a6478 !important; }
 .chat-msg-user {
   font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
@@ -2494,6 +2543,14 @@ tr:last-child td{border:none;}
   </div>
 </div>
 
+<!-- BAN EKRANI -->
+<div id="banScreen">
+  <div class="ban-icon">🔨</div>
+  <div class="ban-title">HESABINIZ BANLANDI</div>
+  <div class="ban-sub" id="banReason">Bu siteden erişiminiz yönetici tarafından kısıtlanmıştır.</div>
+  <div style="font-size:11px;color:#5a6478;margin-top:8px;">Siteyi yenileseniz bile giriş yapamazsınız.</div>
+</div>
+
 <div id="loginScreen">
   <div class="login-bg"></div>
   <div class="login-box">
@@ -3401,6 +3458,43 @@ function quickDemo(){ loginSuccess({username:'Demo User', email:'demo@canlitv.co
 function loginSuccess(user){
   // Misafir girişini tamamen engelle
   if(user.guest || user.demo){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); return; }
+  // Ban kontrolü — admin hariç
+  if(user.role !== 'admin'){
+    const checkBan = () => {
+      if(window.bannedDbRef){
+        const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
+        window.bannedDbRef.child(key).once('value', snap => {
+          if(snap.exists()){
+            const banData = snap.val();
+            document.getElementById('loginScreen').style.display = 'none';
+            const banScreen = document.getElementById('banScreen');
+            banScreen.style.display = 'flex';
+            document.getElementById('banReason').textContent =
+              'Ban nedeni: ' + (banData.reason || 'Belirtilmedi');
+          } else {
+            _doLoginSuccess(user);
+          }
+        });
+      } else {
+        // Firebase yoksa localStorage ban kontrolü
+        const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+        const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
+        if(bans[key]){
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('banScreen').style.display = 'flex';
+          document.getElementById('banReason').textContent = 'Ban nedeni: ' + (bans[key].reason || 'Belirtilmedi');
+        } else {
+          _doLoginSuccess(user);
+        }
+      }
+    };
+    // Firebase hazır değilse kısa bekle
+    if(firebaseReady){ checkBan(); } else { setTimeout(checkBan, 1500); }
+    return;
+  }
+  _doLoginSuccess(user);
+}
+function _doLoginSuccess(user){
   currentUser = user;
   // Her girişte chat uyarısını sıfırla (admin hariç)
   if(user.role !== 'admin'){
@@ -5427,6 +5521,10 @@ function closeAdminBackToSite(){
         <span class="si-icon">👥</span><span>Kullanıcılar</span>
         <span class="si-badge" id="userBadge">0</span>
       </div>
+      <div class="sidebar-item" onclick="showPage('banned',this)">
+        <span class="si-icon">⛔</span><span>Banlı Kullanıcılar</span>
+        <span class="si-badge" id="bannedBadge" style="background:rgba(232,55,61,.7);">0</span>
+      </div>
       <div class="sidebar-item" onclick="showPage('roles',this)">
         <span class="si-icon">🛡️</span><span>Roller & İzinler</span>
       </div>
@@ -5672,6 +5770,41 @@ function closeAdminBackToSite(){
                 </tr>
               </thead>
               <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BANNED USERS -->
+      <div class="admin-page" id="page_banned">
+        <div class="page-header">
+          <div class="page-title">⛔ Banlı Kullanıcılar</div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="renderBanned()">🔄 Yenile</button>
+          </div>
+        </div>
+        <div class="filter-bar">
+          <div class="search-input">
+            <span>🔍</span>
+            <input type="text" placeholder="Banlı kullanıcı ara..." oninput="filterBanned(this.value)">
+          </div>
+        </div>
+        <div class="card" style="padding:0;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>KULLANICI ADI</th>
+                  <th>BAN NEDENİ</th>
+                  <th>BAN TARİHİ</th>
+                  <th>BANLAYAN</th>
+                  <th>İŞLEMLER</th>
+                </tr>
+              </thead>
+              <tbody id="bannedTableBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px;font-size:12px;">Yükleniyor...</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -6107,6 +6240,8 @@ function initAdmin(){
   renderLogs();
   renderBackupHistory();
   renderAnalytics();
+  // Ban badge'ini güncelle
+  setTimeout(_updateBannedBadge, 2000);
 
   // Firebase gerçek zamanlı kullanıcı dinleyicisi — yeni kayıt anında görünsün
   function startUserListener(){
@@ -6319,9 +6454,13 @@ function renderUserTable(list){
       : isPending
         ? '<span class="td-badge" style="background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);">⏳ Onay Bekliyor</span>'
         : '<span class="td-badge badge-online">● Aktif</span>';
+    const isBanned = u.status === 'banned';
     const approveBtn = isPending
       ? `<button class="btn btn-xs" style="background:rgba(39,174,96,.8);color:#fff;border:none;" onclick="approveUser(${i},'${u.username}')">✅ Onayla</button>`
       : '';
+    const banBtn = isBanned
+      ? `<button class="btn btn-xs" style="background:rgba(39,174,96,.8);color:#fff;border:none;" onclick="unbanUser('${u.username}')">✅ Banı Kaldır</button>`
+      : (u.role !== 'admin' ? `<button class="btn btn-warning btn-xs" onclick="banUser(${i},'${u.username}')">⛔ Banla</button>` : '');
     return `
     <tr>
       <td style="color:var(--muted);">${i+1}</td>
@@ -6333,8 +6472,8 @@ function renderUserTable(list){
       <td>${(JSON.parse(localStorage.getItem('cltv_favs')||'[]')).length}</td>
       <td><div class="td-actions">
         ${approveBtn}
+        ${banBtn}
         <button class="btn btn-secondary btn-xs" onclick="editUser(${i})">✏️</button>
-        <button class="btn btn-warning btn-xs" onclick="banUser(${i},'${u.username}')">⛔</button>
         <button class="btn btn-primary btn-xs" style="background:var(--accent);" onclick="deleteUser(${i},'${u.username}')">🗑️</button>
       </div></td>
     </tr>`;
@@ -6372,7 +6511,117 @@ function saveUser(){
     _fbUpdateUser(key,updates).then(()=>{ showToast('✅ Kullanıcı güncellendi','success'); renderUsers(); closeModal('userModal'); });
   }
 }
-function banUser(idx, name){ if(!confirm(name+' kullanıcısını yasaklamak istiyor musunuz?')) return; showToast('⛔ '+name+' yasaklandı','warning'); addLog('user','user','⛔ Kullanıcı yasaklandı: '+name,'var(--accent)'); }
+function banUser(idx, name){
+  if(name === _d(_un) || name === 'admin'){ showToast('Admin banlanamaz!','warning'); return; }
+  const reason = prompt('Ban nedeni (isteğe bağlı):', 'Kural ihlali');
+  if(reason === null) return; // iptal
+  const key = name.replace(/[.#$\/\[\]]/g,'_');
+  const banData = {
+    username: name,
+    reason: reason || 'Belirtilmedi',
+    bannedAt: Date.now(),
+    bannedBy: _d(_un)
+  };
+  // Kullanıcı kaydını banned yap
+  _fbUpdateUser(key, {status:'banned', banReason: reason || 'Belirtilmedi', bannedAt: Date.now()});
+  // bannedDbRef'e kaydet
+  if(window.bannedDbRef){
+    window.bannedDbRef.child(key).set(banData).then(()=>{
+      showToast('⛔ '+name+' banlı', 'warning');
+      addLog('user','user','⛔ Kullanıcı banlandı: '+name+' — '+banData.reason,'var(--accent)');
+      renderUsers();
+      _updateBannedBadge();
+    });
+  } else {
+    // Firebase yoksa localStorage'da tut
+    const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+    bans[key] = banData;
+    localStorage.setItem('cltv_banned', JSON.stringify(bans));
+    showToast('⛔ '+name+' banlı','warning');
+    addLog('user','user','⛔ Kullanıcı banlandı: '+name,'var(--accent)');
+    renderUsers();
+    _updateBannedBadge();
+  }
+}
+
+function unbanUser(name){
+  if(!confirm(name+' kullanıcısının banını kaldırmak istiyor musunuz?')) return;
+  const key = name.replace(/[.#$\/\[\]]/g,'_');
+  _fbUpdateUser(key, {status:'active', banReason:'', bannedAt:''});
+  if(window.bannedDbRef){
+    window.bannedDbRef.child(key).remove().then(()=>{
+      showToast('✅ '+name+' banı kaldırıldı','success');
+      addLog('user','user','✅ Ban kaldırıldı: '+name,'var(--green)');
+      renderBanned();
+      renderUsers();
+      _updateBannedBadge();
+    });
+  } else {
+    const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+    delete bans[key];
+    localStorage.setItem('cltv_banned', JSON.stringify(bans));
+    showToast('✅ '+name+' banı kaldırıldı','success');
+    addLog('user','user','✅ Ban kaldırıldı: '+name,'var(--green)');
+    renderBanned();
+    renderUsers();
+    _updateBannedBadge();
+  }
+}
+
+let _allBanned = [];
+function renderBanned(){
+  const tbody = document.getElementById('bannedTableBody');
+  if(!tbody) return;
+  if(window.bannedDbRef){
+    window.bannedDbRef.once('value', snap => {
+      _allBanned = [];
+      snap.forEach(child => { const v = child.val(); if(v) _allBanned.push(v); });
+      _renderBannedTable(_allBanned);
+      _updateBannedBadge(_allBanned.length);
+    });
+  } else {
+    const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+    _allBanned = Object.values(bans);
+    _renderBannedTable(_allBanned);
+    _updateBannedBadge(_allBanned.length);
+  }
+}
+function _renderBannedTable(list){
+  const tbody = document.getElementById('bannedTableBody');
+  if(!tbody) return;
+  if(!list.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px;font-size:12px;">🎉 Banlı kullanıcı bulunmuyor.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((b,i)=>{
+    const date = b.bannedAt ? new Date(b.bannedAt).toLocaleString('tr-TR') : '—';
+    return `<tr>
+      <td style="color:var(--muted);">${i+1}</td>
+      <td><div style="font-weight:700;color:#ff6b6b;">⛔ ${b.username||'?'}</div></td>
+      <td><div style="font-size:11px;color:var(--text2);max-width:200px;">${b.reason||'Belirtilmedi'}</div></td>
+      <td><div style="font-size:11px;color:var(--muted);">${date}</div></td>
+      <td><div style="font-size:11px;color:var(--muted);">${b.bannedBy||'Admin'}</div></td>
+      <td><div class="td-actions">
+        <button class="btn btn-xs" style="background:rgba(39,174,96,.8);color:#fff;border:none;" onclick="unbanUser('${b.username}')">✅ Banı Kaldır</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function filterBanned(q){
+  if(!q){ _renderBannedTable(_allBanned); return; }
+  const low = q.toLowerCase();
+  _renderBannedTable(_allBanned.filter(b => (b.username||'').toLowerCase().includes(low) || (b.reason||'').toLowerCase().includes(low)));
+}
+function _updateBannedBadge(count){
+  const badge = document.getElementById('bannedBadge');
+  if(!badge) return;
+  if(count !== undefined){ badge.textContent = count; return; }
+  if(window.bannedDbRef){
+    window.bannedDbRef.once('value', snap => { badge.textContent = snap.numChildren(); });
+  } else {
+    badge.textContent = Object.keys(JSON.parse(localStorage.getItem('cltv_banned')||'{}')).length;
+  }
+}
 function deleteUser(idx, name){ if(!confirm(name+' kullanıcısını silmek istiyor musunuz?')) return; if(name==='admin'||name===_d(_un)){ showToast('Admin silinemez!','warning'); return; } _fbDeleteUser(name); renderUsers(); showToast('🗑️ Kullanıcı silindi: '+name,'warning'); addLog('user','user','🗑️ Kullanıcı silindi: '+name,'var(--accent)'); }
 function exportUsers(){ const data=JSON.stringify([{username:_d(_un),email:_d(_em),role:'admin'},...getUsers()],null,2); downloadFile('users.json',data,'application/json'); showToast('📥 Kullanıcılar dışa aktarıldı','success'); }
 
@@ -6581,7 +6830,7 @@ function renderBackupHistory(){ document.getElementById('backupHistory').innerHT
 
 /* SETTINGS */
 function saveSettings(){ showToast('✅ Ayarlar kaydedildi','success'); addLog('system','system','⚙️ Ayarlar güncellendi','var(--green)'); }
-function refreshAll(){ loadM3UAdmin(); renderUsers(); renderDashboard(); showToast('🔄 Veriler yenilendi','info'); }
+function refreshAll(){ loadM3UAdmin(); renderUsers(); renderDashboard(); _updateBannedBadge(); showToast('🔄 Veriler yenilendi','info'); }
 
 /* UTILS */
 function showPage(id, el){
@@ -6589,6 +6838,7 @@ function showPage(id, el){
   document.getElementById('page_'+id).classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
   if(el) el.classList.add('active');
+  if(id === 'banned') renderBanned();
 }
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
