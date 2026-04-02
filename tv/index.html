@@ -5344,18 +5344,29 @@ function openCtxMenu(username, fbKey, x, y){
   const delBtn  = document.getElementById('ctxDelBtn');
   if(!menu) return;
   label.textContent = '👤 ' + username;
-  muteBtn.textContent = _isMuted(username) ? '🔊 Susturmayı Kaldır' : '🔇 Sustur';
-  muteBtn.className  = _isMuted(username) ? 'ctx-btn' : 'ctx-btn ctx-mute';
   delBtn.style.display = fbKey ? 'flex' : 'none';
   // Ekran sınırlarını aş
   const W = window.innerWidth, H = window.innerHeight;
-  const mW = 180, mH = 180;
+  const mW = 190, mH = 200;
   let left = x, top = y;
   if(left + mW > W) left = W - mW - 8;
   if(top  + mH > H) top  = H - mH - 8;
   menu.style.left = left + 'px';
   menu.style.top  = top  + 'px';
-  menu.classList.add('open');
+
+  // Firebase'den anlık mute durumunu oku, sonra menüyü göster
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  function _showMenu(isMuted){
+    muteBtn.textContent = isMuted ? '🔊 Susturmayı Kaldır' : '🔇 Sustur';
+    muteBtn.className   = isMuted ? 'ctx-btn ctx-kick' : 'ctx-btn ctx-mute';
+    muteBtn.dataset.isMuted = isMuted ? '1' : '0';
+    menu.classList.add('open');
+  }
+  if(window.mutedDbRef && firebaseReady){
+    window.mutedDbRef.child(key).once('value', snap => _showMenu(snap.exists()));
+  } else {
+    _showMenu(_isMuted(username));
+  }
 }
 
 function closeCtxMenu(){
@@ -5399,25 +5410,31 @@ function ctxAction(action){
 function chatMuteUser(username){
   if(!username || username === _d(_un)) return;
   const key = username.replace(/[.#$\/\[\]]/g,'_');
-  if(_isMuted(username)){
-    if(window.mutedDbRef) window.mutedDbRef.child(key).remove();
-    else {
+  // Firebase'den anlık durumu oku, sonra toggle et
+  function _doToggle(currentlyMuted){
+    if(currentlyMuted){
+      // Susturmayı kaldır
+      if(window.mutedDbRef) window.mutedDbRef.child(key).remove();
       const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-      delete l[key]; localStorage.setItem('cltv_muted',JSON.stringify(l));
-      delete window._mutedSet[key]; renderChat(); renderOnlineUsers(_lastOnlineUsers||[]);
+      delete l[key]; localStorage.setItem('cltv_muted', JSON.stringify(l));
+      if(window._mutedSet) delete window._mutedSet[key];
+      _chatSystemMsg('🔊 ' + username + ' artık konuşabilir.');
+      showToast('🔊 ' + username + ' susturma kaldırıldı', 'success');
+    } else {
+      // Sustur
+      const data = { username, mutedAt: Date.now(), mutedBy: currentUser.username };
+      if(window.mutedDbRef) window.mutedDbRef.child(key).set(data);
+      const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+      l[key] = data; localStorage.setItem('cltv_muted', JSON.stringify(l));
+      if(window._mutedSet) window._mutedSet[key] = data;
+      _chatSystemMsg('🔇 ' + username + ' susturuldu. Mesaj gönderemez.');
+      showToast('🔇 ' + username + ' susturuldu', 'warning');
     }
-    _chatSystemMsg('🔊 ' + username + ' artık konuşabilir.');
-    showToast('🔊 ' + username + ' susturma kaldırıldı','success');
+  }
+  if(window.mutedDbRef && firebaseReady){
+    window.mutedDbRef.child(key).once('value', snap => _doToggle(snap.exists()));
   } else {
-    const data = { username, mutedAt: Date.now(), mutedBy: currentUser.username };
-    if(window.mutedDbRef) window.mutedDbRef.child(key).set(data);
-    else {
-      const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-      l[key] = data; localStorage.setItem('cltv_muted',JSON.stringify(l));
-      window._mutedSet[key] = data; renderChat(); renderOnlineUsers(_lastOnlineUsers||[]);
-    }
-    _chatSystemMsg('🔇 ' + username + ' susturuldu. Mesaj gönderemez.');
-    showToast('🔇 ' + username + ' susturuldu','warning');
+    _doToggle(_isMuted(username));
   }
 }
 
