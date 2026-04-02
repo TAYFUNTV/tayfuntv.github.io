@@ -3401,6 +3401,11 @@ function loginSuccess(user){
   // Misafir girişini tamamen engelle
   if(user.guest || user.demo){ showLoginErr('⛔ Misafir girişi devre dışı. Lütfen hesabınızla giriş yapın.'); return; }
   currentUser = user;
+  // Her girişte chat uyarısını sıfırla (admin hariç)
+  if(user.role !== 'admin'){
+    localStorage.removeItem('chat_accepted');
+    chatWarningShown = false;
+  }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   ['profileAvatarHeader','settingsAvatar'].forEach(id=>{
@@ -4986,11 +4991,11 @@ function sendMobChat(){
   const msg = input.value.trim();
   if(!msg) return;
   // Admin değilse kural uyarısı göster
-  if(currentUser && currentUser.role === 'admin'){
-    // geç
-  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
-    document.getElementById('chatWarning').style.display = 'flex';
-    return;
+  if(!(currentUser && currentUser.role === 'admin')){
+    if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+      document.getElementById('chatWarning').style.display = 'flex';
+      return;
+    }
   }
   input.value = '';
   const u = currentUser || {username:'Misafir'};
@@ -5019,11 +5024,11 @@ function sendChatSide(){
 }
 function sendChat(){
   // Admin değilse kural uyarısı göster
-  if(currentUser && currentUser.role === 'admin'){
-    // geç
-  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
-    document.getElementById('chatWarning').style.display = 'flex';
-    return;
+  if(!(currentUser && currentUser.role === 'admin')){
+    if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+      document.getElementById('chatWarning').style.display = 'flex';
+      return;
+    }
   }
   const input = document.getElementById('chatInput');
   const val   = input.value.trim();
