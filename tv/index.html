@@ -3331,7 +3331,8 @@ function doLogin(){
   const adminPass  = dec([107,104,105,107,104,105,46,14]);
   const adminEmail = dec([59,62,55,51,52,26,46,59,35,60,47,52,46,44,116,57,53,55]);
   if(user === adminUser && pass === adminPass){
-    if(remember) localStorage.setItem('cltv_remember', JSON.stringify({username: adminUser, pass: adminPass}));
+    if(remember){ localStorage.setItem('cltv_remember', JSON.stringify({username: adminUser, pass: adminPass})); }
+    else { localStorage.removeItem('cltv_remember'); }
     loginSuccess({username: adminUser, email: adminEmail, avatar:'👑', role:'admin', approved:true});
     return;
   }
