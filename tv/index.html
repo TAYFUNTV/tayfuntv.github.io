@@ -678,17 +678,42 @@ header {
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 .dev-btn {
-  display: flex; align-items: center; gap: 7px;
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 8px; padding: 7px 13px;
-  color: var(--text); font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #1a0533 0%, #2d1b69 50%, #0d1b4b 100%);
+  border: 1px solid rgba(167,139,250,0.4);
+  border-radius: 12px; padding: 7px 15px;
+  color: #fff; font-size: 11px; font-weight: 700;
   text-decoration: none; letter-spacing: .3px;
-  transition: var(--transition); white-space: nowrap;
+  transition: all 0.3s ease; white-space: nowrap;
+  box-shadow: 0 3px 16px rgba(109,40,217,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+  font-family: 'DM Sans', sans-serif;
 }
 .dev-btn:hover {
-  background: #229ED9; border-color: #229ED9; color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(34,158,217,.3);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #2e1065 0%, #4c1d95 50%, #1e3a8a 100%);
+  box-shadow: 0 6px 24px rgba(109,40,217,0.55), 0 0 0 1px rgba(167,139,250,0.6);
+  border-color: rgba(167,139,250,0.7);
+}
+.dev-btn-label {
+  background: linear-gradient(90deg, #ff0080, #ff8c00, #ffe600, #00ff88, #00cfff, #ff0080);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-size: 12px;
+  text-transform: uppercase;
+  animation: labelShine 2s linear infinite;
+}
+@keyframes labelShine {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+.dev-btn-divider {
+  width: 1px; height: 14px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px; flex-shrink: 0;
 }
 #ch-counter {
   font-size: 11px; color: var(--muted);
@@ -2577,7 +2602,13 @@ tr:last-child td{border:none;}
     <div class="header-right">
       <span id="ch-counter"></span>
       <a href="https://tayfungullu.carrd.co" target="_blank" rel="noopener" class="dev-btn">
-        ✈️ <span>Developer'ı Görüntüle</span>
+        <span class="dev-btn-label">Beni Takip Et</span>
+        <span class="dev-btn-divider"></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:#1DA1F2"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E4405F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color:#ff0050"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </a>
       <button class="dev-btn admin-panel-btn" onclick="openAdminPanel()" style="background:rgba(232,55,61,.1);border-color:rgba(232,55,61,.3);color:var(--accent);">
         🛡️ <span>Admin Panel</span>
