@@ -3610,7 +3610,11 @@ function _doLoginSuccess(user){
   currentUser = user;
   // chat_accepted bir kez kabul edilince kalıcı — her girişte sıfırlama
   if(user.role !== 'admin'){
-    chatWarningShown = !!localStorage.getItem('chat_accepted');
+    chatWarningShown = !!(localStorage.getItem('chat_accepted') || window._chatAccepted);
+  } else {
+    // Admin için chat uyarısı hiç gösterilmez
+    chatWarningShown = true;
+    window._chatAccepted = true;
   }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
@@ -3880,9 +3884,10 @@ function setRadioVol(val){
 }
 
 function acceptChat(){
-  localStorage.setItem('chat_accepted','1');
-  document.getElementById('chatWarning').style.display = 'none';
+  try { localStorage.setItem('chat_accepted','1'); } catch(e){}
+  window._chatAccepted = true;
   chatWarningShown = true;
+  document.getElementById('chatWarning').style.display = 'none';
 }
 
 function doLogout(){
@@ -5715,7 +5720,7 @@ function sendMobChat(){
   const msg = input.value.trim();
   if(!msg) return;
   if(!(currentUser && currentUser.role === 'admin')){
-    if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+    if(!localStorage.getItem('chat_accepted') && !chatWarningShown && !window._chatAccepted){
       document.getElementById('chatWarning').style.display = 'flex';
       return;
     }
@@ -5752,7 +5757,7 @@ function sendChatSide(){
   // Admine ve misafire chat uyarısı gösterme
   if(currentUser && (currentUser.role==='admin' || currentUser.guest)){
     // geç
-  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown && !window._chatAccepted){
     document.getElementById('chatWarning').style.display = 'flex';
     return;
   }
@@ -5775,7 +5780,7 @@ function sendChatSide(){
 function sendChat(){
   // Admin değilse kural uyarısı göster
   if(!(currentUser && currentUser.role === 'admin')){
-    if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+    if(!localStorage.getItem('chat_accepted') && !chatWarningShown && !window._chatAccepted){
       document.getElementById('chatWarning').style.display = 'flex';
       return;
     }
