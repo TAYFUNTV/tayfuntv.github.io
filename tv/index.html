@@ -4985,6 +4985,13 @@ function sendMobChat(){
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
+  // Admin değilse kural uyarısı göster
+  if(currentUser && currentUser.role === 'admin'){
+    // geç
+  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+    document.getElementById('chatWarning').style.display = 'flex';
+    return;
+  }
   input.value = '';
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
@@ -5011,6 +5018,13 @@ function sendChatSide(){
   input.value = '';
 }
 function sendChat(){
+  // Admin değilse kural uyarısı göster
+  if(currentUser && currentUser.role === 'admin'){
+    // geç
+  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+    document.getElementById('chatWarning').style.display = 'flex';
+    return;
+  }
   const input = document.getElementById('chatInput');
   const val   = input.value.trim();
   if(!val) return;
