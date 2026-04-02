@@ -40,8 +40,15 @@ function _startFirebase() {
     onlineRef  = firebase.database().ref('tayfuntv_online');
     window.usersDbRef  = firebase.database().ref('tayfuntv_users');
     window.bannedDbRef = firebase.database().ref('tayfuntv_banned');
+    window.mutedDbRef  = firebase.database().ref('tayfuntv_muted');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
+    // Susturulmuş kullanıcıları gerçek zamanlı dinle
+    window.mutedDbRef.on('value', snap => {
+      window._mutedSet = {};
+      snap.forEach(child => { window._mutedSet[child.key] = child.val(); });
+      renderChat();
+    });
     // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
     _migrateLocalUsersToFirebase();
     firebase.database().ref('.info/connected').on('value', snap => {
@@ -365,6 +372,11 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   z-index: 99;
 }
 .chat-msg-row:hover .chat-mod-menu { display: flex; }
+.chat-msg-row.mod-open .chat-mod-menu  { display: flex; }
+@media (max-width: 768px) {
+  .chat-mod-menu { right: 2px; top: 0; transform: none; flex-direction: column; }
+  .mod-btn { font-size: 12px; padding: 4px 8px; }
+}
 .mod-btn {
   background: rgba(30,34,48,.92);
   border: 1px solid rgba(255,255,255,.12);
@@ -3538,6 +3550,10 @@ function _doLoginSuccess(user){
     });
   }
   // Admin giriş bildirimi kaldırıldı — online listede zaten görünüyor
+  // Kick/ban dinleyicisini başlat (admin hariç)
+  if(user.role !== 'admin'){
+    setTimeout(_listenKick, 2000);
+  }
 }
 function doLogout(){
   removeOnlinePresence();
@@ -4380,7 +4396,9 @@ function initFirebaseChat(){
   chatDbRef.limitToLast(100).on('value', snapshot => {
     chatMessages = [];
     snapshot.forEach(child => {
-      chatMessages.push(child.val());
+      const msg = child.val();
+      msg._fbKey = child.key;
+      chatMessages.push(msg);
     });
     console.log('📨 Firebase güncellendi, mesaj sayısı:', chatMessages.length);
     renderChat();
@@ -4393,7 +4411,7 @@ function initFirebaseChat(){
   window._chatPollInterval = setInterval(()=>{
     chatDbRef.limitToLast(100).once('value', snapshot => {
       const msgs = [];
-      snapshot.forEach(child => { msgs.push(child.val()); });
+      snapshot.forEach(child => { const m=child.val(); m._fbKey=child.key; msgs.push(m); });
       if(JSON.stringify(msgs) !== JSON.stringify(chatMessages)){
         chatMessages = msgs;
         renderChat();
@@ -4633,27 +4651,79 @@ function getChatUserColor(username){
   return '#74c0fc';
 }
 
+function _isMuted(username){
+  if(!username) return false;
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  // Firebase set
+  if(window._mutedSet && window._mutedSet[key]) return true;
+  // localStorage fallback
+  const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+  return !!local[key];
+}
+
 function renderChat(){
+  const isAdmin = currentUser && currentUser.role === 'admin';
   const boxes = [
     document.getElementById('chatBox'),
     document.getElementById('chatBoxSide'),
     document.getElementById('mobChatMessages')
   ];
   const empty = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok. İlk mesajı sen at!</div>';
-  // Sadece bu oturumda (giriş yapıldıktan sonra) gelen mesajları göster
   const visibleMsgs = chatMessages.filter(msg => !msg.ts || msg.ts >= _chatSessionStart);
   boxes.forEach(box => {
     if(!box) return;
     if(!visibleMsgs.length){ box.innerHTML = empty; return; }
-    box.innerHTML = visibleMsgs.map(msg=>`
-      <div style="display:flex;gap:6px;align-items:flex-start;">
-        <span class="chat-user" style="color:${getChatUserColor(msg.u)}">${msg.u}</span>
-        <span style="font-size:11px;color:${msg.c||'var(--text2)'};flex:1;">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
+    box.innerHTML = visibleMsgs.map((msg,idx)=>{
+      const muted = _isMuted(msg.u);
+      const isSelf = currentUser && msg.u === currentUser.username;
+      const isAdminMsg = msg.u === 'admin' || msg.role === 'admin';
+      // Admin moderasyon menüsü — kendine ve adminin kendi mesajına gösterme
+      const safeUser = encodeURIComponent(msg.u||'');
+      const safeFbKey = (msg._fbKey||'').replace(/[^a-zA-Z0-9_-]/g,'');
+      const modMenu = isAdmin && !isSelf && !isAdminMsg ? `
+        <div class="chat-mod-menu">
+          <button class="mod-btn mute" data-u="${safeUser}" data-action="mute" title="Sustur">
+            ${muted ? '🔊' : '🔇'}
+          </button>
+          <button class="mod-btn" style="color:#74c0fc;" data-u="${safeUser}" data-action="kick" title="Sohbetten at">🚪</button>
+          <button class="mod-btn ban" data-u="${safeUser}" data-action="ban" title="Banla">🔨</button>
+          <button class="mod-btn delmsg" data-fbkey="${safeFbKey}" data-action="delmsg" title="Mesajı sil">🗑</button>
+        </div>` : '';
+      const mutedBadge = muted ? '<span class="chat-muted-badge">🔇 susturuldu</span>' : '';
+      const nameColor = muted ? '#5a6478' : getChatUserColor(msg.u);
+      const textOpacity = muted ? 'opacity:.4;font-style:italic;' : '';
+      return `<div class="chat-msg-row${muted?' is-muted':''}" style="display:flex;gap:6px;align-items:flex-start;position:relative;">
+        <span class="chat-user" style="color:${nameColor};flex-shrink:0;">${msg.u}${mutedBadge}</span>
+        <span style="font-size:11px;color:${msg.c||'var(--text2)'};flex:1;${textOpacity}">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
-      </div>`).join('');
+        ${modMenu}
+      </div>`;
+    }).join('');
     box.scrollTop = box.scrollHeight;
   });
 }
+/* ─── CHAT MOD BUTON DELEGATION ─── */
+(function(){
+  function handleModClick(e){
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    e.stopPropagation();
+    const action  = btn.dataset.action;
+    const username = btn.dataset.u ? decodeURIComponent(btn.dataset.u) : '';
+    const fbKey   = btn.dataset.fbkey || '';
+    if(action === 'mute')   chatMuteUser(username, e);
+    else if(action === 'kick') chatKickUser(username, e);
+    else if(action === 'ban')  chatBanUser(username, e);
+    else if(action === 'delmsg') chatDeleteMsg(fbKey, e);
+  }
+  ['chatBox','chatBoxSide','mobChatMessages'].forEach(id => {
+    document.addEventListener('click', function(e){
+      const box = document.getElementById(id);
+      if(box && box.contains(e.target)) handleModClick(e);
+    });
+  });
+})();
+
 /* ─── GIF & TEPKİ ─── */
 const GIF_CATS = {
   tepki: [
@@ -5080,6 +5150,147 @@ document.addEventListener('click', e => {
   if(gp && !gp.contains(e.target) && !e.target.closest('[onclick="toggleGifPanel()"]')) gp.style.display = 'none';
 });
 
+
+/* ═══════════════════════════════════════════
+   CHAT MODERASYon — Admin Yetkileri
+═══════════════════════════════════════════ */
+window._mutedSet = {};
+
+// Kullanıcıyı sustur / susturmayı kaldır
+function chatMuteUser(username, e){
+  if(e) e.stopPropagation();
+  if(!username || username === _d(_un)) return;
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const alreadyMuted = _isMuted(username);
+  if(alreadyMuted){
+    // Susturmayı kaldır
+    if(window.mutedDbRef){
+      window.mutedDbRef.child(key).remove();
+    } else {
+      const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+      delete local[key];
+      localStorage.setItem('cltv_muted', JSON.stringify(local));
+      renderChat();
+    }
+    _chatSystemMsg('🔊 ' + username + ' artık konuşabilir.');
+    showToast('🔊 ' + username + ' susturma kaldırıldı', 'success');
+    addLog('user','user','🔊 Susturma kaldırıldı: '+username,'var(--green)');
+  } else {
+    // Sustur
+    const muteData = { username, mutedAt: Date.now(), mutedBy: currentUser.username };
+    if(window.mutedDbRef){
+      window.mutedDbRef.child(key).set(muteData);
+    } else {
+      const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+      local[key] = muteData;
+      localStorage.setItem('cltv_muted', JSON.stringify(local));
+      window._mutedSet[key] = muteData;
+      renderChat();
+    }
+    _chatSystemMsg('🔇 ' + username + ' susturuldu.');
+    showToast('🔇 ' + username + ' susturuldu', 'warning');
+    addLog('user','user','🔇 Susturuldu: '+username,'var(--gold)');
+  }
+}
+
+// Kullanıcıyı sohbetten at (kick) — online listeden düşür, sisteme bildir
+function chatKickUser(username, e){
+  if(e) e.stopPropagation();
+  if(!username || username === _d(_un)) return;
+  if(!confirm(username + ' kullanıcısını sohbetten atmak istiyor musunuz?')) return;
+  // Firebase online listesinden çıkar
+  if(firebaseReady && onlineRef){
+    onlineRef.once('value', snap => {
+      snap.forEach(child => {
+        if(child.val().nick === username) child.ref.remove();
+      });
+    });
+  }
+  // Kick mesajı Firebase'e yaz — kullanıcı bu mesajı okuyunca çıkarılacak
+  if(firebaseReady && firebase){
+    firebase.database().ref('tayfuntv_kicks').child(
+      username.replace(/[.#$\/\[\]]/g,'_')
+    ).set({ kickedAt: Date.now(), kickedBy: currentUser.username });
+  }
+  _chatSystemMsg('🚪 ' + username + ' sohbetten atıldı.');
+  showToast('🚪 ' + username + ' atıldı', 'warning');
+  addLog('user','user','🚪 Sohbetten atıldı: '+username,'var(--gold)');
+}
+
+// Kullanıcıyı banla (chat üzerinden)
+function chatBanUser(username, e){
+  if(e) e.stopPropagation();
+  if(!username || username === _d(_un)) return;
+  const reason = prompt(username + ' kullanıcısını banlamak istiyor musunuz?\nBan nedeni:', 'Chat kural ihlali');
+  if(reason === null) return;
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const banData = { username, reason: reason||'Belirtilmedi', bannedAt: Date.now(), bannedBy: currentUser.username };
+  // bannedDbRef'e ekle
+  if(window.bannedDbRef){
+    window.bannedDbRef.child(key).set(banData);
+  }
+  // Kullanıcı kaydını güncelle
+  _fbUpdateUser(key, { status:'banned', banReason: reason||'Belirtilmedi', bannedAt: Date.now() });
+  // Online listesinden at
+  if(firebaseReady && onlineRef){
+    onlineRef.once('value', snap => {
+      snap.forEach(child => { if(child.val().nick === username) child.ref.remove(); });
+    });
+  }
+  // Kick de uygula
+  if(firebaseReady && firebase){
+    firebase.database().ref('tayfuntv_kicks').child(key)
+      .set({ kickedAt: Date.now(), kickedBy: currentUser.username, reason: 'banned' });
+  }
+  _chatSystemMsg('🔨 ' + username + ' siteden banlandı.');
+  showToast('🔨 ' + username + ' banlandı', 'warning');
+  addLog('user','user','🔨 Chatban: '+username+' — '+banData.reason,'var(--accent)');
+  _updateBannedBadge();
+}
+
+// Chat üzerinden mesaj sil
+function chatDeleteMsg(fbKey, e){
+  if(e) e.stopPropagation();
+  if(!fbKey){ showToast('Mesaj silinemedi','warning'); return; }
+  if(firebaseReady && chatDbRef){
+    chatDbRef.child(fbKey).remove();
+    showToast('🗑 Mesaj silindi','info');
+  }
+}
+
+// Sistem mesajı — sarı renkte chatbox'ta göster
+function _chatSystemMsg(text){
+  const now = new Date();
+  const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  pushChatMessage({ u:'⚙️ Sistem', m: text, t, c:'#f5c842', _sys: true, ts: Date.now() });
+}
+
+// Kick dinleyici — bu kullanıcı atıldı mı kontrol et
+function _listenKick(){
+  if(!firebaseReady || !currentUser) return;
+  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+  firebase.database().ref('tayfuntv_kicks/'+key).on('value', snap => {
+    if(!snap.exists()) return;
+    const data = snap.val();
+    if(!data || !data.kickedAt) return;
+    // Sadece son 10 saniye içindeki kick geçerli
+    if(Date.now() - data.kickedAt > 10000) return;
+    if(data.reason === 'banned'){
+      snap.ref.remove();
+      doLogout();
+      setTimeout(()=>{
+        document.getElementById('loginScreen').style.display='none';
+        document.getElementById('banScreen').style.display='flex';
+        document.getElementById('banReason').textContent = 'Ban nedeni: ' + (data.reason2 || 'Chat kural ihlali');
+      }, 100);
+    } else {
+      snap.ref.remove();
+      alert('🚪 Yönetici tarafından sohbetten atıldınız.');
+      doLogout();
+    }
+  });
+}
+
 function sendMobChat(){
   const input = document.getElementById('mobChatInput');
   if(!input) return;
@@ -5092,9 +5303,15 @@ function sendMobChat(){
       return;
     }
   }
-  input.value = '';
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
+  // Susturulmuş kullanıcı mesaj gönderemesin
+  if(_isMuted(displayName)){
+    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+    input.value = '';
+    return;
+  }
+  input.value = '';
   const now = new Date();
   const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
   pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor || null});
@@ -5112,6 +5329,11 @@ function sendChatSide(){
   const input = document.getElementById('chatInputSide');
   const val = input.value.trim();
   if(!val) return;
+  if(_isMuted(currentUser?.username)){
+    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+    input.value = '';
+    return;
+  }
   const now = new Date();
   const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2, c: window._chatColor || null});
@@ -5128,6 +5350,11 @@ function sendChat(){
   const input = document.getElementById('chatInput');
   const val   = input.value.trim();
   if(!val) return;
+  if(_isMuted(currentUser?.username)){
+    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+    input.value = '';
+    return;
+  }
   const now = new Date();
   const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
