@@ -3612,7 +3612,6 @@ function _doLoginSuccess(user){
   if(user.role !== 'admin'){
     chatWarningShown = !!(localStorage.getItem('chat_accepted') || window._chatAccepted);
   } else {
-    // Admin için chat uyarısı hiç gösterilmez
     chatWarningShown = true;
     window._chatAccepted = true;
   }
@@ -6102,8 +6101,9 @@ function closeMoviePlayer() {
     if(!inp&&e.ctrlKey&&['U','S','A','C','X'].includes(e.key.toUpperCase())){e.preventDefault();return false;}
   });
 
-  // CSS user-select sadece yazı elementlerinde kapat
+  // CSS user-select sadece yazı elementlerinde kapat — input barındıran div'lere dokunma
   document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
+    if(el.querySelector('input,textarea')) return;
     el.style.webkitUserSelect='none';
   });
 })();
@@ -7611,8 +7611,9 @@ window.addEventListener('load', ()=>{
     if(!inp&&e.ctrlKey&&['U','S','A','C','X'].includes(e.key.toUpperCase())){e.preventDefault();return false;}
   });
 
-  // CSS user-select sadece yazı elementlerinde kapat
+  // CSS user-select sadece yazı elementlerinde kapat — input barındıran div'lere dokunma
   document.querySelectorAll('p,h1,h2,h3,span:not(input),div').forEach(function(el){
+    if(el.querySelector('input,textarea')) return;
     el.style.webkitUserSelect='none';
   });
 })();
