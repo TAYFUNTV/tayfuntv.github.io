@@ -370,12 +370,19 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   display: none;
   gap: 3px;
   z-index: 99;
+  background: rgba(14,19,24,0.95);
+  border-radius: 7px;
+  padding: 2px 4px;
+  border: 1px solid rgba(255,255,255,0.1);
 }
-.chat-msg-row:hover .chat-mod-menu { display: flex; }
-.chat-msg-row.mod-open .chat-mod-menu  { display: flex; }
+.chat-msg-row:hover .chat-mod-menu { display: flex !important; }
+.chat-msg-row.mod-open .chat-mod-menu  { display: flex !important; }
 @media (max-width: 768px) {
   .chat-mod-menu { right: 2px; top: 0; transform: none; flex-direction: column; }
   .mod-btn { font-size: 12px; padding: 4px 8px; }
+  /* Mobilde hover yok, uzun bas tetikler */
+  .chat-msg-row:hover .chat-mod-menu { display: none !important; }
+  .chat-msg-row.mod-open .chat-mod-menu { display: flex !important; }
 }
 .mod-btn {
   background: rgba(30,34,48,.92);
@@ -4761,7 +4768,14 @@ function renderChat(){
       const isAdminMsg = msg._sys || msg.u === _d(_un);
       const safeUser   = encodeURIComponent(msg.u||'');
       const safeFbKey  = (msg._fbKey||'').replace(/[^a-zA-Z0-9_-]/g,'');
-      // Admin ise mesaj satırı tıklanabilir
+      // Admin ise mesaj satırı tıklanabilir + hover butonlar
+      const modMenu = isAdmin && !isSelf && !isAdminMsg ? `
+        <span class="chat-mod-menu">
+          <button class="mod-btn mute" data-action="${_isMuted(msg.u)?'mute':'mute'}" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="${_isMuted(msg.u)?'Susturmayı Kaldır':'Sustur'}">${_isMuted(msg.u)?'🔊':'🔇'}</button>
+          <button class="mod-btn" data-action="kick" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="At" style="color:#74c0fc;">🚪</button>
+          <button class="mod-btn ban" data-action="ban" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="Banla">🔨</button>
+          <button class="mod-btn delmsg" data-action="delmsg" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="Mesajı Sil">🗑</button>
+        </span>` : '';
       const rowAttrs   = isAdmin && !isSelf && !isAdminMsg
         ? `data-msg-user="${safeUser}" data-fbkey="${safeFbKey}" style="display:flex;gap:6px;align-items:flex-start;position:relative;cursor:pointer;border-radius:6px;padding:2px 4px;" class="chat-msg-row${muted?' is-muted':''}"`
         : `style="display:flex;gap:6px;align-items:flex-start;position:relative;" class="chat-msg-row${muted?' is-muted':''}"`;
@@ -4772,6 +4786,7 @@ function renderChat(){
         <span class="chat-user" style="color:${nameColor};flex-shrink:0;">${msg.u}${mutedBadge}</span>
         <span style="font-size:11px;color:${msg.c||'var(--text2)'};flex:1;${textStyle}">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
+        ${modMenu||''}
       </div>`;
     }).join('');
     box.scrollTop = box.scrollHeight;
@@ -5263,6 +5278,7 @@ function openCtxMenu(username, fbKey, x, y){
 function closeCtxMenu(){
   const menu = document.getElementById('chatContextMenu');
   if(menu) menu.classList.remove('open');
+  document.querySelectorAll('.chat-msg-row.mod-open').forEach(r=>r.classList.remove('mod-open'));
 }
 
 /* ── Context menü aksiyonu ── */
@@ -5465,6 +5481,9 @@ document.addEventListener('DOMContentLoaded', function(){
     const touch = e.touches[0];
     _longPressTimer = setTimeout(()=>{
       if(row){
+        // Mobilde mod-open class ile butonları göster
+        document.querySelectorAll('.chat-msg-row.mod-open').forEach(r=>r.classList.remove('mod-open'));
+        row.classList.add('mod-open');
         openCtxMenu(
           decodeURIComponent(row.dataset.msgUser),
           row.dataset.fbkey||'',
@@ -5830,8 +5849,19 @@ function closeMoviePlayer() {
     return t==='INPUT'||t==='TEXTAREA';
   }
 
-  // Sağ tık engelle
+  // Sağ tık engelle (admin chat moderasyon için izin ver)
   document.addEventListener('contextmenu',function(e){
+    if(window.currentUser && window.currentUser.role === 'admin'){
+      var row  = e.target.closest ? e.target.closest('[data-msg-user]') : null;
+      var pill = e.target.closest ? e.target.closest('[data-mod-user]') : null;
+      if(row || pill){
+        e.preventDefault();
+        var username = row ? decodeURIComponent(row.dataset.msgUser) : decodeURIComponent(pill.dataset.modUser);
+        var fbKey    = row ? (row.dataset.fbkey||'') : '';
+        if(typeof openCtxMenu === 'function') openCtxMenu(username, fbKey, e.clientX, e.clientY);
+        return false;
+      }
+    }
     e.preventDefault();return false;
   });
 
@@ -7321,8 +7351,19 @@ window.addEventListener('load', ()=>{
     return t==='INPUT'||t==='TEXTAREA';
   }
 
-  // Sağ tık engelle
+  // Sağ tık engelle (admin chat moderasyon için izin ver)
   document.addEventListener('contextmenu',function(e){
+    if(window.currentUser && window.currentUser.role === 'admin'){
+      var row  = e.target.closest ? e.target.closest('[data-msg-user]') : null;
+      var pill = e.target.closest ? e.target.closest('[data-mod-user]') : null;
+      if(row || pill){
+        e.preventDefault();
+        var username = row ? decodeURIComponent(row.dataset.msgUser) : decodeURIComponent(pill.dataset.modUser);
+        var fbKey    = row ? (row.dataset.fbkey||'') : '';
+        if(typeof openCtxMenu === 'function') openCtxMenu(username, fbKey, e.clientX, e.clientY);
+        return false;
+      }
+    }
     e.preventDefault();return false;
   });
 
