@@ -5884,42 +5884,20 @@ function sendMobChat(){
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
   const _bKey = (currentUser?.username||displayName).replace(/[.#$\/\[\]]/g,'_');
-
-  // Banlı kontrolü
-  const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
+  // Banlı kontrolü (bellek + localStorage)
+  const _banned = (window._bannedSet && window._bannedSet[_bKey]) ||
+                  !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
   if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-
-  // Susturma: önce bellekte + localStorage kontrol et
-  if(_isMuted(displayName)){
+  // Susturma kontrolü (bellek + localStorage — ikisi de kontrol)
+  const _mutedMem   = !!(window._mutedSet && window._mutedSet[_bKey]);
+  const _mutedLocal = !!(JSON.parse(localStorage.getItem('cltv_muted')||'{}')[_bKey]);
+  if(_mutedMem || _mutedLocal){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
     _applyMuteToInput();
     return;
   }
-
-  // Firebase'den anlık susturma kontrolü (mobil için kritik güvence)
-  if(firebaseReady && window.mutedDbRef){
-    const _savedMsg = msg;
-    const _savedColor = window._mobChatColor || null;
-    input.value = ''; // Hemen temizle (kullanıcı deneyimi)
-    window.mutedDbRef.child(_bKey).once('value', snap => {
-      if(snap.exists()){
-        // Firebase'de muted kaydı var — set'e yaz ve engelle
-        window._mutedSet[_bKey] = snap.val();
-        localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-        _applyMuteToInput();
-        showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-        return;
-      }
-      // Muted değil — mesajı gönder
-      const now = new Date();
-      const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-      pushChatMessage({u: displayName, m: _savedMsg, t: t2, c: _savedColor});
-    });
-    return;
-  }
-
-  // Firebase hazır değilse direkt gönder (fallback)
+  // Mesajı gönder
   input.value = '';
   const now = new Date();
   const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
