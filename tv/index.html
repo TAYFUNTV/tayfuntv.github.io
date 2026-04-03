@@ -3698,19 +3698,22 @@ function _doLoginSuccess(user){
     _kickListenerAttached = false;
     setTimeout(_listenKick, 1500);
   }
-  // Muted dinleyiciyi her girişte sıfırla ve yeniden başlat
+  // Muted dinleyiciyi sıfırla: önce Firebase dinleyicisini kapat, sonra yeniden başlat
   _mutedListenerAttached = false;
-  setTimeout(_initMutedListener, 1200);
+  window._mutedSet = {}; // Belleği temizle
+  if(window.mutedDbRef) window.mutedDbRef.off(); // Eski dinleyiciyi kapat
+  if(window._mutedPollInterval){ clearInterval(window._mutedPollInterval); window._mutedPollInterval = null; }
+  setTimeout(_initMutedListener, 800); // Yeniden başlat
   // Ban dinleyiciyi başlat
   _banListenerAttached = false;
-  setTimeout(_initBanListener, 1300);
+  setTimeout(_initBanListener, 1000);
   // DM bildirim dinleyici (sadece normal kullanıcı)
   setTimeout(function(){ if(typeof window._admDmDinle==='function') window._admDmDinle(); }, 2000);
   // Mevcut mute/ban durumunu hemen input'lara yansıt
   setTimeout(function(){
     if(typeof _applyMuteToInput==='function') _applyMuteToInput();
     if(typeof _applyBanToInput==='function') _applyBanToInput();
-  }, 1600);
+  }, 1400);
 }
 function doLogout(){
   removeOnlinePresence();
@@ -5709,75 +5712,73 @@ function _listenKick(){
 /* ── Muted dinleyici — Firebase gerçek zamanlı ── */
 let _mutedListenerAttached = false;
 function _initMutedListener(){
-  // Firebase hazır değilse veya mutedDbRef yoksa ertelenecek
   if(!window.mutedDbRef || !firebaseReady){
-    setTimeout(_initMutedListener, 1000);
+    setTimeout(_initMutedListener, 500);
     return;
   }
-  // Dinleyiciyi sadece bir kez ekle
-  if(_mutedListenerAttached) return;
+  // Önceki dinleyiciyi kapat, temiz başlat
+  window.mutedDbRef.off();
   _mutedListenerAttached = true;
 
-  // Önce mevcut durumu hemen oku (sayfa açılışında anlık uygula)
-  window.mutedDbRef.once('value', snap => {
-    window._mutedSet = {};
-    snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
-    if(typeof renderChat === 'function') renderChat();
-  });
-
+  // Gerçek zamanlı dinleyici — Firebase'de değişiklik olunca anında tetiklenir
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-
-    // localStorage'ı Firebase ile eşitle (offline fallback için)
-    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-
-    // Chat render
+    // Chat ve online listeyi yenile
     if(typeof renderChat === 'function') renderChat();
     if(typeof _lastOnlineUsers !== 'undefined' && typeof renderOnlineUsers === 'function'){
       renderOnlineUsers(_lastOnlineUsers);
     }
-
-    // Eğer bu kullanıcı susturulduysa input'u disable et
-    _applyMuteToInput();
+    // Susturma durumunu input'lara yansıt
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+  }, err => {
+    console.error('Muted listener hatası:', err);
+    _mutedListenerAttached = false;
+    setTimeout(_initMutedListener, 2000);
   });
 
-  // Mobil için ek güvenlik: her 5 saniyede bir Firebase'den muted durumu oku ve input'a yansıt
+  // Polling: her 4 saniyede bir Firebase'den oku ve input'a yansıt (mobil güvence)
   if(window._mutedPollInterval) clearInterval(window._mutedPollInterval);
   window._mutedPollInterval = setInterval(()=>{
+    if(!currentUser || currentUser.role === 'admin') return;
     if(!window.mutedDbRef || !firebaseReady) return;
-    window.mutedDbRef.once('value', snap => {
-      window._mutedSet = {};
-      snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-      localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+    const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+    window.mutedDbRef.child(key).once('value', snap => {
+      if(snap.exists()){
+        window._mutedSet[key] = snap.val();
+      } else {
+        delete window._mutedSet[key];
+      }
       if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
     });
-  }, 5000);
+  }, 4000);
 }
 
 /* ── Susturma durumunu input'lara yansıt ── */
 function _applyMuteToInput(){
   if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-  // Hem bellekteki set hem localStorage'ı kontrol et
-  const mutedInMemory = !!(window._mutedSet && window._mutedSet[key]);
-  const mutedInLocal  = !!(JSON.parse(localStorage.getItem('cltv_muted')||'{}')[key]);
-  const muted = mutedInMemory || mutedInLocal;
+  // Sadece Firebase _mutedSet'e bak (en güvenilir kaynak)
+  const muted = !!(window._mutedSet && window._mutedSet[key]);
   ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
-    el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
-    el.style.opacity = muted ? '.4' : '1';
+    el.readOnly = muted;
+    el.placeholder = muted ? '\uD83D\uDD07 Susturuldunuz — mesaj g\xF6nderemezsiniz' : 'Mesaj yaz...';
+    el.style.opacity = muted ? '.35' : '1';
+    el.style.cursor = muted ? 'not-allowed' : '';
+    el.style.pointerEvents = muted ? 'none' : '';
+    if(muted) el.blur();
   });
-  // Gönder butonlarını da güncelle
+  // Gönder butonlarını da engelle
   ['chatSendBtn','chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
-    el.style.opacity = muted ? '.4' : '1';
+    el.style.opacity = muted ? '.25' : '1';
+    el.style.pointerEvents = muted ? 'none' : '';
+    el.style.cursor = muted ? 'not-allowed' : '';
   });
 }
 
