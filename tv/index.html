@@ -2677,6 +2677,7 @@ tr:last-child td{border:none;}
 <div id="chatContextMenu">
   <div class="ctx-user-label" id="ctxUserLabel">kullanıcı</div>
   <div class="ctx-divider"></div>
+  <button class="ctx-btn" style="color:#74c0fc;" onclick="ctxAction('dm')">✉️ Mesaj Gönder</button>
   <button class="ctx-btn ctx-mute" id="ctxMuteBtn" onclick="ctxAction('mute')">🔇 Sustur</button>
   <button class="ctx-btn ctx-kick" onclick="ctxAction('kick')">🚪 Sohbetten At</button>
   <button class="ctx-btn ctx-ban"  onclick="ctxAction('ban')">🔨 Banla &amp; At</button>
@@ -5486,6 +5487,7 @@ function ctxAction(action){
   else if(action === 'kick')   chatKickUser(username);
   else if(action === 'ban')    chatBanUser(username);
   else if(action === 'delmsg') chatDeleteMsg(fbKey);
+  else if(action === 'dm')     adminDmAc(encodeURIComponent(username));
 }
 
 /* ── Sustur / Susturma kaldır ── */
@@ -7769,113 +7771,52 @@ window.addEventListener('load', ()=>{
 
 <!-- ===== ADMİN DM SİSTEMİ ===== -->
 <style>
-#adm-dm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2147483647;display:none;align-items:center;justify-content:center;}
-#adm-dm-overlay.ac{display:flex;}
-#adm-dm-kutu{background:#0e1318;border:1px solid rgba(116,192,252,.35);border-radius:16px;width:360px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.9);}
-#adm-dm-baslik{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;}
-#adm-dm-gecmis{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:280px;scrollbar-width:thin;}
-#adm-dm-footer{padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+/* ── ADMIN DM: Floating pencere (sağ alt köşe, ekran kararmaz) ── */
+#adm-dm-overlay{
+  position:fixed;
+  bottom:0; right:16px;
+  z-index:2147483647;
+  display:none;
+  pointer-events:none;
+}
+#adm-dm-overlay.ac { display:block; }
+#adm-dm-kutu{
+  pointer-events:all;
+  background:#0e1318;
+  border:1px solid rgba(116,192,252,.35);
+  border-radius:14px 14px 0 0;
+  width:320px;
+  max-width:calc(100vw - 32px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 -4px 40px rgba(0,0,0,.9);
+  animation:slideUpDm .22s cubic-bezier(.22,.68,0,1.1) both;
+}
+@keyframes slideUpDm{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+#adm-dm-baslik{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;cursor:default;}
+#adm-dm-gecmis{overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px;height:240px;scrollbar-width:thin;}
+#adm-dm-footer{padding:9px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
 #adm-dm-input-row{display:flex;gap:6px;align-items:center;}
-#adm-dm-input{flex:1;background:#141a22;border:1px solid rgba(116,192,252,.3);border-radius:8px;padding:9px 11px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;font-family:inherit;caret-color:#74c0fc;}
-#adm-dm-gonder{background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;padding:9px 15px;color:#000;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;}
+#adm-dm-input{flex:1;background:#141a22;border:1px solid rgba(116,192,252,.3);border-radius:8px;padding:8px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;font-family:inherit;caret-color:#74c0fc;}
+#adm-dm-gonder{background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;padding:8px 14px;color:#000;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;}
 #adm-dm-gif-panel{display:none;background:#0a0f16;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;}
 #adm-dm-gif-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px;}
-#adm-dm-gif-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:120px;overflow-y:auto;}
+#adm-dm-gif-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:110px;overflow-y:auto;}
 #adm-dm-renk-panel{display:none;background:#0a0f16;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;}
 #adm-dm-renk-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;}
 .adm-dm-msg-ben{align-self:flex-end;background:rgba(116,192,252,.15);border:1px solid rgba(116,192,252,.2);border-radius:12px 12px 3px 12px;padding:7px 11px;max-width:85%;font-size:12px;font-weight:600;color:#74c0fc;word-break:break-word;}
 .adm-dm-msg-kisi{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px 12px 12px 3px;padding:7px 11px;max-width:85%;font-size:12px;font-weight:600;color:#e8eaf0;word-break:break-word;}
 .adm-dm-zaman{font-size:9px;color:#5a6478;margin-top:2px;}
 
-/* Kullanıcıya gelen bildirim — floating DM penceresi */
-#adm-dm-notif{
-  position:fixed;
-  bottom:70px;
-  right:16px;
-  z-index:2147483646;
-  background:#0e1318;
-  border:1px solid rgba(116,192,252,.35);
-  border-radius:16px;
-  width:300px;
-  max-width:calc(100vw - 28px);
-  box-shadow:0 12px 40px rgba(0,0,0,.85);
-  display:none;
-  flex-direction:column;
-  overflow:hidden;
-  animation:popIn .25s ease both;
-  font-family:'DM Sans',sans-serif;
-}
-#adm-dm-notif.ac { display:flex; }
-#usr-dm-baslik{
-  display:flex;align-items:center;gap:9px;
-  padding:11px 13px;
-  background:#0a0f16;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  flex-shrink:0;
-  cursor:pointer;
-}
-#usr-dm-baslik:hover { background:#0d1219; }
-#usr-dm-mesajlar{
-  flex:1;
-  overflow-y:auto;
-  padding:10px 11px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-height:220px;
-  min-height:60px;
-  scrollbar-width:thin;
-}
-#usr-dm-input-row{
-  display:flex;gap:6px;align-items:center;
-  padding:8px 10px;
-  border-top:1px solid rgba(255,255,255,.06);
-  flex-shrink:0;
-}
-#usr-dm-input{
-  flex:1;background:#141a22;border:1px solid rgba(116,192,252,.25);border-radius:8px;
-  padding:8px 10px;color:#e8eaf0;font-size:12px;font-weight:600;outline:none;
-  font-family:inherit;caret-color:#74c0fc;
-}
-#usr-dm-input:focus { border-color:rgba(116,192,252,.55); }
-#usr-dm-gonder{
-  background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;
-  padding:8px 13px;color:#000;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0;
-  transition:opacity .15s;
-}
-#usr-dm-gonder:hover { opacity:.85; }
-.usr-dm-msg-ben{
-  align-self:flex-end;background:rgba(116,192,252,.18);border:1px solid rgba(116,192,252,.22);
-  border-radius:12px 12px 3px 12px;padding:6px 10px;max-width:88%;
-  font-size:12px;font-weight:600;color:#74c0fc;word-break:break-word;
-}
-.usr-dm-msg-kisi{
-  align-self:flex-start;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.15);
-  border-radius:12px 12px 12px 3px;padding:6px 10px;max-width:88%;
-  font-size:12px;font-weight:600;color:#e8eaf0;word-break:break-word;
-}
-.usr-dm-zaman{font-size:9px;color:#5a6478;margin-top:2px;padding:0 2px;}
-/* Sağ altta floating tetik butonu */
-#usr-dm-fab{
-  position:fixed;bottom:16px;right:16px;z-index:2147483645;
-  width:48px;height:48px;border-radius:50%;
-  background:linear-gradient(135deg,#74c0fc,#1a7fbf);
-  border:none;cursor:pointer;
-  display:none;align-items:center;justify-content:center;
-  font-size:20px;box-shadow:0 4px 20px rgba(0,0,0,.7);
-  transition:transform .2s,box-shadow .2s;
-  animation:popIn .3s ease both;
-}
-#usr-dm-fab:hover { transform:scale(1.12); box-shadow:0 6px 28px rgba(0,0,0,.8); }
-#usr-dm-fab.okunmadi::after{
-  content:'';position:absolute;top:4px;right:4px;
-  width:10px;height:10px;border-radius:50%;
-  background:#e8373d;border:2px solid #0e1318;
-  animation:pulseDot 1.5s infinite;
-}
+/* Kullanıcıya gelen bildirim */
+#adm-dm-notif{position:fixed;bottom:76px;right:14px;z-index:2147483646;background:#0e1318;border:1px solid rgba(116,192,252,.45);border-radius:14px;padding:13px 15px;min-width:240px;max-width:290px;box-shadow:0 8px 32px rgba(0,0,0,.8);display:none;animation:popIn .3s ease both;}
 </style>
 
-<div id="adm-dm-overlay" onclick="if(event.target===this)admDmKapat()">
+<div id="adm-dm-overlay">
   <div id="adm-dm-kutu">
     <!-- Başlık -->
     <div id="adm-dm-baslik">
@@ -7915,30 +7856,18 @@ window.addEventListener('load', ()=>{
   </div>
 </div>
 
-<!-- Kullanıcı Floating DM Penceresi (Instagram/Facebook DM tarzı) -->
+<!-- Kullanıcıya bildirim -->
 <div id="adm-dm-notif">
-  <!-- Başlık / drag alanı -->
-  <div id="usr-dm-baslik">
-    <span style="font-size:18px;flex-shrink:0;">👑</span>
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:9px;color:#5a6478;font-weight:700;letter-spacing:.8px;">ÖZEL MESAJ</div>
-      <div style="font-size:13px;font-weight:800;color:#ffd700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Admin</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span style="font-size:18px;">✉️</span>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:#5a6478;font-weight:700;">ADMİNDEN ÖZEL MESAJ</div>
+      <div style="font-size:12px;font-weight:800;color:#ffd700;">👑 Admin</div>
     </div>
-    <button onclick="usrDmKapat()" style="background:rgba(255,255,255,.07);border:none;border-radius:6px;color:#5a6478;font-size:13px;cursor:pointer;padding:3px 9px;flex-shrink:0;">✕</button>
+    <button onclick="document.getElementById('adm-dm-notif').style.display='none'" style="background:rgba(255,255,255,.06);border:none;border-radius:6px;color:#5a6478;font-size:13px;cursor:pointer;padding:2px 8px;">✕</button>
   </div>
-  <!-- Mesaj geçmişi -->
-  <div id="usr-dm-mesajlar">
-    <div data-bos style="text-align:center;color:#5a6478;font-size:11px;padding:14px 0;">Henüz mesaj yok.</div>
-  </div>
-  <!-- Yanıt input -->
-  <div id="usr-dm-input-row">
-    <input id="usr-dm-input" placeholder="Yanıtla..." onkeydown="if(event.key==='Enter')usrDmGonder()">
-    <button id="usr-dm-gonder" onclick="usrDmGonder()">↑</button>
-  </div>
+  <div id="adm-dm-notif-icerik" style="font-size:13px;font-weight:600;color:#e8eaf0;line-height:1.5;word-break:break-word;"></div>
 </div>
-
-<!-- Floating Action Button — yeni mesaj gelince görünür -->
-<button id="usr-dm-fab" onclick="usrDmAc()" title="Admin mesajı">✉️</button>
 
 <script>
 (function(){
@@ -8111,110 +8040,25 @@ window.addEventListener('load', ()=>{
     rp.style.display = rp.style.display === 'none' ? 'block' : 'none';
   };
 
-  // ── KULLANICI TARAFI: Instagram/Facebook DM tarzı çift yönlü mesajlaşma ──
+  // Kullanıcı tarafı bildirim
   window._admDmDinle = function(){
     if(!window.currentUser || window.currentUser.role==='admin') return;
     if(!window.firebaseReady || !window.dmDbRef) return;
-
     const key = window.currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-    const notif  = document.getElementById('adm-dm-notif');
-    const mesajlar = document.getElementById('usr-dm-mesajlar');
-    const fab    = document.getElementById('usr-dm-fab');
-
-    // FAB'ı göster (kullanıcı için her zaman erişilebilir)
-    fab.style.display = 'flex';
-
-    function _saat(){
-      const n=new Date();
-      return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-    }
-
-    function _mesajEkle(m){
-      if(mesajlar.querySelector('[data-bos]')) mesajlar.innerHTML='';
-      const benim = m.from === window.currentUser.username;
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex;flex-direction:column;align-items:'+(benim?'flex-end':'flex-start')+';';
-      const balon = document.createElement('div');
-      balon.className = benim ? 'usr-dm-msg-ben' : 'usr-dm-msg-kisi';
-      if(m.isHtml) balon.innerHTML = m.m;
-      else { balon.style.color = m.c||'#e8eaf0'; balon.textContent = m.m; }
-      const zaman = document.createElement('div');
-      zaman.className = 'usr-dm-zaman';
-      zaman.style.textAlign = benim?'right':'left';
-      zaman.textContent = (benim?'Sen':'👑 Admin')+' · '+(m.t||'');
-      wrap.appendChild(balon);
-      wrap.appendChild(zaman);
-      mesajlar.appendChild(wrap);
-      mesajlar.scrollTop = mesajlar.scrollHeight;
-    }
-
-    // Geçmişi yükle + canlı dinle
-    mesajlar.innerHTML = '<div data-bos style="text-align:center;color:#5a6478;font-size:11px;padding:14px 0;">Yükleniyor...</div>';
-    window.dmDbRef.child(key).limitToLast(40).on('value', snap=>{
-      mesajlar.innerHTML = '';
-      const msgs=[];
-      snap.forEach(ch=>msgs.push(ch.val()));
-      if(!msgs.length){
-        mesajlar.innerHTML='<div data-bos style="text-align:center;color:#5a6478;font-size:11px;padding:14px 0;">Henüz mesaj yok.</div>';
-        return;
-      }
-      msgs.forEach(_mesajEkle);
-    });
-
-    // Yeni mesaj gelince FAB'ı kırmızı yap ve pencere kapalıysa bildir
-    let ilk=true;
-    window.dmDbRef.child(key).limitToLast(1).once('value',()=>{ilk=false;});
-    window.dmDbRef.child(key).limitToLast(1).on('child_added',snap=>{
+    let ilk = true;
+    window.dmDbRef.child(key).limitToLast(1).once('value', ()=>{ ilk=false; });
+    window.dmDbRef.child(key).limitToLast(1).on('child_added', snap=>{
       if(ilk) return;
-      const msg=snap.val();
-      if(!msg || msg.from===window.currentUser.username) return;
-      // Pencere kapalıysa FAB'a okunmadı işareti koy ve aç
-      if(!notif.classList.contains('ac')){
-        fab.classList.add('okunmadi');
-        // Otomatik aç
-        notif.classList.add('ac');
-        fab.style.display='none';
-      }
+      const msg = snap.val();
+      if(!msg) return;
+      const notif = document.getElementById('adm-dm-notif');
+      const icerik = document.getElementById('adm-dm-notif-icerik');
+      if(msg.isHtml) icerik.innerHTML = msg.m;
+      else { icerik.textContent = ''; icerik.style.color=msg.c||'#e8eaf0'; icerik.textContent=msg.m; }
+      notif.style.display = 'block';
+      clearTimeout(window._admDmT);
+      window._admDmT = setTimeout(()=>notif.style.display='none', 8000);
     });
-
-    // Kullanıcı gönder fonksiyonu
-    window.usrDmGonder = function(){
-      const inp = document.getElementById('usr-dm-input');
-      const val = inp.value.trim();
-      if(!val || !window.firebaseReady || !window.dmDbRef) return;
-      const msg = {
-        from: window.currentUser.username,
-        to: 'admin',
-        m: val,
-        t: _saat(),
-        ts: Date.now(),
-        c: '#74c0fc',
-        isHtml: false
-      };
-      // Kullanıcının kendi key'ine yaz (admin de oradan okuyor)
-      window.dmDbRef.child(key).push(msg);
-      inp.value='';
-      inp.focus();
-    };
-
-    window.usrDmAc = function(){
-      notif.classList.add('ac');
-      fab.classList.remove('okunmadi');
-      fab.style.display='none';
-      setTimeout(()=>{ mesajlar.scrollTop=mesajlar.scrollHeight; document.getElementById('usr-dm-input').focus(); },100);
-    };
-
-    window.usrDmKapat = function(){
-      notif.classList.remove('ac');
-      fab.style.display='flex';
-    };
-  };
-
-  // Pencere zaten açıksa toggle
-  window.usrDmToggle = function(){
-    const notif=document.getElementById('adm-dm-notif');
-    if(notif.classList.contains('ac')) window.usrDmKapat();
-    else window.usrDmAc && window.usrDmAc();
   };
 })();
 </script>
