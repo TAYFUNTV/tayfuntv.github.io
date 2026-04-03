@@ -2949,8 +2949,8 @@ tr:last-child td{border:none;}
                 <button id="mobColorPaletteBtn" onclick="toggleMobColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk Paleti">
                   <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="mobColorPaletteDot"></span>
                 </button>
-                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
-                <button id="mobChatSendBtn" onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter' && !_isMobMuted())sendMobChat()">
+                <button id="mobChatSendBtn" onclick="if(!_isMobMuted())sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
             </div>
           </div>
@@ -5711,13 +5711,21 @@ let _mutedListenerAttached = false;
 function _initMutedListener(){
   // Firebase hazır değilse veya mutedDbRef yoksa ertelenecek
   if(!window.mutedDbRef || !firebaseReady){
-    // Firebase henüz hazır değil, 1 sn sonra tekrar dene
     setTimeout(_initMutedListener, 1000);
     return;
   }
   // Dinleyiciyi sadece bir kez ekle
   if(_mutedListenerAttached) return;
   _mutedListenerAttached = true;
+
+  // Önce mevcut durumu hemen oku (sayfa açılışında anlık uygula)
+  window.mutedDbRef.once('value', snap => {
+    window._mutedSet = {};
+    snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
+    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+    if(typeof renderChat === 'function') renderChat();
+  });
 
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
@@ -5869,7 +5877,30 @@ document.addEventListener('DOMContentLoaded', function(){
 /* online kullanıcıları son listeyi tut (renderOnlineUsers tekrar çağrılabilsin) */
 let _lastOnlineUsers = [];
 
+/* ── Mobil için anlık susturma kontrolü ── */
+function _isMobMuted(){
+  if(!currentUser || currentUser.role === 'admin') return false;
+  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+  if(window._mutedSet && window._mutedSet[key]){
+    showToast('\uD83D\uDD07 Susturuldunuz, mesaj g\xF6nderemezsiniz.','warning');
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+    return true;
+  }
+  return false;
+}
+
 function sendMobChat(){
+  // ── EN KESİN SUSTURMA BLOĞU ──
+  // Admin değilse susturma + ban kontrolü yap
+  if(currentUser && currentUser.role !== 'admin'){
+    const _ck = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+    // Firebase _mutedSet kontrolü (gerçek zamanlı)
+    if(window._mutedSet && window._mutedSet[_ck]){
+      showToast('\uD83D\uDD07 Susturuldunuz, mesaj g\xF6nderemezsiniz.','warning');
+      _applyMuteToInput();
+      return;
+    }
+  }
   const input = document.getElementById('mobChatInput');
   if(!input) return;
   const msg = input.value.trim();
