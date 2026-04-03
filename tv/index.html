@@ -56,6 +56,15 @@ function _startFirebase() {
       if(typeof _applyBanToInput === 'function') _applyBanToInput();
       if(typeof renderChat === 'function') renderChat();
       if(typeof renderOnlineUsers === 'function' && typeof _lastOnlineUsers !== 'undefined') renderOnlineUsers(_lastOnlineUsers);
+      // Admin panel banned sayfası açıksa otomatik yenile
+      const bannedPage = document.getElementById('page_banned');
+      if(bannedPage && bannedPage.classList.contains('active') && typeof _renderBannedTable === 'function'){
+        const bList = Object.values(window._bannedSet).filter(v => v && v.username);
+        _renderBannedTable(bList);
+        if(typeof _updateBannedBadge === 'function') _updateBannedBadge(bList.length);
+      } else if(typeof _updateBannedBadge === 'function'){
+        _updateBannedBadge();
+      }
     });
     // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
     _migrateLocalUsersToFirebase();
@@ -5548,6 +5557,9 @@ function chatBanUser(username){
   // Chat render (nick işaretlensin)
   if(typeof renderChat === 'function') renderChat();
   if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+  // Admin panel banned listesini güncelle
+  if(typeof renderBanned === 'function') renderBanned();
+  if(typeof renderUsers === 'function') renderUsers();
   _chatSystemMsg('🔨 ' + username + ' banlandı. Mesaj gönderemez ve siteye giremez.');
   showToast('🔨 ' + username + ' banlandı','warning');
   _updateBannedBadge();
@@ -5569,6 +5581,9 @@ function chatUnbanUser(username){
   _fbUpdateUser(key, { status:'active', banReason:'', bannedAt:'' });
   if(typeof renderChat === 'function') renderChat();
   if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+  // Admin panel banned ve kullanıcı listesini güncelle
+  if(typeof renderBanned === 'function') renderBanned();
+  if(typeof renderUsers === 'function') renderUsers();
   _chatSystemMsg('🔓 ' + username + ' banı kaldırıldı.');
   showToast('🔓 ' + username + ' banı kaldırıldı','success');
   if(typeof _updateBannedBadge === 'function') _updateBannedBadge();
@@ -7367,15 +7382,33 @@ function renderBanned(){
   const tbody = document.getElementById('bannedTableBody');
   if(!tbody) return;
   if(window.bannedDbRef){
+    // Önce bellekteki _bannedSet ile anında göster
+    if(window._bannedSet && Object.keys(window._bannedSet).length > 0){
+      _allBanned = Object.values(window._bannedSet).filter(v => v && v.username);
+      _renderBannedTable(_allBanned);
+      _updateBannedBadge(_allBanned.length);
+    }
+    // Firebase'den güncel veriyi çek
     window.bannedDbRef.once('value', snap => {
       _allBanned = [];
-      snap.forEach(child => { const v = child.val(); if(v) _allBanned.push(v); });
+      snap.forEach(child => { const v = child.val(); if(v && v.username) _allBanned.push(v); });
+      // Bellekteki _bannedSet'i güncelle
+      window._bannedSet = window._bannedSet || {};
+      _allBanned.forEach(b => {
+        const k = (b.username||'').replace(/[.#$\/\[\]]/g,'_');
+        window._bannedSet[k] = b;
+      });
       _renderBannedTable(_allBanned);
       _updateBannedBadge(_allBanned.length);
     });
   } else {
-    const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
-    _allBanned = Object.values(bans);
+    // Firebase yoksa: önce _bannedSet, sonra localStorage
+    if(window._bannedSet && Object.keys(window._bannedSet).length > 0){
+      _allBanned = Object.values(window._bannedSet).filter(v => v && v.username);
+    } else {
+      const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+      _allBanned = Object.values(bans).filter(v => v && v.username);
+    }
     _renderBannedTable(_allBanned);
     _updateBannedBadge(_allBanned.length);
   }
