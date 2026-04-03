@@ -3684,6 +3684,10 @@ function _doLoginSuccess(user){
 }
 function doLogout(){
   removeOnlinePresence();
+  // Kick/mute listener'ları sıfırla
+  _kickListenerAttached = false;
+  _mutedListenerAttached = false;
+  clearInterval(_kickPollTimer);
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
@@ -3857,6 +3861,10 @@ function acceptChat(){
 
 function doLogout(){
   removeOnlinePresence();
+  // Kick/mute listener'ları sıfırla
+  _kickListenerAttached = false;
+  _mutedListenerAttached = false;
+  clearInterval(_kickPollTimer);
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
@@ -5395,15 +5403,15 @@ function chatKickUser(username){
   if(!confirm(username + ' kullanıcısını sohbetten atmak istiyor musunuz?')) return;
   const key = username.replace(/[.#$\/\[\]]/g,'_');
   const kickData = { kickedAt: Date.now(), kickedBy: currentUser.username, reason: 'kick' };
+  // Her durumda localStorage'a yaz (polling fallback)
+  localStorage.setItem('cltv_kick_' + key, JSON.stringify(kickData));
   if(firebaseReady){
+    // Firebase'e yaz
     firebase.database().ref('tayfuntv_kicks/' + key).set(kickData);
     // Online listesinden de düşür
     if(onlineRef) onlineRef.once('value', snap => {
       snap.forEach(ch => { if(ch.val().nick === username) ch.ref.remove(); });
     });
-  } else {
-    // Firebase yoksa localStorage kick sinyali
-    localStorage.setItem('cltv_kick_' + key, JSON.stringify(kickData));
   }
   _chatSystemMsg('🚪 ' + username + ' sohbetten atıldı.');
   showToast('🚪 ' + username + ' atıldı','warning');
@@ -5452,31 +5460,87 @@ function _chatSystemMsg(text){
 
 /* ── Kick/Ban dinleyici — kullanıcı tarafında ── */
 let _kickListenerAttached = false;
+let _kickPollTimer = null;
+
+function _handleKickData(data, ref){
+  if(!data || !data.kickedAt) return;
+  // 2 dakika içindeki sinyal geçerli
+  if(Date.now() - data.kickedAt > 120000) return;
+  if(ref) ref.remove(); // sinyali temizle
+  // localStorage kick sinyalini de temizle
+  if(currentUser){
+    const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+    localStorage.removeItem('cltv_kick_' + key);
+  }
+  if(data.reason === 'banned'){
+    doLogout();
+    setTimeout(()=>{
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('banScreen').style.display  = 'flex';
+      document.getElementById('banReason').textContent    =
+        'Ban nedeni: ' + (data.banReason || 'Kural ihlali');
+    }, 200);
+  } else {
+    // Kick: logout yap, login ekranı göster, chat temizlensin
+    const kickedUsername = currentUser ? currentUser.username : '';
+    doLogout();
+    setTimeout(()=>{
+      showKickNotice(kickedUsername);
+    }, 300);
+  }
+}
+
+function showKickNotice(username){
+  // Login ekranında bildirim göster
+  const loginScreen = document.getElementById('loginScreen');
+  if(!loginScreen) return;
+  loginScreen.style.display = 'flex';
+  // Mevcut hata alanını kullan
+  const err = document.getElementById('loginErr');
+  if(err){
+    err.style.display = 'block';
+    err.style.background = 'rgba(116,192,252,0.12)';
+    err.style.color = '#74c0fc';
+    err.style.borderLeft = '3px solid #74c0fc';
+    err.style.padding = '10px 14px';
+    err.style.borderRadius = '7px';
+    err.style.marginBottom = '10px';
+    err.textContent = '🚪 Yönetici tarafından sohbetten atıldınız. Tekrar giriş yapabilirsiniz.';
+    // 8 saniye sonra temizle
+    setTimeout(()=>{ err.textContent=''; err.style.cssText=''; }, 8000);
+  }
+}
+
 function _listenKick(){
-  if(!firebaseReady || !currentUser || _kickListenerAttached) return;
-  if(currentUser.role === 'admin') return;
-  _kickListenerAttached = true;
+  if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-  firebase.database().ref('tayfuntv_kicks/' + key).on('value', snap => {
-    if(!snap.exists()) return;
-    const data = snap.val();
-    if(!data || !data.kickedAt) return;
-    // 30 saniye içindeki kick sinyali geçerli
-    if(Date.now() - data.kickedAt > 30000) return;
-    snap.ref.remove(); // sinyali temizle
-    if(data.reason === 'banned'){
-      doLogout();
-      setTimeout(()=>{
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('banScreen').style.display  = 'flex';
-        document.getElementById('banReason').textContent    =
-          'Ban nedeni: ' + (data.banReason || 'Kural ihlali');
-      }, 200);
-    } else {
-      doLogout();
-      setTimeout(()=>{ alert('🚪 Yönetici tarafından sohbetten atıldınız.'); }, 200);
+
+  // Firebase dinleyici
+  if(firebaseReady && !_kickListenerAttached){
+    _kickListenerAttached = true;
+    firebase.database().ref('tayfuntv_kicks/' + key).on('value', snap => {
+      if(!snap.exists()) return;
+      _handleKickData(snap.val(), snap.ref);
+    });
+  } else if(!firebaseReady){
+    // Firebase henüz hazır değil, 1sn sonra tekrar dene
+    setTimeout(_listenKick, 1000);
+    return;
+  }
+
+  // Polling: localStorage kick sinyali kontrol et (2sn'de bir)
+  clearInterval(_kickPollTimer);
+  _kickPollTimer = setInterval(()=>{
+    if(!currentUser) { clearInterval(_kickPollTimer); return; }
+    const localKey = 'cltv_kick_' + key;
+    const raw = localStorage.getItem(localKey);
+    if(raw){
+      try {
+        const data = JSON.parse(raw);
+        _handleKickData(data, null);
+      } catch(e){}
     }
-  });
+  }, 2000);
 }
 
 /* ── Muted dinleyici — Firebase gerçek zamanlı ── */
