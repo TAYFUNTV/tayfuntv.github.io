@@ -3679,14 +3679,21 @@ function _doLoginSuccess(user){
   // Muted dinleyiciyi her girişte sıfırla ve yeniden başlat
   _mutedListenerAttached = false;
   setTimeout(_initMutedListener, 1200);
-  // Mevcut mute durumunu hemen input'lara yansıt
-  setTimeout(function(){ if(typeof _applyMuteToInput==='function') _applyMuteToInput(); }, 1500);
+  // Ban dinleyiciyi başlat
+  _banListenerAttached = false;
+  setTimeout(_initBanListener, 1300);
+  // Mevcut mute/ban durumunu hemen input'lara yansıt
+  setTimeout(function(){
+    if(typeof _applyMuteToInput==='function') _applyMuteToInput();
+    if(typeof _applyBanToInput==='function') _applyBanToInput();
+  }, 1600);
 }
 function doLogout(){
   removeOnlinePresence();
-  // Kick/mute listener'ları sıfırla
+  // Kick/mute/ban listener'ları sıfırla
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
+  _banListenerAttached = false;
   clearInterval(_kickPollTimer);
   currentUser = null;
   localStorage.removeItem('cltv_remember');
@@ -3861,9 +3868,10 @@ function acceptChat(){
 
 function doLogout(){
   removeOnlinePresence();
-  // Kick/mute listener'ları sıfırla
+  // Kick/mute/ban listener'ları sıfırla
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
+  _banListenerAttached = false;
   clearInterval(_kickPollTimer);
   currentUser = null;
   localStorage.removeItem('cltv_remember');
@@ -4577,10 +4585,13 @@ function clearChat(){
 
 /* ── Mesaj gönderme yardımcısı ── */
 function pushChatMessage(msgObj){
-  // Son savunma: susturulmuş kullanıcı mesaj gönderemesin
-  // (sistem mesajları _sys:true ile işaretli, onları engelleme)
+  // Son savunma: banlı veya susturulmuş kullanıcı mesaj gönderemesin
   if(!msgObj._sys && msgObj.u && msgObj.u !== '⚙️ Sistem'){
     const sender = msgObj.u;
+    if(_isBanned(sender)){
+      showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
+      return;
+    }
     if(_isMuted(sender)){
       showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
       return;
@@ -4656,20 +4667,26 @@ function renderOnlineUsers(users){
 
     // Admin için hover yönetim balonu olan wrapper
     if(clickable){
-      const muteLabel = isMuted ? '🔊 Susturmayı Kaldır' : '🔇 Sustur';
-      const muteClass = isMuted ? 'opa-btn' : 'opa-btn opa-mute';
+      const isBanned   = _isBanned(u.nick);
+      const muteLabel  = isMuted ? '🔊 Susturmayı Kaldır' : '🔇 Sustur';
+      const muteClass  = isMuted ? 'opa-btn' : 'opa-btn opa-mute';
+      const banLabel   = isBanned ? '🔓 Banı Kaldır' : '🔨 Banla';
+      const banClass   = isBanned ? 'opa-btn' : 'opa-btn opa-ban';
+      const nickColor  = isBanned ? '#ff6b6b' : (isMuted ? '#5a6478' : color);
+      const nickSuffix = isBanned ? ' 🔨' : (isMuted ? ' 🔇' : '');
+      const pillBorder = isBanned ? 'rgba(255,107,107,.4)' : 'rgba(232,55,61,.35)';
       return `<span class="online-pill-wrap" data-mod-user="${safeNick}">
         <span title="${u.nick} — yönet"
-          style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid rgba(232,55,61,.35);border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;cursor:pointer;">
+          style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid ${pillBorder};border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;cursor:pointer;">
           <span style="font-size:12px;line-height:1;">${icon}</span>
-          <span style="font-size:10px;font-weight:700;color:${isMuted?'#5a6478':color};">${u.nick}${isMuted?' 🔇':''}</span>
+          <span style="font-size:10px;font-weight:700;color:${nickColor};">${u.nick}${nickSuffix}</span>
           <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;"></span>
         </span>
         <div class="online-pill-actions">
           <div class="opa-label">👤 ${u.nick}</div>
           <button class="${muteClass}" onclick="event.stopPropagation();_onlineMute('${safeNick}')">${muteLabel}</button>
           <button class="opa-btn opa-kick" onclick="event.stopPropagation();_onlineKick('${safeNick}')">🚪 Sohbetten At</button>
-          <button class="opa-btn opa-ban"  onclick="event.stopPropagation();_onlineBan('${safeNick}')">🔨 Banla &amp; At</button>
+          <button class="${banClass}" onclick="event.stopPropagation();_onlineBan('${safeNick}')">${banLabel}</button>
         </div>
       </span>`;
     }
@@ -4834,6 +4851,55 @@ function _isMuted(username){
   return false;
 }
 
+/* ── Banlı mı kontrol ── */
+window._bannedSet = {};
+function _isBanned(username){
+  if(!username) return false;
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  if(window._bannedSet && window._bannedSet[key]) return true;
+  return false;
+}
+
+/* ── Ban dinleyici — Firebase gerçek zamanlı ── */
+let _banListenerAttached = false;
+function _initBanListener(){
+  if(!window.bannedDbRef || !firebaseReady){
+    setTimeout(_initBanListener, 1000);
+    return;
+  }
+  if(_banListenerAttached) return;
+  _banListenerAttached = true;
+  window.bannedDbRef.on('value', snap => {
+    window._bannedSet = {};
+    snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
+    // Chat ve online listeyi yenile
+    if(typeof renderChat === 'function') renderChat();
+    if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+    // Eğer mevcut kullanıcı banlıysa input'u kilitle
+    _applyBanToInput();
+  });
+}
+
+/* ── Ban durumunu input'lara yansıt ── */
+function _applyBanToInput(){
+  if(!currentUser || currentUser.role === 'admin') return;
+  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+  const banned = _isBanned(currentUser.username);
+  ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = banned || _isMuted(currentUser.username);
+    el.placeholder = banned ? '🔨 Banlandınız' : (_isMuted(currentUser.username) ? '🔇 Susturuldunuz' : 'Mesaj yaz...');
+    el.style.opacity = banned ? '.3' : (_isMuted(currentUser.username) ? '.4' : '1');
+  });
+  ['chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = banned || _isMuted(currentUser.username);
+    el.style.opacity = (banned || _isMuted(currentUser.username)) ? '.3' : '1';
+  });
+}
+
 function renderChat(){
   const isAdmin = currentUser && currentUser.role === 'admin';
   const boxes = [
@@ -4848,6 +4914,7 @@ function renderChat(){
     if(!visibleMsgs.length){ box.innerHTML = empty; return; }
     box.innerHTML = visibleMsgs.map((msg,idx)=>{
       const muted      = _isMuted(msg.u);
+      const banned     = _isBanned(msg.u);
       const isSelf     = currentUser && msg.u === currentUser.username;
       const isAdminMsg = msg._sys || msg.u === _d(_un);
       const safeUser   = encodeURIComponent(msg.u||'');
@@ -4855,19 +4922,20 @@ function renderChat(){
       // Admin ise mesaj satırı tıklanabilir + hover butonlar
       const modMenu = isAdmin && !isSelf && !isAdminMsg ? `
         <span class="chat-mod-menu">
-          <button class="mod-btn mute" data-action="${_isMuted(msg.u)?'mute':'mute'}" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="${_isMuted(msg.u)?'Susturmayı Kaldır':'Sustur'}">${_isMuted(msg.u)?'🔊':'🔇'}</button>
+          <button class="mod-btn mute" data-action="mute" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="${_isMuted(msg.u)?'Susturmayı Kaldır':'Sustur'}">${_isMuted(msg.u)?'🔊':'🔇'}</button>
           <button class="mod-btn" data-action="kick" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="At" style="color:#74c0fc;">🚪</button>
-          <button class="mod-btn ban" data-action="ban" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="Banla">🔨</button>
+          <button class="mod-btn ban" data-action="ban" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="${_isBanned(msg.u)?'Banı Kaldır':'Banla'}">${_isBanned(msg.u)?'🔓':'🔨'}</button>
           <button class="mod-btn delmsg" data-action="delmsg" data-u="${safeUser}" data-fbkey="${safeFbKey}" title="Mesajı Sil">🗑</button>
         </span>` : '';
       const rowAttrs   = isAdmin && !isSelf && !isAdminMsg
-        ? `data-msg-user="${safeUser}" data-fbkey="${safeFbKey}" style="display:flex;gap:6px;align-items:flex-start;position:relative;cursor:pointer;border-radius:6px;padding:2px 4px;" class="chat-msg-row${muted?' is-muted':''}"`
-        : `style="display:flex;gap:6px;align-items:flex-start;position:relative;" class="chat-msg-row${muted?' is-muted':''}"`;
+        ? `data-msg-user="${safeUser}" data-fbkey="${safeFbKey}" style="display:flex;gap:6px;align-items:flex-start;position:relative;cursor:pointer;border-radius:6px;padding:2px 4px;" class="chat-msg-row${muted?' is-muted':''}${banned?' is-banned':''}"`
+        : `style="display:flex;gap:6px;align-items:flex-start;position:relative;" class="chat-msg-row${muted?' is-muted':''}${banned?' is-banned':''}"`;
       const mutedBadge = muted ? '<span class="chat-muted-badge">🔇</span>' : '';
-      const nameColor  = muted ? '#5a6478' : getChatUserColor(msg.u);
-      const textStyle  = muted ? 'opacity:.4;font-style:italic;' : '';
+      const bannedBadge = banned ? '<span class="chat-muted-badge" style="background:rgba(255,107,107,.15);color:#ff6b6b;border-color:rgba(255,107,107,.3);">🔨</span>' : '';
+      const nameColor  = banned ? '#ff6b6b' : (muted ? '#5a6478' : getChatUserColor(msg.u));
+      const textStyle  = banned ? 'opacity:.35;font-style:italic;text-decoration:line-through;' : (muted ? 'opacity:.4;font-style:italic;' : '');
       return `<div ${rowAttrs}>
-        <span class="chat-user" style="color:${nameColor};flex-shrink:0;">${msg.u}${mutedBadge}</span>
+        <span class="chat-user" style="color:${nameColor};flex-shrink:0;">${msg.u}${bannedBadge}${mutedBadge}</span>
         <span style="font-size:11px;color:${msg.c||'var(--text2)'};flex:1;${textStyle}">${msg.isHtml ? msg.m : msg.m.replace(/</g,'&lt;')}</span>
         <span style="font-size:9px;color:var(--muted);flex-shrink:0;">${msg.t}</span>
         ${modMenu||''}
@@ -5420,22 +5488,40 @@ function chatKickUser(username){
 /* ── Banla ve at ── */
 function chatBanUser(username){
   if(!username || username === _d(_un)) return;
+  // Zaten banlıysa → banı kaldır
+  if(_isBanned(username)){
+    chatUnbanUser(username);
+    return;
+  }
   const reason = prompt(username + ' kullanıcısını banlamak istiyorsunuz.\nBan nedeni:', 'Kural ihlali');
   if(reason === null) return;
   const key = username.replace(/[.#$\/\[\]]/g,'_');
   const banData = { username, reason: reason||'Belirtilmedi', bannedAt: Date.now(), bannedBy: currentUser.username };
+  // Firebase banned listesine yaz
   if(window.bannedDbRef) window.bannedDbRef.child(key).set(banData);
+  // Kullanıcı kaydını güncelle
   _fbUpdateUser(key, { status:'banned', banReason: reason||'Belirtilmedi', bannedAt: Date.now() });
-  // Kick ile de at (ban sinyali)
-  const kickData = { kickedAt: Date.now(), kickedBy: currentUser.username, reason: 'banned', banReason: reason||'Kural ihlali' };
-  if(firebaseReady){
-    firebase.database().ref('tayfuntv_kicks/' + key).set(kickData);
-    if(onlineRef) onlineRef.once('value', snap => {
-      snap.forEach(ch => { if(ch.val().nick === username) ch.ref.remove(); });
-    });
-  }
-  _chatSystemMsg('🔨 ' + username + ' siteden banlandı.');
+  // Lokal set'e hemen yansıt
+  window._bannedSet[key] = banData;
+  // Chat render (nick işaretlensin)
+  if(typeof renderChat === 'function') renderChat();
+  if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+  _chatSystemMsg('🔨 ' + username + ' banlandı. Mesaj gönderemez ve siteye giremez.');
   showToast('🔨 ' + username + ' banlandı','warning');
+  _updateBannedBadge();
+}
+
+/* ── Ban kaldır ── */
+function chatUnbanUser(username){
+  if(!username) return;
+  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  if(window.bannedDbRef) window.bannedDbRef.child(key).remove();
+  _fbUpdateUser(key, { status:'active', banReason:'', bannedAt:'' });
+  delete window._bannedSet[key];
+  if(typeof renderChat === 'function') renderChat();
+  if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+  _chatSystemMsg('🔓 ' + username + ' banı kaldırıldı.');
+  showToast('🔓 ' + username + ' banı kaldırıldı','success');
   _updateBannedBadge();
 }
 
@@ -5608,7 +5694,8 @@ function _onlineKick(safeNick){
 }
 function _onlineBan(safeNick){
   const username = decodeURIComponent(safeNick);
-  chatBanUser(username);
+  chatBanUser(username); // içinde toggle var: banlıysa kaldırır, değilse banlar
+  setTimeout(()=>renderOnlineUsers(_lastOnlineUsers||[]), 100);
 }
 
 /* ── Tıklama dinleyici: mesaj satırı + online liste ── */
@@ -5705,6 +5792,10 @@ function sendMobChat(){
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
   // Susturulmuş kullanıcı mesaj gönderemesin
+  if(_isBanned(displayName)||_isBanned(currentUser?.username)){
+    showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
+    input.value = ''; return;
+  }
   if(_isMuted(displayName)){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
@@ -5728,6 +5819,10 @@ function sendChatSide(){
   const input = document.getElementById('chatInputSide');
   const val = input.value.trim();
   if(!val) return;
+  if(_isBanned(currentUser?.username)){
+    showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
+    input.value = ''; return;
+  }
   if(_isMuted(currentUser?.username)){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
@@ -5749,6 +5844,10 @@ function sendChat(){
   const input = document.getElementById('chatInput');
   const val   = input.value.trim();
   if(!val) return;
+  if(_isBanned(currentUser?.username)){
+    showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
+    input.value = ''; return;
+  }
   if(_isMuted(currentUser?.username)){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
