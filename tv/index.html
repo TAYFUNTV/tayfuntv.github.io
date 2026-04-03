@@ -3147,63 +3147,6 @@ tr:last-child td{border:none;}
             </div>
             </div>
 
-            <!-- ADMİN: Kullanıcıya Özel Mesaj Gönder Paneli -->
-            <div id="adminDmPanel" style="display:none;flex-direction:column;gap:4px;flex-shrink:0;margin-bottom:4px;background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.22);border-radius:10px;padding:7px 8px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-                <span style="font-size:9px;font-weight:800;color:#f5c842;letter-spacing:.8px;">👑 KULLANICIYA MESAJ GÖNDER</span>
-                <button onclick="closeAdminDm()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;line-height:1;padding:0;">✕</button>
-              </div>
-              <div style="display:flex;gap:4px;align-items:center;">
-                <select id="adminDmTarget" style="flex:1;background:var(--bg3);border:1px solid rgba(245,200,66,0.3);border-radius:7px;padding:5px 7px;color:#f5c842;font-size:11px;font-weight:700;outline:none;min-width:0;">
-                  <option value="">— Kullanıcı seç —</option>
-                </select>
-              </div>
-              <div style="display:flex;gap:4px;">
-                <button onclick="toggleAdminDmGif()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 7px;font-size:10px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;">GIF</button>
-                <button id="adminDmColorBtn" onclick="toggleAdminDmColor()" style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:4px 6px;font-size:12px;cursor:pointer;flex-shrink:0;" title="Renk">
-                  <span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="adminDmColorDot"></span>
-                </button>
-                <input type="text" id="adminDmInput" placeholder="Kullanıcıya özel mesaj..."
-                  style="flex:1;background:var(--bg3);border:1px solid rgba(245,200,66,0.3);border-radius:7px;padding:6px 8px;color:#f5c842;font-size:12px;font-weight:600;outline:none;min-width:0;caret-color:#f5c842;"
-                  onkeydown="if(event.key==='Enter')sendAdminDm()">
-                <button onclick="sendAdminDm()" style="background:linear-gradient(135deg,#f5c842,#d4a017);border:none;border-radius:7px;padding:6px 11px;color:#000;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
-              </div>
-              <!-- Admin DM GIF Paneli -->
-              <div id="adminDmGifPanel" style="display:none;background:#1a2130;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:8px;margin-top:2px;">
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">
-                  <button onclick="setAdminDmGifCat('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
-                  <button onclick="setAdminDmGifCat('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
-                  <button onclick="setAdminDmGifCat('dans',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
-                  <button onclick="setAdminDmGifCat('hayvan',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
-                  <button onclick="setAdminDmGifCat('spor',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
-                  <button onclick="setAdminDmGifCat('film',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
-                </div>
-                <div id="adminDmGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:120px;overflow-y:auto;scrollbar-width:thin;"></div>
-              </div>
-              <!-- Admin DM Renk Paleti -->
-              <div id="adminDmColorPanel" style="display:none;background:#1a2130;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:8px;margin-top:2px;">
-                <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:6px;">🎨 YAZI RENGİ SEÇ</div>
-                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
-                  <button onclick="setAdminDmColor('#e8eaf0',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;" title="Beyaz"></button>
-                  <button onclick="setAdminDmColor('#74c0fc',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;" title="Mavi"></button>
-                  <button onclick="setAdminDmColor('#f5c842',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;" title="Altın"></button>
-                  <button onclick="setAdminDmColor('#e8373d',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;" title="Kırmızı"></button>
-                  <button onclick="setAdminDmColor('#2ecc71',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;" title="Yeşil"></button>
-                  <button onclick="setAdminDmColor('#a855f7',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;" title="Mor"></button>
-                  <button onclick="setAdminDmColor('#fb923c',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;" title="Turuncu"></button>
-                  <button onclick="setAdminDmColor('#f472b6',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;" title="Pembe"></button>
-                  <button onclick="setAdminDmColor('#22d3ee',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;" title="Cyan"></button>
-                  <button onclick="setAdminDmColor('#a3e635',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;" title="Limon"></button>
-                  <button onclick="setAdminDmColor('#fbbf24',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;" title="Sarı"></button>
-                  <button onclick="setAdminDmColor('#ff6b6b',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;" title="Mercan"></button>
-                  <button onclick="setAdminDmColor('#818cf8',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;" title="İndigo"></button>
-                  <button onclick="setAdminDmColor('#34d399',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;" title="Nane"></button>
-                  <button onclick="setAdminDmColor('#e879f9',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;" title="Fuşya"></button>
-                  <button onclick="setAdminDmColor('#94a3b8',this)" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;" title="Gri"></button>
-                </div>
-              </div>
-            </div>
-
             <div style="display:flex;gap:4px;flex-shrink:0;">
               <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
               <button id="colorPaletteBtn" onclick="toggleColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;position:relative;" title="Renk Paleti">
@@ -3213,10 +3156,6 @@ tr:last-child td{border:none;}
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
               <button id="chatSendBtnSide" onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
-            </div>
-            <!-- ADMİN: DM Aç Butonu (sadece adminde görünür) -->
-            <div id="adminDmOpenBtnWrap" style="display:none;margin-top:3px;">
-              <button onclick="openAdminDm()" style="width:100%;background:rgba(245,200,66,0.10);border:1px dashed rgba(245,200,66,0.35);border-radius:8px;padding:5px 8px;color:#f5c842;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px;">👑 Kullanıcıya Mesaj Gönder</button>
             </div>
           </div>
         </div>
@@ -3749,8 +3688,6 @@ function _doLoginSuccess(user){
       const el = document.getElementById(id);
       if(el){ el.style.color = '#ffd700'; el.textContent = '👑 ' + user.username; }
     });
-    // Admin DM butonunu göster
-    setTimeout(_showAdminDmBtn, 300);
   }
   // Admin giriş bildirimi kaldırıldı — online listede zaten görünüyor
   // Kick/ban dinleyicisini başlat (admin hariç)
@@ -4796,10 +4733,6 @@ function renderOnlineUsers(users){
     b.style.overflowY = '';
     b.innerHTML = html;
   });
-  // Admin DM hedef listesini de güncelle
-  if(typeof _fillAdminDmTargets === 'function' && currentUser && currentUser.role === 'admin'){
-    _fillAdminDmTargets();
-  }
 }
 // Temizle butonunu addEventListener ile bağla
 
@@ -5991,150 +5924,6 @@ function sendChat(){
   const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
-}
-
-// ===== ADMİN: KULLANICIYA ÖZEL MESAJ =====
-window._adminDmColor = '#e8eaf0';
-window._adminDmGifCat = 'tepki';
-
-function openAdminDm(){
-  const panel = document.getElementById('adminDmPanel');
-  const btn   = document.getElementById('adminDmOpenBtnWrap');
-  if(!panel) return;
-  panel.style.display = 'flex';
-  if(btn) btn.style.display = 'none';
-  // Online kullanıcıları dolduir
-  _fillAdminDmTargets();
-}
-
-function closeAdminDm(){
-  const panel = document.getElementById('adminDmPanel');
-  const btn   = document.getElementById('adminDmOpenBtnWrap');
-  if(panel){ panel.style.display = 'none'; }
-  if(btn && currentUser && currentUser.role === 'admin') btn.style.display = 'block';
-  // Alt panelleri kapat
-  const gp = document.getElementById('adminDmGifPanel');
-  const cp = document.getElementById('adminDmColorPanel');
-  if(gp) gp.style.display = 'none';
-  if(cp) cp.style.display = 'none';
-}
-
-function _fillAdminDmTargets(){
-  const sel = document.getElementById('adminDmTarget');
-  if(!sel) return;
-  const online = window._lastOnlineUsers || [];
-  sel.innerHTML = '<option value="">— Kullanıcı seç —</option>';
-  online.forEach(u => {
-    if(!u.nick || u.role === 'admin') return;
-    const opt = document.createElement('option');
-    opt.value = u.nick;
-    opt.textContent = (u.avatar||'👤') + ' ' + u.nick;
-    sel.appendChild(opt);
-  });
-}
-
-function sendAdminDm(){
-  if(!currentUser || currentUser.role !== 'admin') return;
-  const sel   = document.getElementById('adminDmTarget');
-  const input = document.getElementById('adminDmInput');
-  if(!sel || !input) return;
-  const target = sel.value;
-  const msg    = input.value.trim();
-  if(!target){ showToast('⚠️ Lütfen bir kullanıcı seçin!','warning'); return; }
-  if(!msg){ showToast('⚠️ Mesaj boş olamaz!','warning'); return; }
-  const now = new Date();
-  const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  // Özel DM mesajı: dm:true, to: hedef, sadece hedef ve admin görür (renderChat'te filtre uygulanır)
-  pushChatMessage({
-    u: currentUser.username,
-    m: `📩 <b style="color:#f5c842;">[DM → ${target}]</b> ${msg}`,
-    t: t2,
-    c: window._adminDmColor || '#f5c842',
-    isHtml: true,
-    _dm: true,
-    _dmTo: target
-  });
-  input.value = '';
-  showToast('✅ Mesaj gönderildi → ' + target, 'success');
-}
-
-function toggleAdminDmGif(){
-  const gp = document.getElementById('adminDmGifPanel');
-  const cp = document.getElementById('adminDmColorPanel');
-  if(cp) cp.style.display = 'none';
-  if(gp){
-    const show = gp.style.display === 'none';
-    gp.style.display = show ? 'block' : 'none';
-    if(show) _renderAdminDmGifGrid();
-  }
-}
-
-function toggleAdminDmColor(){
-  const gp = document.getElementById('adminDmGifPanel');
-  const cp = document.getElementById('adminDmColorPanel');
-  if(gp) gp.style.display = 'none';
-  if(cp) cp.style.display = cp.style.display === 'none' ? 'block' : 'none';
-}
-
-function setAdminDmGifCat(cat, el){
-  window._adminDmGifCat = cat;
-  document.querySelectorAll('#adminDmGifPanel .gif-cat-btn').forEach(b => {
-    b.style.background = 'rgba(255,255,255,.08)';
-    b.style.border = '1px solid rgba(255,255,255,.1)';
-    b.style.color = 'var(--text2)';
-  });
-  if(el){ el.style.background = 'var(--accent)'; el.style.border = 'none'; el.style.color = '#fff'; }
-  _renderAdminDmGifGrid();
-}
-
-function _renderAdminDmGifGrid(){
-  const grid = document.getElementById('adminDmGifGrid');
-  if(!grid) return;
-  const list = (typeof GIF_CATS !== 'undefined' ? GIF_CATS[window._adminDmGifCat] : null) || [];
-  grid.innerHTML = list.map(g =>
-    `<img src="${g.url}" title="${g.label}" onclick="sendAdminDmGif('${g.url}','${g.label}')"
-      style="width:100%;border-radius:6px;cursor:pointer;object-fit:cover;height:60px;transition:transform .15s;"
-      onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
-      loading="lazy">`
-  ).join('');
-}
-
-function sendAdminDmGif(url, label){
-  if(!currentUser || currentUser.role !== 'admin') return;
-  const sel = document.getElementById('adminDmTarget');
-  if(!sel) return;
-  const target = sel.value;
-  if(!target){ showToast('⚠️ Lütfen bir kullanıcı seçin!','warning'); return; }
-  const now = new Date();
-  const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  pushChatMessage({
-    u: currentUser.username,
-    m: `📩 <b style="color:#f5c842;">[DM → ${target}]</b> 🎞️ GIF: ${label} <img src="${url}" style="max-width:110px;border-radius:6px;display:block;margin-top:4px;">`,
-    t: t2,
-    c: '#f5c842',
-    isHtml: true,
-    _dm: true,
-    _dmTo: target
-  });
-  document.getElementById('adminDmGifPanel').style.display = 'none';
-  showToast('✅ GIF gönderildi → ' + target, 'success');
-}
-
-function setAdminDmColor(color, btn){
-  window._adminDmColor = color;
-  const input = document.getElementById('adminDmInput');
-  if(input) input.style.color = color;
-  const dot = document.getElementById('adminDmColorDot');
-  if(dot) dot.style.background = color;
-  document.querySelectorAll('#adminDmColorPanel button').forEach(b => b.style.border = '2px solid transparent');
-  if(btn) btn.style.border = '2px solid #fff';
-  document.getElementById('adminDmColorPanel').style.display = 'none';
-}
-
-// Login sonrası admin DM butonunu göster
-function _showAdminDmBtn(){
-  const wrap = document.getElementById('adminDmOpenBtnWrap');
-  if(wrap && currentUser && currentUser.role === 'admin') wrap.style.display = 'block';
 }
 
 // ===== RENK PALETİ (DESKTOP) =====
