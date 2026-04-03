@@ -5900,7 +5900,6 @@ function sendMobChat(){
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
-  // Admin değilse kural uyarısı göster
   if(!(currentUser && currentUser.role === 'admin')){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
       document.getElementById('chatWarning').style.display = 'flex';
@@ -5909,12 +5908,35 @@ function sendMobChat(){
   }
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
-  // Susturulmuş kullanıcı mesaj gönderemesin
-  {
-    const _bKey = (currentUser?.username||displayName).replace(/[.#$\/\[\]]/g,'_');
-    const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-    if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+  const _bKey = (currentUser?.username||displayName).replace(/[.#$\/\[\]]/g,'_');
+
+  // Ban kontrolü (memory + localStorage)
+  const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
+  if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+
+  // Susturma: Firebase'den anlık kontrol (APK'da _mutedSet geç dolabilir)
+  if(firebaseReady && window.mutedDbRef){
+    window.mutedDbRef.child(_bKey).once('value', snap => {
+      if(snap.exists()){
+        // Susturulmuş — seti güncelle, engelle
+        if(!window._mutedSet) window._mutedSet = {};
+        window._mutedSet[_bKey] = snap.val();
+        localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+        _applyMuteToInput();
+        showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+        input.value = '';
+      } else {
+        // Susturulmamış — gönder
+        input.value = '';
+        const now = new Date();
+        const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor || null});
+      }
+    });
+    return;
   }
+
+  // Firebase yoksa memory/localStorage ile kontrol
   if(_isMuted(displayName)){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
