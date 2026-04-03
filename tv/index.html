@@ -5891,50 +5891,70 @@ function _isMobMuted(){
 }
 
 function sendMobChat(){
-  // ── EN KESİN SUSTURMA BLOĞU ──
-  // Admin değilse susturma + ban kontrolü yap
-  if(currentUser && currentUser.role !== 'admin'){
-    const _ck = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-    // Firebase _mutedSet kontrolü (gerçek zamanlı)
-    if(window._mutedSet && window._mutedSet[_ck]){
-      showToast('\uD83D\uDD07 Susturuldunuz, mesaj g\xF6nderemezsiniz.','warning');
-      _applyMuteToInput();
-      return;
-    }
-  }
+  if(!currentUser){ return; }
   const input = document.getElementById('mobChatInput');
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
-  // Admin değilse kural uyarısı göster
-  if(!(currentUser && currentUser.role === 'admin')){
+
+  // Admin değilse kural uyarısı
+  if(currentUser.role !== 'admin'){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
       document.getElementById('chatWarning').style.display = 'flex';
       return;
     }
   }
-  const u = currentUser || {username:'Misafir'};
-  const displayName = u.username || u.name || 'Misafir';
-  const _bKey = (currentUser?.username||displayName).replace(/[.#$\/\[\]]/g,'_');
-  // Banlı kontrolü (bellek + localStorage)
-  const _banned = (window._bannedSet && window._bannedSet[_bKey]) ||
-                  !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-  if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-  // Susturma kontrolü (bellek + localStorage — ikisi de kontrol)
-  const _mutedMem   = !!(window._mutedSet && window._mutedSet[_bKey]);
-  const _mutedLocal = !!(JSON.parse(localStorage.getItem('cltv_muted')||'{}')[_bKey]);
-  if(_mutedMem || _mutedLocal){
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-    input.value = '';
-    _applyMuteToInput();
+
+  const displayName = currentUser.username;
+  const _bKey = displayName.replace(/[.#$\/\[\]]/g,'_');
+
+  // Ban kontrolü
+  if(window._bannedSet && window._bannedSet[_bKey]){
+    showToast('\uD83D\uDD28 Banland\u0131n\u0131z.','warning');
+    input.value='';
     return;
   }
-  // Mesajı gönder
-  input.value = '';
-  const now = new Date();
-  const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor || null});
+
+  // SUSTURMA: Firebase'den anlık oku, sonra karar ver
+  if(!firebaseReady || !window.mutedDbRef){
+    // Firebase yoksa gönder
+    input.value = '';
+    const now = new Date();
+    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
+    return;
+  }
+
+  // Firebase'den bu kullanıcının muted kaydını anlık oku
+  window.mutedDbRef.child(_bKey).once('value').then(snap => {
+    if(snap.exists()){
+      // Susturulmuş — gönderme, input'u kapat
+      window._mutedSet[_bKey] = snap.val();
+      showToast('\uD83D\uDD07 Susturuldunuz, mesaj g\xF6nderemezsiniz.','warning');
+      input.value = '';
+      input.disabled = true;
+      input.readOnly = true;
+      input.placeholder = '\uD83D\uDD07 Susturuldunuz';
+      input.style.opacity = '.35';
+      const btn = document.getElementById('mobChatSendBtn');
+      if(btn){ btn.disabled=true; btn.style.opacity='.25'; btn.style.pointerEvents='none'; }
+      return;
+    }
+    // Susturulmamış — gönder
+    delete window._mutedSet[_bKey];
+    input.value = '';
+    const now = new Date();
+    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
+  }).catch(() => {
+    // Hata olursa yine de gönder
+    input.value = '';
+    const now = new Date();
+    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
+  });
 }
+
 
 function sendChatSide(){
   // İlk kez yazmadan önce kural uyarısı göster
