@@ -5957,34 +5957,76 @@ function openAdminDmPanel(safeNick){
   if(!currentUser || currentUser.role !== 'admin') return;
   const nick = decodeURIComponent(safeNick);
   window._dmTarget = nick;
-  const overlay = document.getElementById('adminDmOverlay');
-  const nameEl  = document.getElementById('dmTargetName');
-  const nameEl2 = document.getElementById('dmTargetNameSmall');
-  if(nameEl)  nameEl.textContent  = nick;
-  if(nameEl2) nameEl2.textContent = nick;
-  // Input rengi sıfırla
-  const inp = document.getElementById('dmInput');
-  if(inp){ inp.value=''; inp.style.color='#e8eaf0'; }
-  window._dmColor = '#e8eaf0';
-  const dot = document.getElementById('dmColorDot');
-  if(dot) dot.style.background = '#e8eaf0';
-  // Panelleri kapat
-  ['dmColorPanel','dmGifPanel'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.style.display='none';
-  });
-  // Overlay aç
-  overlay.style.display = 'flex';
-  // Geçmiş mesajları yükle
+  window._dmColor  = '#e8eaf0';
+
+  // Varsa eski overlay'i sil
+  const old = document.getElementById('adminDmOverlay');
+  if(old) old.remove();
+
+  // Modal HTML'i body'e ekle
+  const overlay = document.createElement('div');
+  overlay.id = 'adminDmOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function(e){ if(e.target === overlay) closeAdminDmPanel(); };
+
+  overlay.innerHTML = `
+    <div style="background:#0e1318;border:1px solid rgba(116,192,252,.3);border-radius:16px;padding:20px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.9);animation:popIn .2s ease both;position:relative;">
+      <!-- Başlık -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:20px;">✉️</span>
+        <div style="flex:1;">
+          <div style="font-size:10px;color:#5a6478;font-weight:700;letter-spacing:.8px;margin-bottom:2px;">ÖZEL MESAJ GÖNDER</div>
+          <div style="font-size:15px;font-weight:800;color:#74c0fc;">${nick}</div>
+        </div>
+        <button onclick="closeAdminDmPanel()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#5a6478;font-size:15px;cursor:pointer;padding:4px 10px;line-height:1;">✕</button>
+      </div>
+      <!-- Mesaj geçmişi -->
+      <div id="dmHistoryBox" style="background:#080b10;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px;min-height:80px;max-height:200px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;">
+        <div style="text-align:center;color:#5a6478;font-size:11px;padding:10px 0;">Yükleniyor...</div>
+      </div>
+      <!-- Renk paleti -->
+      <div id="dmColorPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;margin-bottom:8px;">
+        <div style="font-size:10px;color:#5a6478;font-weight:700;letter-spacing:.8px;margin-bottom:6px;">🎨 YAZI RENGİ</div>
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;">
+          ${['#e8eaf0','#74c0fc','#f5c842','#e8373d','#2ecc71','#a855f7','#fb923c','#f472b6','#22d3ee','#a3e635','#fbbf24','#ff6b6b','#818cf8','#34d399','#e879f9','#94a3b8'].map((c,i)=>`
+          <button onclick="setDmColor('${c}',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:${c};border:2px solid ${i===0?'#fff':'transparent'};cursor:pointer;transition:.15s;" title="${c}"></button>`).join('')}
+        </div>
+      </div>
+      <!-- GIF paneli -->
+      <div id="dmGifPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">
+          <button onclick="setDmGifCat('tepki',this)" class="dm-gif-cat" style="background:var(--accent);border:none;border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+          <button onclick="setDmGifCat('kutlama',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#b0b8cc;cursor:pointer;">🎉 Kutlama</button>
+          <button onclick="setDmGifCat('dans',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#b0b8cc;cursor:pointer;">💃 Dans</button>
+          <button onclick="setDmGifCat('hayvan',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#b0b8cc;cursor:pointer;">🐾 Hayvan</button>
+          <button onclick="setDmGifCat('spor',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#b0b8cc;cursor:pointer;">⚽ Spor</button>
+          <button onclick="setDmGifCat('film',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px;font-size:10px;font-weight:700;color:#b0b8cc;cursor:pointer;">🎬 Film</button>
+        </div>
+        <div id="dmGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:130px;overflow-y:auto;"></div>
+      </div>
+      <!-- Input satırı -->
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="toggleDmGifPanel()" style="background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 9px;font-size:11px;font-weight:700;color:#e8373d;cursor:pointer;flex-shrink:0;">GIF</button>
+        <button onclick="toggleDmColorPanel()" style="background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 8px;cursor:pointer;flex-shrink:0;">
+          <span id="dmColorDot" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;"></span>
+        </button>
+        <input type="text" id="dmInput" placeholder="Mesaj yaz..." autofocus
+          style="flex:1;background:#141a22;border:1px solid rgba(116,192,252,.3);border-radius:8px;padding:8px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#74c0fc;font-family:inherit;"
+          onkeydown="if(event.key==='Enter')sendAdminDm()">
+        <button onclick="sendAdminDm()" style="background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;padding:8px 14px;color:#000;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:#5a6478;text-align:center;">🔒 Sadece <b style="color:#74c0fc;">${nick}</b> görebilir</div>
+    </div>`;
+
+  document.body.appendChild(overlay);
   _loadDmHistory(nick);
-  // Input focus
-  setTimeout(()=>{ if(inp) inp.focus(); }, 200);
+  setTimeout(()=>{ const inp=document.getElementById('dmInput'); if(inp) inp.focus(); }, 100);
 }
 
 function closeAdminDmPanel(){
   const overlay = document.getElementById('adminDmOverlay');
-  if(overlay) overlay.style.display = 'none';
-  // Listener temizle
-  if(window._dmListener && dmDbRef){
+  if(overlay) overlay.remove();
+  if(window._dmListener && dmDbRef && window._dmTarget){
     const key = window._dmTarget.replace(/[.#$\/\[\]]/g,'_');
     dmDbRef.child(key).off('value', window._dmListener);
     window._dmListener = null;
