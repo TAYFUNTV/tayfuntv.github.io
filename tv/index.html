@@ -2885,7 +2885,7 @@ tr:last-child td{border:none;}
                   <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="mobColorPaletteDot"></span>
                 </button>
                 <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
-                <button onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+                <button id="mobChatSendBtn" onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
             </div>
           </div>
@@ -3091,7 +3091,7 @@ tr:last-child td{border:none;}
               <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
                 onkeydown="if(event.key==='Enter')sendChatSide()">
-              <button onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+              <button id="chatSendBtnSide" onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
           </div>
         </div>
@@ -4525,6 +4525,15 @@ function clearChat(){
 
 /* ── Mesaj gönderme yardımcısı ── */
 function pushChatMessage(msgObj){
+  // Son savunma: susturulmuş kullanıcı mesaj gönderemesin
+  // (sistem mesajları _sys:true ile işaretli, onları engelleme)
+  if(!msgObj._sys && msgObj.u && msgObj.u !== '⚙️ Sistem'){
+    const sender = msgObj.u;
+    if(_isMuted(sender)){
+      showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+      return;
+    }
+  }
   msgObj.ts = Date.now();
   if(firebaseReady && chatDbRef){
     chatDbRef.push(msgObj);
@@ -4745,11 +4754,12 @@ function getChatUserColor(username){
 function _isMuted(username){
   if(!username) return false;
   const key = username.replace(/[.#$\/\[\]]/g,'_');
-  // Firebase set
+  // 1) Önce bellekteki Firebase seti kontrol et
   if(window._mutedSet && window._mutedSet[key]) return true;
-  // localStorage fallback
+  // 2) localStorage fallback
   const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-  return !!local[key];
+  if(local[key]) return true;
+  return false;
 }
 
 function renderChat(){
@@ -5244,14 +5254,7 @@ document.addEventListener('click', e => {
 window._mutedSet   = {};
 window._ctxTarget  = { username: '', fbKey: '' };
 
-/* ── Susturulmuş mu kontrol ── */
-function _isMuted(username){
-  if(!username) return false;
-  const key = username.replace(/[.#$\/\[\]]/g,'_');
-  if(window._mutedSet && window._mutedSet[key]) return true;
-  const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-  return !!local[key];
-}
+/* ── Susturulmuş mu kontrol ── _isMuted yukarıda tanımlı ── */
 
 /* ── Context menüyü aç ── */
 function openCtxMenu(username, fbKey, x, y){
@@ -5428,6 +5431,9 @@ function _initMutedListener(){
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
+
+    // localStorage'ı Firebase ile eşitle (offline fallback için)
+    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
 
     // Chat render
     if(typeof renderChat === 'function') renderChat();
