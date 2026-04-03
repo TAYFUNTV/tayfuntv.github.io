@@ -3719,6 +3719,7 @@ function doLogout(){
   _mutedListenerAttached = false;
   _banListenerAttached = false;
   clearInterval(_kickPollTimer);
+  if(window._mutedPollInterval){ clearInterval(window._mutedPollInterval); window._mutedPollInterval = null; }
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
@@ -4584,6 +4585,9 @@ function initFirebaseChat(){
         renderChat();
       }
     });
+    // Mobil için: her polling'de mute/ban durumunu input'lara yansıt
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+    if(typeof _applyBanToInput === 'function') _applyBanToInput();
   }, 3000);
 
   console.log('✅ Firebase chat dinleyici aktif');
@@ -4874,7 +4878,7 @@ function _isMuted(username){
   const key = username.replace(/[.#$\/\[\]]/g,'_');
   // 1) Önce bellekteki Firebase seti kontrol et
   if(window._mutedSet && window._mutedSet[key]) return true;
-  // 2) localStorage fallback
+  // 2) localStorage fallback (mobil için kritik)
   const local = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
   if(local[key]) return true;
   return false;
@@ -5727,13 +5731,28 @@ function _initMutedListener(){
     // Eğer bu kullanıcı susturulduysa input'u disable et
     _applyMuteToInput();
   });
+
+  // Mobil için ek güvenlik: her 5 saniyede bir Firebase'den muted durumu oku ve input'a yansıt
+  if(window._mutedPollInterval) clearInterval(window._mutedPollInterval);
+  window._mutedPollInterval = setInterval(()=>{
+    if(!window.mutedDbRef || !firebaseReady) return;
+    window.mutedDbRef.once('value', snap => {
+      window._mutedSet = {};
+      snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
+      localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+      if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+    });
+  }, 5000);
 }
 
 /* ── Susturma durumunu input'lara yansıt ── */
 function _applyMuteToInput(){
   if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-  const muted = !!(window._mutedSet && window._mutedSet[key]);
+  // Hem bellekteki set hem localStorage'ı kontrol et
+  const mutedInMemory = !!(window._mutedSet && window._mutedSet[key]);
+  const mutedInLocal  = !!(JSON.parse(localStorage.getItem('cltv_muted')||'{}')[key]);
+  const muted = mutedInMemory || mutedInLocal;
   ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
