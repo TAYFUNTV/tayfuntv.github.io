@@ -2694,84 +2694,6 @@ tr:last-child td{border:none;}
   <button class="ctx-btn ctx-del"  id="ctxDelBtn" onclick="ctxAction('delmsg')" style="display:none;">🗑 Mesajı Sil</button>
 </div>
 
-<!-- ADMİN → KULLANICI ÖZEL MESAJ MODALİ -->
-<div id="adminDmOverlay" onclick="if(event.target===this)closeAdminDmPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;align-items:center;justify-content:center;">
-  <div style="background:#0e1318;border:1px solid rgba(116,192,252,.25);border-radius:16px;padding:20px;width:340px;max-width:95vw;box-shadow:0 16px 48px rgba(0,0,0,.8);animation:popIn .25s ease both;">
-    <!-- Başlık -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-      <span style="font-size:18px;">✉️</span>
-      <div style="flex:1;">
-        <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.8px;">ÖZEL MESAJ GÖNDER</div>
-        <div id="dmTargetName" style="font-size:14px;font-weight:800;color:#74c0fc;"></div>
-      </div>
-      <button onclick="closeAdminDmPanel()" style="background:rgba(255,255,255,.06);border:none;border-radius:7px;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
-    </div>
-    <!-- Geçmiş mesajlar -->
-    <div id="dmHistoryBox" style="background:#080b10;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;min-height:80px;max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;">
-      <div style="text-align:center;color:var(--muted);font-size:11px;">Önceki mesaj yok.</div>
-    </div>
-    <!-- Renk paleti -->
-    <div id="dmColorPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
-      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:6px;">🎨 YAZI RENGİ</div>
-      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
-        <button onclick="setDmColor('#e8eaf0',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;" title="Beyaz"></button>
-        <button onclick="setDmColor('#74c0fc',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;" title="Mavi"></button>
-        <button onclick="setDmColor('#f5c842',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;" title="Altın"></button>
-        <button onclick="setDmColor('#e8373d',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;" title="Kırmızı"></button>
-        <button onclick="setDmColor('#2ecc71',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;" title="Yeşil"></button>
-        <button onclick="setDmColor('#a855f7',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;" title="Mor"></button>
-        <button onclick="setDmColor('#fb923c',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;" title="Turuncu"></button>
-        <button onclick="setDmColor('#f472b6',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;" title="Pembe"></button>
-        <button onclick="setDmColor('#22d3ee',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;" title="Cyan"></button>
-        <button onclick="setDmColor('#a3e635',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;" title="Limon"></button>
-        <button onclick="setDmColor('#fbbf24',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;" title="Sarı"></button>
-        <button onclick="setDmColor('#ff6b6b',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;" title="Mercan"></button>
-        <button onclick="setDmColor('#818cf8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;" title="İndigo"></button>
-        <button onclick="setDmColor('#34d399',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;" title="Nane"></button>
-        <button onclick="setDmColor('#e879f9',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;" title="Fuşya"></button>
-        <button onclick="setDmColor('#94a3b8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;" title="Gri"></button>
-      </div>
-    </div>
-    <!-- GIF paneli -->
-    <div id="dmGifPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">
-        <button onclick="setDmGifCat('tepki',this)" class="dm-gif-cat" style="background:var(--accent);border:none;border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
-        <button onclick="setDmGifCat('kutlama',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
-        <button onclick="setDmGifCat('dans',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
-        <button onclick="setDmGifCat('hayvan',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
-        <button onclick="setDmGifCat('spor',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
-        <button onclick="setDmGifCat('film',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
-      </div>
-      <div id="dmGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:130px;overflow-y:auto;"></div>
-    </div>
-    <!-- Input satırı -->
-    <div style="display:flex;gap:6px;align-items:center;">
-      <button onclick="toggleDmGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;">GIF</button>
-      <button onclick="toggleDmColorPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk">
-        <span id="dmColorDot" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;"></span>
-      </button>
-      <input type="text" id="dmInput" placeholder="Özel mesaj..."
-        style="flex:1;background:var(--bg3);border:1px solid rgba(116,192,252,.25);border-radius:8px;padding:7px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#74c0fc;"
-        onkeydown="if(event.key==='Enter')sendAdminDm()">
-      <button onclick="sendAdminDm()" style="background:linear-gradient(135deg,#74c0fc,#229ED9);border:none;border-radius:8px;padding:7px 13px;color:#000;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
-    </div>
-    <div style="margin-top:8px;font-size:10px;color:var(--muted);text-align:center;">🔒 Bu mesaj sadece <span id="dmTargetNameSmall" style="color:#74c0fc;font-weight:700;"></span> tarafından görülebilir</div>
-  </div>
-</div>
-
-<!-- KULLANICI DM BİLDİRİM KUTUSU -->
-<div id="dmNotifBox" style="display:none;position:fixed;bottom:80px;right:16px;z-index:88888;background:linear-gradient(135deg,#0e1318,#141a22);border:1px solid rgba(116,192,252,.4);border-radius:14px;padding:12px 14px;min-width:240px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:popIn .3s ease both;">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-    <span style="font-size:16px;">✉️</span>
-    <div style="flex:1;">
-      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;">ADMİNDEN ÖZEL MESAJ</div>
-      <div id="dmNotifSender" style="font-size:12px;font-weight:800;color:#ffd700;">👑 Admin</div>
-    </div>
-    <button onclick="closeDmNotif()" style="background:rgba(255,255,255,.06);border:none;border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 7px;">✕</button>
-  </div>
-  <div id="dmNotifText" style="font-size:13px;color:#e8eaf0;font-weight:600;line-height:1.4;word-break:break-word;"></div>
-</div>
-
 </div>
 
 <div id="loginScreen">
@@ -6051,7 +5973,7 @@ function openAdminDmPanel(safeNick){
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   // Overlay aç
-  overlay.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;align-items:center;justify-content:center;';
+  overlay.style.display = 'flex';
   // Geçmiş mesajları yükle
   _loadDmHistory(nick);
   // Input focus
@@ -8073,6 +7995,79 @@ window.addEventListener('load', ()=>{
   });
 })();
 </script>
+
+<!-- ADMİN → KULLANICI ÖZEL MESAJ MODALİ -->
+<div id="adminDmOverlay" onclick="if(event.target===this)closeAdminDmPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999999;align-items:center;justify-content:center;">
+  <div style="background:#0e1318;border:1px solid rgba(116,192,252,.25);border-radius:16px;padding:20px;width:340px;max-width:95vw;box-shadow:0 16px 48px rgba(0,0,0,.8);animation:popIn .25s ease both;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:18px;">✉️</span>
+      <div style="flex:1;">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.8px;">ÖZEL MESAJ GÖNDER</div>
+        <div id="dmTargetName" style="font-size:14px;font-weight:800;color:#74c0fc;"></div>
+      </div>
+      <button onclick="closeAdminDmPanel()" style="background:rgba(255,255,255,.06);border:none;border-radius:7px;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div id="dmHistoryBox" style="background:#080b10;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;min-height:80px;max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;">
+      <div style="text-align:center;color:var(--muted);font-size:11px;">Önceki mesaj yok.</div>
+    </div>
+    <div id="dmColorPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:6px;">🎨 YAZI RENGİ</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
+        <button onclick="setDmColor('#e8eaf0',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;" title="Beyaz"></button>
+        <button onclick="setDmColor('#74c0fc',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;" title="Mavi"></button>
+        <button onclick="setDmColor('#f5c842',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;" title="Altın"></button>
+        <button onclick="setDmColor('#e8373d',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;" title="Kırmızı"></button>
+        <button onclick="setDmColor('#2ecc71',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;" title="Yeşil"></button>
+        <button onclick="setDmColor('#a855f7',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;" title="Mor"></button>
+        <button onclick="setDmColor('#fb923c',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;" title="Turuncu"></button>
+        <button onclick="setDmColor('#f472b6',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;" title="Pembe"></button>
+        <button onclick="setDmColor('#22d3ee',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;" title="Cyan"></button>
+        <button onclick="setDmColor('#a3e635',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;" title="Limon"></button>
+        <button onclick="setDmColor('#fbbf24',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;" title="Sarı"></button>
+        <button onclick="setDmColor('#ff6b6b',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;" title="Mercan"></button>
+        <button onclick="setDmColor('#818cf8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;" title="İndigo"></button>
+        <button onclick="setDmColor('#34d399',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;" title="Nane"></button>
+        <button onclick="setDmColor('#e879f9',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;" title="Fuşya"></button>
+        <button onclick="setDmColor('#94a3b8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;" title="Gri"></button>
+      </div>
+    </div>
+    <div id="dmGifPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">
+        <button onclick="setDmGifCat('tepki',this)" class="dm-gif-cat" style="background:var(--accent);border:none;border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+        <button onclick="setDmGifCat('kutlama',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+        <button onclick="setDmGifCat('dans',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+        <button onclick="setDmGifCat('hayvan',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+        <button onclick="setDmGifCat('spor',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+        <button onclick="setDmGifCat('film',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+      </div>
+      <div id="dmGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:130px;overflow-y:auto;"></div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button onclick="toggleDmGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;">GIF</button>
+      <button onclick="toggleDmColorPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk">
+        <span id="dmColorDot" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;"></span>
+      </button>
+      <input type="text" id="dmInput" placeholder="Özel mesaj..."
+        style="flex:1;background:var(--bg3);border:1px solid rgba(116,192,252,.25);border-radius:8px;padding:7px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#74c0fc;"
+        onkeydown="if(event.key==='Enter')sendAdminDm()">
+      <button onclick="sendAdminDm()" style="background:linear-gradient(135deg,#74c0fc,#229ED9);border:none;border-radius:8px;padding:7px 13px;color:#000;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);text-align:center;">🔒 Bu mesaj sadece <span id="dmTargetNameSmall" style="color:#74c0fc;font-weight:700;"></span> tarafından görülebilir</div>
+  </div>
+</div>
+
+<!-- KULLANICI DM BİLDİRİM KUTUSU -->
+<div id="dmNotifBox" style="display:none;position:fixed;bottom:80px;right:16px;z-index:999998;background:linear-gradient(135deg,#0e1318,#141a22);border:1px solid rgba(116,192,252,.4);border-radius:14px;padding:12px 14px;min-width:240px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span style="font-size:16px;">✉️</span>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;">ADMİNDEN ÖZEL MESAJ</div>
+      <div id="dmNotifSender" style="font-size:12px;font-weight:800;color:#ffd700;">👑 Admin</div>
+    </div>
+    <button onclick="closeDmNotif()" style="background:rgba(255,255,255,.06);border:none;border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 7px;">✕</button>
+  </div>
+  <div id="dmNotifText" style="font-size:13px;color:#e8eaf0;font-weight:600;line-height:1.4;word-break:break-word;"></div>
+</div>
 
 </body>
                 </html>
