@@ -433,6 +433,50 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
 .ctx-btn.ctx-ban    { color: #ff6b6b; }
 .ctx-btn.ctx-del    { color: #94a3b8; }
 .ctx-divider { height: 1px; background: rgba(255,255,255,.07); margin: 3px 0; }
+
+/* ── Online kullanıcı hover yönetim balonu ── */
+.online-pill-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.online-pill-actions {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1e2e;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 10px;
+  padding: 5px;
+  z-index: 99999;
+  box-shadow: 0 8px 28px rgba(0,0,0,.8);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 155px;
+  animation: popIn .13s ease;
+  white-space: nowrap;
+}
+.online-pill-wrap:hover .online-pill-actions,
+.online-pill-wrap.pinned .online-pill-actions {
+  display: flex;
+}
+.opa-label {
+  font-size: 10px; color: #5a6478; font-weight: 700;
+  padding: 2px 8px 4px; letter-spacing: .5px;
+}
+.opa-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 10px; border-radius: 7px;
+  border: none; background: none;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  width: 100%; text-align: left;
+  transition: background .12s;
+}
+.opa-btn:hover { background: rgba(255,255,255,.08); }
+.opa-mute  { color: #f5c842; }
+.opa-kick  { color: #74c0fc; }
+.opa-ban   { color: #ff6b6b; }
 .ctx-user-label {
   font-size: 10px; color: var(--muted); padding: 4px 12px 2px;
   font-weight: 700; letter-spacing: .5px;
@@ -4599,15 +4643,35 @@ function renderOnlineUsers(users){
     const color = isAdminUser ? '#ffd700' : '#74c0fc';
     const icon  = isAdminUser ? '👑' : (u.avatar || '👤');
     const isMuted = _isMuted(u.nick);
-    // Admin başka kullanıcıya tıklayabilsin
     const clickable = isAdminViewer && !isAdminUser;
     const safeNick = encodeURIComponent(u.nick||'');
+
+    // Admin için hover yönetim balonu olan wrapper
+    if(clickable){
+      const muteLabel = isMuted ? '🔊 Susturmayı Kaldır' : '🔇 Sustur';
+      const muteClass = isMuted ? 'opa-btn' : 'opa-btn opa-mute';
+      return `<span class="online-pill-wrap" data-mod-user="${safeNick}">
+        <span title="${u.nick} — yönet"
+          style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid rgba(232,55,61,.35);border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;cursor:pointer;">
+          <span style="font-size:12px;line-height:1;">${icon}</span>
+          <span style="font-size:10px;font-weight:700;color:${isMuted?'#5a6478':color};">${u.nick}${isMuted?' 🔇':''}</span>
+          <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;"></span>
+        </span>
+        <div class="online-pill-actions">
+          <div class="opa-label">👤 ${u.nick}</div>
+          <button class="${muteClass}" onclick="event.stopPropagation();_onlineMute('${safeNick}')">${muteLabel}</button>
+          <button class="opa-btn opa-kick" onclick="event.stopPropagation();_onlineKick('${safeNick}')">🚪 Sohbetten At</button>
+          <button class="opa-btn opa-ban"  onclick="event.stopPropagation();_onlineBan('${safeNick}')">🔨 Banla &amp; At</button>
+        </div>
+      </span>`;
+    }
+
+    // Normal kullanıcı veya admin pill (tıklanamaz)
     return `<span 
-      title="${u.nick}${clickable?' — yönet':''}"
-      ${clickable ? `data-mod-user="${safeNick}" style="cursor:pointer;"` : ''}
-      style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid ${clickable?'rgba(232,55,61,.3)':'rgba(255,255,255,0.08)'};border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;${clickable?'cursor:pointer;':''}">
+      title="${u.nick}"
+      style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;">
       <span style="font-size:12px;line-height:1;">${icon}</span>
-      <span style="font-size:10px;font-weight:700;color:${isMuted?'#5a6478':color};">${u.nick}${isMuted?' 🔇':''}</span>
+      <span style="font-size:10px;font-weight:700;color:${color};">${u.nick}</span>
       <span style="width:5px;height:5px;border-radius:50%;background:#2ecc71;box-shadow:0 0 4px rgba(46,204,113,.7);flex-shrink:0;"></span>
     </span>`;
   }).join('') : emptyHtml;
@@ -5465,6 +5529,22 @@ function _applyMuteToInput(){
     el.disabled = muted;
     el.style.opacity = muted ? '.4' : '1';
   });
+}
+
+/* ── Online kullanıcı listesi hızlı aksiyon yardımcıları ── */
+function _onlineMute(safeNick){
+  const username = decodeURIComponent(safeNick);
+  chatMuteUser(username);
+  // Pill'i hemen güncelle (Firebase event olmadan)
+  setTimeout(()=>renderOnlineUsers(_lastOnlineUsers||[]), 100);
+}
+function _onlineKick(safeNick){
+  const username = decodeURIComponent(safeNick);
+  chatKickUser(username);
+}
+function _onlineBan(safeNick){
+  const username = decodeURIComponent(safeNick);
+  chatBanUser(username);
 }
 
 /* ── Tıklama dinleyici: mesaj satırı + online liste ── */
