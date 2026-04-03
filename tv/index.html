@@ -29,6 +29,7 @@ let chatDbRef = null;
 let onlineRef = null;   // çevrimiçi kullanıcılar
 let myOnlineKey = null; // bu sekmenin Firebase anahtarı
 let firebaseApp = null;
+let dmDbRef = null;     // admin → kullanıcı özel mesajlar
 
 function _startFirebase() {
   try {
@@ -41,6 +42,7 @@ function _startFirebase() {
     window.usersDbRef  = firebase.database().ref('tayfuntv_users');
     window.bannedDbRef = firebase.database().ref('tayfuntv_banned');
     window.mutedDbRef  = firebase.database().ref('tayfuntv_muted');
+    dmDbRef    = firebase.database().ref('tayfuntv_dm');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
     // Muted dinleyici _initMutedListener tarafından yönetilir (chat açıldığında)
@@ -2683,6 +2685,84 @@ tr:last-child td{border:none;}
   <button class="ctx-btn ctx-del"  id="ctxDelBtn" onclick="ctxAction('delmsg')" style="display:none;">🗑 Mesajı Sil</button>
 </div>
 
+<!-- ADMİN → KULLANICI ÖZEL MESAJ MODALİ -->
+<div id="adminDmOverlay" onclick="if(event.target===this)closeAdminDmPanel()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;align-items:center;justify-content:center;">
+  <div style="background:#0e1318;border:1px solid rgba(116,192,252,.25);border-radius:16px;padding:20px;width:340px;max-width:95vw;box-shadow:0 16px 48px rgba(0,0,0,.8);animation:popIn .25s ease both;">
+    <!-- Başlık -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span style="font-size:18px;">✉️</span>
+      <div style="flex:1;">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.8px;">ÖZEL MESAJ GÖNDER</div>
+        <div id="dmTargetName" style="font-size:14px;font-weight:800;color:#74c0fc;"></div>
+      </div>
+      <button onclick="closeAdminDmPanel()" style="background:rgba(255,255,255,.06);border:none;border-radius:7px;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <!-- Geçmiş mesajlar -->
+    <div id="dmHistoryBox" style="background:#080b10;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;min-height:80px;max-height:180px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:6px;">
+      <div style="text-align:center;color:var(--muted);font-size:11px;">Önceki mesaj yok.</div>
+    </div>
+    <!-- Renk paleti -->
+    <div id="dmColorPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:6px;">🎨 YAZI RENGİ</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
+        <button onclick="setDmColor('#e8eaf0',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;" title="Beyaz"></button>
+        <button onclick="setDmColor('#74c0fc',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;" title="Mavi"></button>
+        <button onclick="setDmColor('#f5c842',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;" title="Altın"></button>
+        <button onclick="setDmColor('#e8373d',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;" title="Kırmızı"></button>
+        <button onclick="setDmColor('#2ecc71',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;" title="Yeşil"></button>
+        <button onclick="setDmColor('#a855f7',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;" title="Mor"></button>
+        <button onclick="setDmColor('#fb923c',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;" title="Turuncu"></button>
+        <button onclick="setDmColor('#f472b6',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;" title="Pembe"></button>
+        <button onclick="setDmColor('#22d3ee',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;" title="Cyan"></button>
+        <button onclick="setDmColor('#a3e635',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;" title="Limon"></button>
+        <button onclick="setDmColor('#fbbf24',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;" title="Sarı"></button>
+        <button onclick="setDmColor('#ff6b6b',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;" title="Mercan"></button>
+        <button onclick="setDmColor('#818cf8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;" title="İndigo"></button>
+        <button onclick="setDmColor('#34d399',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;" title="Nane"></button>
+        <button onclick="setDmColor('#e879f9',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;" title="Fuşya"></button>
+        <button onclick="setDmColor('#94a3b8',this)" class="dm-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;" title="Gri"></button>
+      </div>
+    </div>
+    <!-- GIF paneli -->
+    <div id="dmGifPanel" style="display:none;background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">
+        <button onclick="setDmGifCat('tepki',this)" class="dm-gif-cat" style="background:var(--accent);border:none;border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+        <button onclick="setDmGifCat('kutlama',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+        <button onclick="setDmGifCat('dans',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+        <button onclick="setDmGifCat('hayvan',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+        <button onclick="setDmGifCat('spor',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+        <button onclick="setDmGifCat('film',this)" class="dm-gif-cat" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+      </div>
+      <div id="dmGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:130px;overflow-y:auto;"></div>
+    </div>
+    <!-- Input satırı -->
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button onclick="toggleDmGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;">GIF</button>
+      <button onclick="toggleDmColorPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk">
+        <span id="dmColorDot" style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;"></span>
+      </button>
+      <input type="text" id="dmInput" placeholder="Özel mesaj..."
+        style="flex:1;background:var(--bg3);border:1px solid rgba(116,192,252,.25);border-radius:8px;padding:7px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#74c0fc;"
+        onkeydown="if(event.key==='Enter')sendAdminDm()">
+      <button onclick="sendAdminDm()" style="background:linear-gradient(135deg,#74c0fc,#229ED9);border:none;border-radius:8px;padding:7px 13px;color:#000;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);text-align:center;">🔒 Bu mesaj sadece <span id="dmTargetNameSmall" style="color:#74c0fc;font-weight:700;"></span> tarafından görülebilir</div>
+  </div>
+</div>
+
+<!-- KULLANICI DM BİLDİRİM KUTUSU -->
+<div id="dmNotifBox" style="display:none;position:fixed;bottom:80px;right:16px;z-index:88888;background:linear-gradient(135deg,#0e1318,#141a22);border:1px solid rgba(116,192,252,.4);border-radius:14px;padding:12px 14px;min-width:240px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:popIn .3s ease both;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span style="font-size:16px;">✉️</span>
+    <div style="flex:1;">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;">ADMİNDEN ÖZEL MESAJ</div>
+      <div id="dmNotifSender" style="font-size:12px;font-weight:800;color:#ffd700;">👑 Admin</div>
+    </div>
+    <button onclick="closeDmNotif()" style="background:rgba(255,255,255,.06);border:none;border-radius:6px;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 7px;">✕</button>
+  </div>
+  <div id="dmNotifText" style="font-size:13px;color:#e8eaf0;font-weight:600;line-height:1.4;word-break:break-word;"></div>
+</div>
+
 </div>
 
 <div id="loginScreen">
@@ -3701,6 +3781,10 @@ function _doLoginSuccess(user){
   // Ban dinleyiciyi başlat
   _banListenerAttached = false;
   setTimeout(_initBanListener, 1300);
+  // Özel mesaj (DM) dinleyicisi — sadece normal kullanıcılar için
+  if(user.role !== 'admin'){
+    setTimeout(_listenMyDms, 1800);
+  }
   // Mevcut mute/ban durumunu hemen input'lara yansıt
   setTimeout(function(){
     if(typeof _applyMuteToInput==='function') _applyMuteToInput();
@@ -4708,6 +4792,7 @@ function renderOnlineUsers(users){
         </span>
         <div class="online-pill-actions">
           <div class="opa-label">👤 ${u.nick}</div>
+          <button class="opa-btn" style="color:#74c0fc;border-color:rgba(116,192,252,.3);" onclick="event.stopPropagation();openAdminDmPanel('${safeNick}')">✉️ Mesaj Gönder</button>
           <button class="${muteClass}" onclick="event.stopPropagation();_onlineMute('${safeNick}')">${muteLabel}</button>
           <button class="opa-btn opa-kick" onclick="event.stopPropagation();_onlineKick('${safeNick}')">🚪 Sohbetten At</button>
           <button class="${banClass}" onclick="event.stopPropagation();_onlineBan('${safeNick}')">${banLabel}</button>
@@ -5924,6 +6009,219 @@ function sendChat(){
   const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
+}
+
+// ===================================================
+// ADMİN → KULLANICI ÖZEL MESAJ (DM) SİSTEMİ
+// ===================================================
+window._dmTarget = '';
+window._dmColor  = '#e8eaf0';
+window._dmListener = null;
+
+function openAdminDmPanel(safeNick){
+  if(!currentUser || currentUser.role !== 'admin') return;
+  const nick = decodeURIComponent(safeNick);
+  window._dmTarget = nick;
+  const overlay = document.getElementById('adminDmOverlay');
+  const nameEl  = document.getElementById('dmTargetName');
+  const nameEl2 = document.getElementById('dmTargetNameSmall');
+  if(nameEl)  nameEl.textContent  = nick;
+  if(nameEl2) nameEl2.textContent = nick;
+  // Input rengi sıfırla
+  const inp = document.getElementById('dmInput');
+  if(inp){ inp.value=''; inp.style.color='#e8eaf0'; }
+  window._dmColor = '#e8eaf0';
+  const dot = document.getElementById('dmColorDot');
+  if(dot) dot.style.background = '#e8eaf0';
+  // Panelleri kapat
+  ['dmColorPanel','dmGifPanel'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  // Overlay aç
+  overlay.style.display = 'flex';
+  // Geçmiş mesajları yükle
+  _loadDmHistory(nick);
+  // Input focus
+  setTimeout(()=>{ if(inp) inp.focus(); }, 200);
+}
+
+function closeAdminDmPanel(){
+  const overlay = document.getElementById('adminDmOverlay');
+  if(overlay) overlay.style.display = 'none';
+  // Listener temizle
+  if(window._dmListener && dmDbRef){
+    const key = window._dmTarget.replace(/[.#$\/\[\]]/g,'_');
+    dmDbRef.child(key).off('value', window._dmListener);
+    window._dmListener = null;
+  }
+  window._dmTarget = '';
+}
+
+function _loadDmHistory(nick){
+  const box = document.getElementById('dmHistoryBox');
+  if(!box) return;
+  box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:10px;">Yükleniyor...</div>';
+  if(!firebaseReady || !dmDbRef){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:11px;">Firebase bağlı değil.</div>';
+    return;
+  }
+  const key = nick.replace(/[.#$\/\[\]]/g,'_');
+  // Önceki listener varsa temizle
+  if(window._dmListener) dmDbRef.child(key).off('value', window._dmListener);
+  window._dmListener = dmDbRef.child(key).limitToLast(30).on('value', snap => {
+    const msgs = [];
+    snap.forEach(ch => msgs.push(ch.val()));
+    if(!msgs.length){
+      box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:11px;padding:10px;">Henüz mesaj yok.</div>';
+      return;
+    }
+    box.innerHTML = msgs.map(m => {
+      const isAdmin = m.from === (currentUser && currentUser.username);
+      const align = isAdmin ? 'flex-end' : 'flex-start';
+      const bg    = isAdmin ? 'rgba(116,192,252,.12)' : 'rgba(255,255,255,.05)';
+      const color = m.c || (isAdmin ? '#74c0fc' : '#e8eaf0');
+      const label = isAdmin ? '👑 Sen' : `📨 ${m.from}`;
+      return `<div style="display:flex;flex-direction:column;align-items:${align};gap:2px;">
+        <span style="font-size:9px;color:var(--muted);">${label} · ${m.t||''}</span>
+        <div style="background:${bg};border-radius:8px;padding:5px 9px;max-width:90%;font-size:12px;font-weight:600;color:${color};word-break:break-word;">${m.isHtml ? m.m : _escHtml(m.m)}</div>
+      </div>`;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  });
+}
+
+function sendAdminDm(){
+  if(!currentUser || currentUser.role !== 'admin') return;
+  const nick = window._dmTarget;
+  if(!nick) return;
+  const inp = document.getElementById('dmInput');
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val) return;
+  _pushDmMessage(nick, val, false);
+  inp.value = '';
+}
+
+function sendAdminDmGif(url){
+  if(!currentUser || currentUser.role !== 'admin') return;
+  const nick = window._dmTarget;
+  if(!nick) return;
+  const msg = `<img src="${url}" style="max-width:120px;border-radius:8px;display:block;">`;
+  _pushDmMessage(nick, msg, true);
+  document.getElementById('dmGifPanel').style.display = 'none';
+}
+
+function _pushDmMessage(nick, text, isHtml){
+  const now = new Date();
+  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const msgObj = {
+    from: currentUser.username,
+    to: nick,
+    m: text,
+    t: t2,
+    ts: Date.now(),
+    c: window._dmColor,
+    isHtml: isHtml || false
+  };
+  const key = nick.replace(/[.#$\/\[\]]/g,'_');
+  if(firebaseReady && dmDbRef){
+    dmDbRef.child(key).push(msgObj).then(()=>{
+      showToast('✉️ Özel mesaj gönderildi → ' + nick, 'success');
+    });
+  } else {
+    showToast('⚠️ Firebase bağlı değil!', 'warning');
+  }
+}
+
+function _escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Renk seçimi (DM paneli)
+function setDmColor(color, btn){
+  window._dmColor = color;
+  const inp = document.getElementById('dmInput');
+  if(inp) inp.style.color = color;
+  const dot = document.getElementById('dmColorDot');
+  if(dot) dot.style.background = color;
+  document.querySelectorAll('.dm-color-swatch').forEach(b=>b.style.border='2px solid transparent');
+  if(btn) btn.style.border='2px solid #fff';
+  document.getElementById('dmColorPanel').style.display = 'none';
+}
+
+function toggleDmColorPanel(){
+  const cp = document.getElementById('dmColorPanel');
+  const gp = document.getElementById('dmGifPanel');
+  if(gp) gp.style.display='none';
+  if(cp) cp.style.display = cp.style.display==='none' ? 'block' : 'none';
+}
+
+function toggleDmGifPanel(){
+  const gp = document.getElementById('dmGifPanel');
+  const cp = document.getElementById('dmColorPanel');
+  if(cp) cp.style.display='none';
+  if(!gp) return;
+  const open = gp.style.display !== 'none';
+  gp.style.display = open ? 'none' : 'block';
+  if(!open) _renderDmGifGrid('tepki');
+}
+
+function setDmGifCat(cat, btn){
+  document.querySelectorAll('.dm-gif-cat').forEach(b=>{
+    b.style.background='rgba(255,255,255,.08)'; b.style.color='var(--text2)'; b.style.border='1px solid rgba(255,255,255,.1)';
+  });
+  if(btn){ btn.style.background='var(--accent)'; btn.style.color='#fff'; btn.style.border='none'; }
+  _renderDmGifGrid(cat);
+}
+
+function _renderDmGifGrid(cat){
+  const grid = document.getElementById('dmGifGrid');
+  if(!grid) return;
+  const list = (typeof GIF_CATS !== 'undefined' ? GIF_CATS[cat] : null) || (typeof _mobGifData !== 'undefined' ? _mobGifData[cat] : null) || [];
+  if(!list.length){ grid.innerHTML='<div style="color:var(--muted);font-size:11px;grid-column:1/-1;padding:8px;text-align:center;">GIF yok.</div>'; return; }
+  grid.innerHTML = list.map(g=>{
+    const url   = g.url || g.u;
+    const label = g.label || g.l || '';
+    return `<img src="${url}" alt="${label}" loading="lazy"
+      onclick="sendAdminDmGif('${url}')"
+      style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:.15s;"
+      onmouseover="this.style.border='2px solid var(--accent)'" onmouseout="this.style.border='2px solid transparent'">`;
+  }).join('');
+}
+
+// Kullanıcı tarafı: kendi DM'lerini dinle
+function _listenMyDms(){
+  if(!currentUser || !firebaseReady || !dmDbRef) return;
+  if(currentUser.role === 'admin') return; // admin zaten gönderiyor
+  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+  let firstLoad = true;
+  dmDbRef.child(key).limitToLast(1).on('child_added', snap => {
+    if(firstLoad){ firstLoad=false; return; } // sayfa açılışındaki eski mesajı gösterme
+    const msg = snap.val();
+    if(!msg) return;
+    _showDmNotif(msg);
+  });
+  // İlk yükü işaretle
+  dmDbRef.child(key).limitToLast(1).once('value', ()=>{ firstLoad=false; });
+}
+
+function _showDmNotif(msg){
+  const box  = document.getElementById('dmNotifBox');
+  const text = document.getElementById('dmNotifText');
+  if(!box || !text) return;
+  text.style.color = msg.c || '#e8eaf0';
+  if(msg.isHtml){
+    text.innerHTML = msg.m;
+  } else {
+    text.textContent = msg.m;
+  }
+  box.style.display = 'block';
+  // 8 saniye sonra otomatik kapat
+  clearTimeout(window._dmNotifTimer);
+  window._dmNotifTimer = setTimeout(closeDmNotif, 8000);
+}
+
+function closeDmNotif(){
+  const box = document.getElementById('dmNotifBox');
+  if(box) box.style.display = 'none';
 }
 
 // ===== RENK PALETİ (DESKTOP) =====
