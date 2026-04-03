@@ -46,6 +46,15 @@ function _startFirebase() {
     // Muted dinleyici _initMutedListener tarafından yönetilir (chat açıldığında)
     // Erken çağrı: eğer currentUser zaten varsa hemen başlat
     if(typeof _initMutedListener === 'function') _initMutedListener();
+    // Banned set'i sayfa açılır açılmaz yükle (login ban kontrolü için)
+    window.bannedDbRef.on('value', snap => {
+      window._bannedSet = {};
+      snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
+      // Giriş yapmış kullanıcı banlıysa anında kilitle
+      if(typeof _applyBanToInput === 'function') _applyBanToInput();
+      if(typeof renderChat === 'function') renderChat();
+      if(typeof renderOnlineUsers === 'function' && typeof _lastOnlineUsers !== 'undefined') renderOnlineUsers(_lastOnlineUsers);
+    });
     // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
     _migrateLocalUsersToFirebase();
     firebase.database().ref('.info/connected').on('value', snap => {
@@ -3575,53 +3584,52 @@ function loginSuccess(user){
   // Ban kontrolü — admin hariç
   if(user.role !== 'admin'){
     const key = (user.username||'').replace(/[.#$\/\[\]]/g,'_');
+
+    function _showBanScreen(reason){
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('banScreen').style.display  = 'flex';
+      document.getElementById('banReason').textContent = 'Ban nedeni: ' + (reason || 'Kural ihlali');
+    }
+
     const checkBan = () => {
+      // Önce bellekteki _bannedSet'e bak (en hızlı)
+      if(window._bannedSet && window._bannedSet[key]){
+        _showBanScreen(window._bannedSet[key].reason);
+        return;
+      }
+      // Firebase'den direkt oku
       if(window.bannedDbRef){
         window.bannedDbRef.child(key).once('value', snap => {
           if(snap.exists()){
-            const banData = snap.val();
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('banScreen').style.display = 'flex';
-            document.getElementById('banReason').textContent =
-              'Ban nedeni: ' + (banData.reason || 'Belirtilmedi');
+            // Bellekteki seti güncelle
+            window._bannedSet[key] = snap.val();
+            _showBanScreen(snap.val().reason);
           } else {
             _doLoginSuccess(user);
           }
         }, err => {
-          // Firebase okuma hatası — yine de giriş yaptır
-          console.warn('Ban kontrol hatası, giriş izin veriliyor:', err);
-          _doLoginSuccess(user);
+          console.warn('Ban kontrol hatası:', err);
+          // Hata durumunda localStorage'a bak
+          const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+          if(bans[key]){ _showBanScreen(bans[key].reason); } else { _doLoginSuccess(user); }
         });
       } else {
-        // Firebase yoksa localStorage ban kontrolü
+        // Firebase yok — localStorage ban kontrolü
         const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
-        if(bans[key]){
-          document.getElementById('loginScreen').style.display = 'none';
-          document.getElementById('banScreen').style.display = 'flex';
-          document.getElementById('banReason').textContent = 'Ban nedeni: ' + (bans[key].reason || 'Belirtilmedi');
-        } else {
-          _doLoginSuccess(user);
-        }
+        if(bans[key]){ _showBanScreen(bans[key].reason); } else { _doLoginSuccess(user); }
       }
     };
-    // bannedDbRef hazır olana kadar bekle, max 3sn sonra direkt giriş yaptır
-    if(window.bannedDbRef){
-      checkBan();
-    } else if(firebaseReady){
-      // Firebase hazır ama bannedDbRef henüz atanmadı — 500ms bekle
-      setTimeout(() => {
-        if(window.bannedDbRef){ checkBan(); } else { _doLoginSuccess(user); }
-      }, 500);
-    } else {
-      // Firebase hiç hazır değil — localStorage ile kontrol et
-      const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
-      if(bans[key]){
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('banScreen').style.display = 'flex';
-        document.getElementById('banReason').textContent = 'Ban nedeni: ' + (bans[key].reason || 'Belirtilmedi');
-      } else {
-        _doLoginSuccess(user);
-      }
+
+    if(firebaseReady){ checkBan(); }
+    else {
+      // Firebase henüz hazır değil — 800ms bekle sonra tekrar dene
+      setTimeout(()=>{
+        if(firebaseReady){ checkBan(); }
+        else {
+          const bans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+          if(bans[key]){ _showBanScreen(bans[key].reason); } else { _doLoginSuccess(user); }
+        }
+      }, 800);
     }
     return;
   }
@@ -4872,10 +4880,12 @@ function _initBanListener(){
   window.bannedDbRef.on('value', snap => {
     window._bannedSet = {};
     snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
+    // localStorage ile eşitle
+    localStorage.setItem('cltv_banned', JSON.stringify(window._bannedSet));
     // Chat ve online listeyi yenile
     if(typeof renderChat === 'function') renderChat();
     if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
-    // Eğer mevcut kullanıcı banlıysa input'u kilitle
+    // Eğer mevcut kullanıcı banlıysa ban ekranına gönder
     _applyBanToInput();
   });
 }
@@ -4883,21 +4893,40 @@ function _initBanListener(){
 /* ── Ban durumunu input'lara yansıt ── */
 function _applyBanToInput(){
   if(!currentUser || currentUser.role === 'admin') return;
-  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
   const banned = _isBanned(currentUser.username);
+  const muted  = _isMuted(currentUser.username);
+  const blocked = banned || muted;
+
   ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
-    el.disabled = banned || _isMuted(currentUser.username);
-    el.placeholder = banned ? '🔨 Banlandınız' : (_isMuted(currentUser.username) ? '🔇 Susturuldunuz' : 'Mesaj yaz...');
-    el.style.opacity = banned ? '.3' : (_isMuted(currentUser.username) ? '.4' : '1');
+    el.disabled = blocked;
+    el.placeholder = banned ? '🔨 Banlandınız — mesaj gönderemezsiniz' : (muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...');
+    el.style.opacity = banned ? '.25' : (muted ? '.4' : '1');
   });
   ['chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
-    el.disabled = banned || _isMuted(currentUser.username);
-    el.style.opacity = (banned || _isMuted(currentUser.username)) ? '.3' : '1';
+    el.disabled = blocked;
+    el.style.opacity = blocked ? '.25' : '1';
   });
+
+  // Ban varsa — kullanıcıyı banEkranına gönder (eğer app görünüyorsa)
+  if(banned){
+    const app = document.getElementById('app');
+    if(app && app.classList.contains('visible')){
+      // Firebase'den ban nedenini al ve ban ekranını göster
+      const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+      const banData = window._bannedSet[key];
+      doLogout();
+      setTimeout(()=>{
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('banScreen').style.display  = 'flex';
+        document.getElementById('banReason').textContent =
+          'Ban nedeni: ' + (banData && banData.reason ? banData.reason : 'Kural ihlali');
+      }, 200);
+    }
+  }
 }
 
 function renderChat(){
@@ -5503,6 +5532,10 @@ function chatBanUser(username){
   _fbUpdateUser(key, { status:'banned', banReason: reason||'Belirtilmedi', bannedAt: Date.now() });
   // Lokal set'e hemen yansıt
   window._bannedSet[key] = banData;
+  // localStorage fallback için de yaz
+  const localBans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+  localBans[key] = banData;
+  localStorage.setItem('cltv_banned', JSON.stringify(localBans));
   // Chat render (nick işaretlensin)
   if(typeof renderChat === 'function') renderChat();
   if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
@@ -5518,6 +5551,10 @@ function chatUnbanUser(username){
   if(window.bannedDbRef) window.bannedDbRef.child(key).remove();
   _fbUpdateUser(key, { status:'active', banReason:'', bannedAt:'' });
   delete window._bannedSet[key];
+  // localStorage fallback'i de temizle
+  const localBans = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
+  delete localBans[key];
+  localStorage.setItem('cltv_banned', JSON.stringify(localBans));
   if(typeof renderChat === 'function') renderChat();
   if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
   _chatSystemMsg('🔓 ' + username + ' banı kaldırıldı.');
