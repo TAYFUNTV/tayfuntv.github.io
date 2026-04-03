@@ -70,6 +70,26 @@ function _startFirebase() {
     _migrateLocalUsersToFirebase();
     firebase.database().ref('.info/connected').on('value', snap => {
       console.log(snap.val() ? '🟢 Firebase bağlı' : '🔴 Firebase bağlantısı kesildi');
+      if(snap.val() && typeof currentUser !== 'undefined' && currentUser){
+        // Bağlantı kuruldu — aktif kullanıcı varsa listener'ları başlat/yenile
+        if(typeof _initBanListener === 'function' && !window._banListenerAttached){
+          window._banRetryCount = 0;
+          _initBanListener();
+        }
+        if(typeof _initMutedListener === 'function' && !window._mutedListenerAttached){
+          window._muteRetryCount = 0;
+          _initMutedListener();
+        }
+        if(currentUser.role !== 'admin' && typeof _listenKick === 'function' && !window._kickListenerAttached){
+          window._kickRetryCount = 0;
+          _listenKick();
+        }
+        // Mevcut durumu hemen uygula
+        setTimeout(()=>{
+          if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+          if(typeof _applyBanToInput === 'function') _applyBanToInput();
+        }, 200);
+      }
     });
   } catch(e) {
     console.warn('⚠️ Firebase başlatılamadı, yerel mod devrede:', e.message);
@@ -2672,6 +2692,7 @@ tr:last-child td{border:none;}
   <div class="ban-title">HESABINIZ BANLANDI</div>
   <div class="ban-sub" id="banReason">Bu siteden erişiminiz yönetici tarafından kısıtlanmıştır.</div>
   <div style="font-size:11px;color:#5a6478;margin-top:8px;">Siteyi yenileseniz bile giriş yapamazsınız.</div>
+</div>
 
 <!-- ADMIN CHAT CONTEXT MENU -->
 <div id="chatContextMenu">
@@ -3693,28 +3714,46 @@ function _doLoginSuccess(user){
     });
   }
   // Admin giriş bildirimi kaldırıldı — online listede zaten görünüyor
-  // Kick/ban dinleyicisini başlat (admin hariç)
+  // Kick/ban/mute dinleyicileri sıfırla ve başlat
+  _mutedListenerAttached = false;
+  _banListenerAttached   = false;
+  window._muteRetryCount = 0;
+  window._banRetryCount  = 0;
+  window._kickRetryCount = 0;
+
   if(user.role !== 'admin'){
     _kickListenerAttached = false;
-    setTimeout(_listenKick, 1500);
+    // Hemen dene, Firebase hazır değilse kendi içinde retry yapar
+    _listenKick();
   }
-  // Muted dinleyiciyi her girişte sıfırla ve yeniden başlat
-  _mutedListenerAttached = false;
-  setTimeout(_initMutedListener, 1200);
-  // Ban dinleyiciyi başlat
-  _banListenerAttached = false;
-  setTimeout(_initBanListener, 1300);
-  // DM bildirim dinleyici (sadece normal kullanıcı)
-  setTimeout(function(){ if(typeof window._admDmDinle==='function') window._admDmDinle(); }, 2000);
-  // Mevcut mute/ban durumunu hemen input'lara yansıt
+  _initMutedListener();
+  _initBanListener();
+
+  // Firebase bağlandığında da yeniden dene (APK'da bağlantı geç gelebilir)
+  if(typeof firebase !== 'undefined'){
+    firebase.database().ref('.info/connected').on('value', function _onConnect(snap){
+      if(!snap.val()) return;
+      // Bağlandı: listener'ları kontrol et
+      if(!_mutedListenerAttached){ _mutedListenerAttached=false; _initMutedListener(); }
+      if(!_banListenerAttached){ _banListenerAttached=false; _initBanListener(); }
+      if(user.role !== 'admin' && !_kickListenerAttached){ _kickListenerAttached=false; _listenKick(); }
+      // Mevcut durumu hemen uygula
+      setTimeout(()=>{
+        if(typeof _applyMuteToInput==='function') _applyMuteToInput();
+        if(typeof _applyBanToInput==='function') _applyBanToInput();
+      }, 300);
+    });
+  }
+
+  // Kısa gecikme ile de bir kez daha uygula (UI hazır olsun diye)
   setTimeout(function(){
     if(typeof _applyMuteToInput==='function') _applyMuteToInput();
     if(typeof _applyBanToInput==='function') _applyBanToInput();
-  }, 1600);
+  }, 800);
 }
-function doLogout(){
+function doLogout(showLogin){
+  // showLogin=false ise loginScreen açılmaz (ban ekranı için)
   removeOnlinePresence();
-  // Kick/mute/ban listener'ları sıfırla
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
   _banListenerAttached = false;
@@ -3722,12 +3761,19 @@ function doLogout(){
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
-  document.getElementById('loginScreen').style.display = 'flex';
   stopPlayer();
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('rememberMe').checked = false;
   Object.values(dropdowns).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('open'); });
+  // Ban ekranı açıksa loginScreen açma
+  const banScr = document.getElementById('banScreen');
+  const isBanOpen = banScr && banScr.style.display === 'flex';
+  if(showLogin !== false && !isBanOpen){
+    document.getElementById('loginScreen').style.display = 'flex';
+  } else if(!isBanOpen){
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
 }
 let chatWarningShown = false;
 
@@ -3890,9 +3936,9 @@ function acceptChat(){
   chatWarningShown = true;
 }
 
-function doLogout(){
+function doLogout(showLogin){
+  // showLogin=false ise loginScreen açılmaz (ban ekranı için)
   removeOnlinePresence();
-  // Kick/mute/ban listener'ları sıfırla
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
   _banListenerAttached = false;
@@ -3900,12 +3946,19 @@ function doLogout(){
   currentUser = null;
   localStorage.removeItem('cltv_remember');
   document.getElementById('app').classList.remove('visible');
-  document.getElementById('loginScreen').style.display = 'flex';
   stopPlayer();
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('rememberMe').checked = false;
   Object.values(dropdowns).forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('open'); });
+  // Ban ekranı açıksa loginScreen açma
+  const banScr = document.getElementById('banScreen');
+  const isBanOpen = banScr && banScr.style.display === 'flex';
+  if(showLogin !== false && !isBanOpen){
+    document.getElementById('loginScreen').style.display = 'flex';
+  } else if(!isBanOpen){
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
 }
 function changeAvatar(){
   const avatars = ['🎬','🎭','🎮','🦊','🐉','🌙','⚡','🌊','🔥','🎯','👾','🤖'];
@@ -4892,21 +4945,30 @@ function _isBanned(username){
 /* ── Ban dinleyici — Firebase gerçek zamanlı ── */
 let _banListenerAttached = false;
 function _initBanListener(){
+  // Firebase hazır değilse agresif retry (500ms, max 30 deneme)
   if(!window.bannedDbRef || !firebaseReady){
-    setTimeout(_initBanListener, 1000);
+    window._banRetryCount = (window._banRetryCount||0) + 1;
+    if(window._banRetryCount < 30) setTimeout(_initBanListener, 500);
     return;
   }
+  window._banRetryCount = 0;
   if(_banListenerAttached) return;
   _banListenerAttached = true;
+
   window.bannedDbRef.on('value', snap => {
     window._bannedSet = {};
     snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
-    // localStorage ile eşitle
     localStorage.setItem('cltv_banned', JSON.stringify(window._bannedSet));
-    // Chat ve online listeyi yenile
     if(typeof renderChat === 'function') renderChat();
     if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
-    // Eğer mevcut kullanıcı banlıysa ban ekranına gönder
+    _applyBanToInput();
+  });
+
+  // Mevcut ban durumunu hemen oku (sayfa açılışında anlık kontrol)
+  window.bannedDbRef.once('value', snap => {
+    window._bannedSet = {};
+    snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
+    localStorage.setItem('cltv_banned', JSON.stringify(window._bannedSet));
     _applyBanToInput();
   });
 }
@@ -4932,23 +4994,28 @@ function _applyBanToInput(){
     el.style.opacity = blocked ? '.25' : '1';
   });
 
-  // Ban varsa — kullanıcıyı anında ban ekranına gönder (app açıksa veya login ekranındaysa)
+  // Ban varsa — kullanıcıyı anında ban ekranına gönder
   if(banned){
-    const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+    const _banUser = currentUser.username; // doLogout öncesi sakla
+    const key = _banUser.replace(/[.#$\/\[\]]/g,'_');
     const banData = (window._bannedSet && window._bannedSet[key])
                  || JSON.parse(localStorage.getItem('cltv_banned')||'{}')[key];
     const banReason = banData && banData.reason ? banData.reason : 'Kural ihlali';
-    doLogout();
-    setTimeout(()=>{
-      const loginScr = document.getElementById('loginScreen');
-      const banScr   = document.getElementById('banScreen');
+    // Önce ban ekranını göster, sonra logout yap (race condition önleme)
+    const loginScr = document.getElementById('loginScreen');
+    const banScr   = document.getElementById('banScreen');
+    if(banScr){
       if(loginScr) loginScr.style.display = 'none';
-      if(banScr){
-        banScr.style.display = 'flex';
-        const reasonEl = document.getElementById('banReason');
-        if(reasonEl) reasonEl.textContent = 'Ban nedeni: ' + banReason;
-      }
-    }, 150);
+      banScr.style.display = 'flex';
+      const reasonEl = document.getElementById('banReason');
+      if(reasonEl) reasonEl.textContent = 'Ban nedeni: ' + banReason;
+    }
+    doLogout();
+    // Logout sonrası ban ekranı kapanmış olabilir, tekrar göster
+    setTimeout(()=>{
+      if(loginScr) loginScr.style.display = 'none';
+      if(banScr) banScr.style.display = 'flex';
+    }, 100);
   }
 }
 
@@ -5628,13 +5695,20 @@ function _handleKickData(data, ref){
     localStorage.removeItem('cltv_kick_' + key);
   }
   if(data.reason === 'banned'){
+    const _br = data.banReason || 'Kural ihlali';
+    // Önce ban ekranını göster
+    const _ls = document.getElementById('loginScreen');
+    const _bs = document.getElementById('banScreen');
+    const _re = document.getElementById('banReason');
+    if(_bs){ if(_ls) _ls.style.display='none'; _bs.style.display='flex'; }
+    if(_re) _re.textContent = 'Ban nedeni: ' + _br;
     doLogout();
+    // Logout sonrası tekrar göster (doLogout loginScreen'i açabilir)
     setTimeout(()=>{
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('banScreen').style.display  = 'flex';
-      document.getElementById('banReason').textContent    =
-        'Ban nedeni: ' + (data.banReason || 'Kural ihlali');
-    }, 200);
+      if(_ls) _ls.style.display='none';
+      if(_bs) _bs.style.display='flex';
+      if(_re) _re.textContent = 'Ban nedeni: ' + _br;
+    }, 150);
   } else {
     // Kick: logout yap, login ekranı göster, chat temizlensin
     const kickedUsername = currentUser ? currentUser.username : '';
@@ -5670,61 +5744,75 @@ function _listenKick(){
   if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
 
-  // Firebase dinleyici
-  if(firebaseReady && !_kickListenerAttached){
+  // Firebase hazır değilse agresif retry (500ms, max 30 deneme)
+  if(!firebaseReady || !window.bannedDbRef){
+    window._kickRetryCount = (window._kickRetryCount||0) + 1;
+    if(window._kickRetryCount < 30) setTimeout(_listenKick, 500);
+    return;
+  }
+  window._kickRetryCount = 0;
+
+  // Firebase gerçek zamanlı dinleyici
+  if(!_kickListenerAttached){
     _kickListenerAttached = true;
     firebase.database().ref('tayfuntv_kicks/' + key).on('value', snap => {
       if(!snap.exists()) return;
       _handleKickData(snap.val(), snap.ref);
     });
-  } else if(!firebaseReady){
-    // Firebase henüz hazır değil, 1sn sonra tekrar dene
-    setTimeout(_listenKick, 1000);
-    return;
+    // Mevcut kick sinyali var mı hemen kontrol et
+    firebase.database().ref('tayfuntv_kicks/' + key).once('value', snap => {
+      if(snap.exists()) _handleKickData(snap.val(), snap.ref);
+    });
   }
 
-  // Polling: localStorage kick sinyali kontrol et (2sn'de bir)
+  // Polling: Firebase + localStorage — 1sn'de bir (mobil APK için)
   clearInterval(_kickPollTimer);
   _kickPollTimer = setInterval(()=>{
     if(!currentUser) { clearInterval(_kickPollTimer); return; }
+    if(firebaseReady){
+      firebase.database().ref('tayfuntv_kicks/' + key).once('value', snap => {
+        if(snap.exists()) _handleKickData(snap.val(), snap.ref);
+      });
+    }
     const localKey = 'cltv_kick_' + key;
     const raw = localStorage.getItem(localKey);
     if(raw){
-      try {
-        const data = JSON.parse(raw);
-        _handleKickData(data, null);
-      } catch(e){}
+      try { const data = JSON.parse(raw); _handleKickData(data, null); } catch(e){}
     }
-  }, 2000);
+  }, 1000);
 }
 
 /* ── Muted dinleyici — Firebase gerçek zamanlı ── */
 let _mutedListenerAttached = false;
 function _initMutedListener(){
-  // Firebase hazır değilse veya mutedDbRef yoksa ertelenecek
+  // Firebase hazır değilse agresif retry (500ms, max 30 deneme)
   if(!window.mutedDbRef || !firebaseReady){
-    // Firebase henüz hazır değil, 1 sn sonra tekrar dene
-    setTimeout(_initMutedListener, 1000);
+    window._muteRetryCount = (window._muteRetryCount||0) + 1;
+    if(window._muteRetryCount < 30) setTimeout(_initMutedListener, 500);
     return;
   }
-  // Dinleyiciyi sadece bir kez ekle
+  window._muteRetryCount = 0;
   if(_mutedListenerAttached) return;
   _mutedListenerAttached = true;
 
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-
-    // localStorage'ı Firebase ile eşitle (offline fallback için)
     localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-
-    // Chat render
     if(typeof renderChat === 'function') renderChat();
     if(typeof _lastOnlineUsers !== 'undefined' && typeof renderOnlineUsers === 'function'){
       renderOnlineUsers(_lastOnlineUsers);
     }
+    _applyMuteToInput();
+    // Aynı zamanda ban durumunu da kontrol et (mute geldiğinde ban da gelebilir)
+    if(typeof _applyBanToInput === 'function') _applyBanToInput();
+  });
 
-    // Eğer bu kullanıcı susturulduysa input'u disable et
+  // Mevcut mute durumunu hemen oku
+  window.mutedDbRef.once('value', snap => {
+    window._mutedSet = {};
+    snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
+    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
     _applyMuteToInput();
   });
 }
@@ -5860,17 +5948,60 @@ function sendMobChat(){
   }
   const u = currentUser || {username:'Misafir'};
   const displayName = u.username || u.name || 'Misafir';
-  // Susturulmuş kullanıcı mesaj gönderemesin
-  {
-    const _bKey = (currentUser?.username||displayName).replace(/[.#$\/\[\]]/g,'_');
-    const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-    if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-  }
-  if(_isMuted(displayName)){
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+  const _bKey = displayName.replace(/[.#$\/\[\]]/g,'_');
+
+  // Ban kontrolü: memory + localStorage (Firebase anlık)
+  const _bannedMem = !!(window._bannedSet && window._bannedSet[_bKey]);
+  const _bannedLoc = !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
+  if(_bannedMem || _bannedLoc){
+    showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
     input.value = '';
+    _applyBanToInput();
     return;
   }
+
+  // Susturma kontrolü: memory + localStorage + Firebase anlık kontrol
+  const _mutedMem = !!(window._mutedSet && window._mutedSet[_bKey]);
+  const _mutedLoc = !!JSON.parse(localStorage.getItem('cltv_muted')||'{}')[_bKey];
+  if(_mutedMem || _mutedLoc){
+    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+    input.value = '';
+    _applyMuteToInput();
+    return;
+  }
+
+  // Firebase anlık susturma/ban kontrolü (APK için çift güvence)
+  if(firebaseReady && window.mutedDbRef && window.bannedDbRef){
+    window.mutedDbRef.child(_bKey).once('value', mSnap => {
+      if(mSnap.exists()){
+        // Firebase'de susturulmuş — set'i güncelle ve reddet
+        window._mutedSet[_bKey] = mSnap.val();
+        localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+        showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+        input.value = '';
+        _applyMuteToInput();
+        return;
+      }
+      window.bannedDbRef.child(_bKey).once('value', bSnap => {
+        if(bSnap.exists()){
+          window._bannedSet[_bKey] = bSnap.val();
+          localStorage.setItem('cltv_banned', JSON.stringify(window._bannedSet));
+          showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning');
+          input.value = '';
+          _applyBanToInput();
+          return;
+        }
+        // Temiz — mesajı gönder
+        _doSendMobChat(input, displayName, msg);
+      });
+    });
+    return; // Firebase async — gönderme _doSendMobChat içinde yapılacak
+  }
+
+  _doSendMobChat(input, displayName, msg);
+}
+
+function _doSendMobChat(input, displayName, msg){
   input.value = '';
   const now = new Date();
   const t2 = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
@@ -5878,8 +6009,6 @@ function sendMobChat(){
 }
 
 function sendChatSide(){
-  // İlk kez yazmadan önce kural uyarısı göster
-  // Admine ve misafire chat uyarısı gösterme
   if(currentUser && (currentUser.role==='admin' || currentUser.guest)){
     // geç
   } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
@@ -5889,14 +6018,25 @@ function sendChatSide(){
   const input = document.getElementById('chatInputSide');
   const val = input.value.trim();
   if(!val) return;
-  {
-    const _bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
-    const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-    if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-  }
-  if(_isMuted(currentUser?.username)){
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-    input.value = '';
+  const _bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
+  const _bannedMem = !!(window._bannedSet&&window._bannedSet[_bKey]);
+  const _bannedLoc = !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
+  if(_bannedMem||_bannedLoc){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+  const _mutedMem = !!(window._mutedSet&&window._mutedSet[_bKey]);
+  const _mutedLoc = !!JSON.parse(localStorage.getItem('cltv_muted')||'{}')[_bKey];
+  if(_mutedMem||_mutedLoc){ showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning'); input.value=''; _applyMuteToInput(); return; }
+
+  if(firebaseReady && window.mutedDbRef && window.bannedDbRef){
+    window.mutedDbRef.child(_bKey).once('value', mSnap => {
+      if(mSnap.exists()){ if(!window._mutedSet) window._mutedSet={}; window._mutedSet[_bKey]=mSnap.val(); showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning'); input.value=''; _applyMuteToInput(); return; }
+      window.bannedDbRef.child(_bKey).once('value', bSnap => {
+        if(bSnap.exists()){ if(!window._bannedSet) window._bannedSet={}; window._bannedSet[_bKey]=bSnap.val(); showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+        const now = new Date();
+        const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2, c: window._chatColor || null});
+        input.value = '';
+      });
+    });
     return;
   }
   const now = new Date();
@@ -5905,7 +6045,6 @@ function sendChatSide(){
   input.value = '';
 }
 function sendChat(){
-  // Admin değilse kural uyarısı göster
   if(!(currentUser && currentUser.role === 'admin')){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
       document.getElementById('chatWarning').style.display = 'flex';
@@ -5913,20 +6052,31 @@ function sendChat(){
     }
   }
   const input = document.getElementById('chatInput');
-  const val   = input.value.trim();
+  const val = input.value.trim();
   if(!val) return;
-  {
-    const _bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
-    const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-    if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-  }
-  if(_isMuted(currentUser?.username)){
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-    input.value = '';
+  const _bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
+  const _bannedMem = !!(window._bannedSet&&window._bannedSet[_bKey]);
+  const _bannedLoc = !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
+  if(_bannedMem||_bannedLoc){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+  const _mutedMem = !!(window._mutedSet&&window._mutedSet[_bKey]);
+  const _mutedLoc = !!JSON.parse(localStorage.getItem('cltv_muted')||'{}')[_bKey];
+  if(_mutedMem||_mutedLoc){ showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning'); input.value=''; _applyMuteToInput(); return; }
+
+  if(firebaseReady && window.mutedDbRef && window.bannedDbRef){
+    window.mutedDbRef.child(_bKey).once('value', mSnap => {
+      if(mSnap.exists()){ if(!window._mutedSet) window._mutedSet={}; window._mutedSet[_bKey]=mSnap.val(); showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning'); input.value=''; _applyMuteToInput(); return; }
+      window.bannedDbRef.child(_bKey).once('value', bSnap => {
+        if(bSnap.exists()){ if(!window._bannedSet) window._bannedSet={}; window._bannedSet[_bKey]=bSnap.val(); showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
+        const now = new Date();
+        const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
+        input.value = '';
+      });
+    });
     return;
   }
   const now = new Date();
-  const t2  = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2});
   input.value = '';
 }
