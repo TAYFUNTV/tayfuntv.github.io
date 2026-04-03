@@ -475,13 +475,22 @@ input, select, textarea { font-family: 'DM Sans', sans-serif; }
   box-shadow: 0 8px 28px rgba(0,0,0,.8);
   flex-direction: column;
   gap: 2px;
-  min-width: 155px;
+  min-width: 160px;
   animation: popIn .13s ease;
   white-space: nowrap;
+  transition: opacity 0.1s;
 }
 .online-pill-wrap:hover .online-pill-actions,
 .online-pill-wrap.pinned .online-pill-actions {
   display: flex;
+}
+/* Hover ayrıldığında 200ms bekle - buton click'i kaybolmasın */
+.online-pill-wrap .online-pill-actions {
+  pointer-events: none;
+}
+.online-pill-wrap:hover .online-pill-actions,
+.online-pill-wrap.pinned .online-pill-actions {
+  pointer-events: auto;
 }
 .opa-label {
   font-size: 10px; color: #5a6478; font-weight: 700;
@@ -4783,7 +4792,7 @@ function renderOnlineUsers(users){
       const nickColor  = isBanned ? '#ff6b6b' : (isMuted ? '#5a6478' : color);
       const nickSuffix = isBanned ? ' 🔨' : (isMuted ? ' 🔇' : '');
       const pillBorder = isBanned ? 'rgba(255,107,107,.4)' : 'rgba(232,55,61,.35)';
-      return `<span class="online-pill-wrap" data-mod-user="${safeNick}">
+      return `<span class="online-pill-wrap" data-mod-user="${safeNick}" onclick="event.stopPropagation();this.classList.toggle('pinned')">
         <span title="${u.nick} — yönet"
           style="display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,0.05);border:1px solid ${pillBorder};border-radius:20px;padding:2px 7px 2px 4px;white-space:nowrap;cursor:pointer;">
           <span style="font-size:12px;line-height:1;">${icon}</span>
@@ -4792,7 +4801,7 @@ function renderOnlineUsers(users){
         </span>
         <div class="online-pill-actions">
           <div class="opa-label">👤 ${u.nick}</div>
-          <button class="opa-btn" style="color:#74c0fc;border-color:rgba(116,192,252,.3);" onclick="event.stopPropagation();openAdminDmPanel('${safeNick}')">✉️ Mesaj Gönder</button>
+          <button class="opa-btn" style="color:#74c0fc;" onclick="event.stopPropagation();this.closest('.online-pill-wrap').classList.remove('pinned');openAdminDmPanel('${safeNick}')">✉️ Mesaj Gönder</button>
           <button class="${muteClass}" onclick="event.stopPropagation();_onlineMute('${safeNick}')">${muteLabel}</button>
           <button class="opa-btn opa-kick" onclick="event.stopPropagation();_onlineKick('${safeNick}')">🚪 Sohbetten At</button>
           <button class="${banClass}" onclick="event.stopPropagation();_onlineBan('${safeNick}')">${banLabel}</button>
@@ -5920,6 +5929,10 @@ document.addEventListener('DOMContentLoaded', function(){
   // Context menüyü dışarı tıklayınca kapat
   document.addEventListener('click', function(e){
     if(!e.target.closest('#chatContextMenu')) closeCtxMenu();
+    // Online pill pinned temizle
+    if(!e.target.closest('.online-pill-wrap')){
+      document.querySelectorAll('.online-pill-wrap.pinned').forEach(el=>el.classList.remove('pinned'));
+    }
   });
 });
 
@@ -6038,7 +6051,7 @@ function openAdminDmPanel(safeNick){
     const el=document.getElementById(id); if(el) el.style.display='none';
   });
   // Overlay aç
-  overlay.style.display = 'flex';
+  overlay.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;align-items:center;justify-content:center;';
   // Geçmiş mesajları yükle
   _loadDmHistory(nick);
   // Input focus
