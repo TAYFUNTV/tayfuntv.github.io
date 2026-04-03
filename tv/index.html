@@ -3115,6 +3115,41 @@ tr:last-child td{border:none;}
             </div>
             <!-- GIF Paneli -->
             <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+
+            <!-- ✉️ ADMIN DM POPUP — gifPanel gibi sidebar içinde açılır -->
+            <div id="admDmPopup" style="display:none;position:absolute;bottom:50px;left:0;right:0;z-index:200;background:#0e1318;border:1px solid rgba(116,192,252,.35);border-radius:14px;margin:0 8px;box-shadow:0 -4px 32px rgba(0,0,0,.9);flex-direction:column;overflow:hidden;animation:popIn .2s ease both;">
+              <!-- Başlık -->
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0a0f16;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;">
+                <span style="font-size:16px;">✉️</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:9px;color:#5a6478;font-weight:700;letter-spacing:.8px;">ÖZEL MESAJ</div>
+                  <div id="admDmPopupAd" style="font-size:13px;font-weight:800;color:#74c0fc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                </div>
+                <button onclick="admDmPopupKapat()" style="background:rgba(255,255,255,.07);border:none;border-radius:6px;color:#5a6478;font-size:13px;cursor:pointer;padding:2px 8px;flex-shrink:0;">✕</button>
+              </div>
+              <!-- Mesajlar -->
+              <div id="admDmPopupMsgs" style="overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;height:200px;scrollbar-width:thin;background:#0e1318;"></div>
+              <!-- GIF paneli -->
+              <div id="admDmPopupGif" style="display:none;background:#0a0f16;border-top:1px solid rgba(255,255,255,.07);padding:8px;">
+                <div id="admDmPopupGifCats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;"></div>
+                <div id="admDmPopupGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:100px;overflow-y:auto;"></div>
+              </div>
+              <!-- Renk paneli -->
+              <div id="admDmPopupRenk" style="display:none;background:#0a0f16;border-top:1px solid rgba(255,255,255,.07);padding:8px;">
+                <div style="font-size:10px;color:#5a6478;font-weight:700;margin-bottom:6px;">🎨 YAZI RENGİ</div>
+                <div id="admDmPopupRenkGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;"></div>
+              </div>
+              <!-- Input -->
+              <div style="display:flex;gap:5px;align-items:center;padding:8px 10px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0;">
+                <button onclick="admDmPopupGifToggle()" style="background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 8px;font-size:10px;font-weight:700;color:#e8373d;cursor:pointer;flex-shrink:0;">GIF</button>
+                <button onclick="admDmPopupRenkToggle()" style="background:#141a22;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 7px;cursor:pointer;flex-shrink:0;" title="Renk">
+                  <span id="admDmPopupRenkDot" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;"></span>
+                </button>
+                <input id="admDmPopupInput" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter')admDmPopupGonder()"
+                  style="flex:1;background:#141a22;border:1px solid rgba(116,192,252,.25);border-radius:7px;padding:7px 9px;color:#e8eaf0;font-size:12px;font-weight:600;outline:none;font-family:inherit;caret-color:#74c0fc;min-width:0;">
+                <button onclick="admDmPopupGonder()" style="background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:7px;padding:7px 12px;color:#000;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0;">↑</button>
+              </div>
+            </div>
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
                 <button onclick="setGifCat('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
                 <button onclick="setGifCat('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
@@ -4712,7 +4747,7 @@ function renderOnlineUsers(users){
         </span>
         <div class="online-pill-actions">
           <div class="opa-label">👤 ${u.nick}</div>
-          <button class="opa-btn" style="color:#74c0fc;" onclick="event.stopPropagation();adminDmAc('${safeNick}')">✉️ Mesaj Gönder</button>
+          <button class="opa-btn" style="color:#74c0fc;" onclick="event.stopPropagation();admDmPopupAc('${safeNick}')">✉️ Mesaj Gönder</button>
           <button class="${muteClass}" onclick="event.stopPropagation();_onlineMute('${safeNick}')">${muteLabel}</button>
           <button class="opa-btn opa-kick" onclick="event.stopPropagation();_onlineKick('${safeNick}')">🚪 Sohbetten At</button>
           <button class="${banClass}" onclick="event.stopPropagation();_onlineBan('${safeNick}')">${banLabel}</button>
@@ -5487,7 +5522,7 @@ function ctxAction(action){
   else if(action === 'kick')   chatKickUser(username);
   else if(action === 'ban')    chatBanUser(username);
   else if(action === 'delmsg') chatDeleteMsg(fbKey);
-  else if(action === 'dm')     adminDmAc(encodeURIComponent(username));
+  else if(action === 'dm')     admDmPopupAc(encodeURIComponent(username));
 }
 
 /* ── Sustur / Susturma kaldır ── */
@@ -7771,41 +7806,18 @@ window.addEventListener('load', ()=>{
 
 <!-- ===== ADMİN DM SİSTEMİ ===== -->
 <style>
-/* ── ADMIN DM: Floating pencere (sağ alt köşe, ekran kararmaz) ── */
-#adm-dm-overlay{
-  position:fixed;
-  bottom:0; right:16px;
-  z-index:2147483647;
-  display:none;
-  pointer-events:none;
-}
-#adm-dm-overlay.ac { display:block; }
-#adm-dm-kutu{
-  pointer-events:all;
-  background:#0e1318;
-  border:1px solid rgba(116,192,252,.35);
-  border-radius:14px 14px 0 0;
-  width:320px;
-  max-width:calc(100vw - 32px);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  box-shadow:0 -4px 40px rgba(0,0,0,.9);
-  animation:slideUpDm .22s cubic-bezier(.22,.68,0,1.1) both;
-}
-@keyframes slideUpDm{
-  from{opacity:0;transform:translateY(30px);}
-  to{opacity:1;transform:translateY(0);}
-}
-#adm-dm-baslik{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;cursor:default;}
-#adm-dm-gecmis{overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px;height:240px;scrollbar-width:thin;}
-#adm-dm-footer{padding:9px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:7px;flex-shrink:0;}
+#adm-dm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2147483647;display:none;align-items:center;justify-content:center;}
+#adm-dm-overlay.ac{display:flex;}
+#adm-dm-kutu{background:#0e1318;border:1px solid rgba(116,192,252,.35);border-radius:16px;width:360px;max-width:94vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.9);}
+#adm-dm-baslik{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;}
+#adm-dm-gecmis{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:280px;scrollbar-width:thin;}
+#adm-dm-footer{padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
 #adm-dm-input-row{display:flex;gap:6px;align-items:center;}
-#adm-dm-input{flex:1;background:#141a22;border:1px solid rgba(116,192,252,.3);border-radius:8px;padding:8px 10px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;font-family:inherit;caret-color:#74c0fc;}
-#adm-dm-gonder{background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;padding:8px 14px;color:#000;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;}
+#adm-dm-input{flex:1;background:#141a22;border:1px solid rgba(116,192,252,.3);border-radius:8px;padding:9px 11px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;font-family:inherit;caret-color:#74c0fc;}
+#adm-dm-gonder{background:linear-gradient(135deg,#74c0fc,#1a7fbf);border:none;border-radius:8px;padding:9px 15px;color:#000;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;}
 #adm-dm-gif-panel{display:none;background:#0a0f16;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;}
 #adm-dm-gif-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px;}
-#adm-dm-gif-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:110px;overflow-y:auto;}
+#adm-dm-gif-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:120px;overflow-y:auto;}
 #adm-dm-renk-panel{display:none;background:#0a0f16;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;}
 #adm-dm-renk-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;}
 .adm-dm-msg-ben{align-self:flex-end;background:rgba(116,192,252,.15);border:1px solid rgba(116,192,252,.2);border-radius:12px 12px 3px 12px;padding:7px 11px;max-width:85%;font-size:12px;font-weight:600;color:#74c0fc;word-break:break-word;}
@@ -7816,7 +7828,7 @@ window.addEventListener('load', ()=>{
 #adm-dm-notif{position:fixed;bottom:76px;right:14px;z-index:2147483646;background:#0e1318;border:1px solid rgba(116,192,252,.45);border-radius:14px;padding:13px 15px;min-width:240px;max-width:290px;box-shadow:0 8px 32px rgba(0,0,0,.8);display:none;animation:popIn .3s ease both;}
 </style>
 
-<div id="adm-dm-overlay">
+<div id="adm-dm-overlay" onclick="if(event.target===this)admDmKapat()">
   <div id="adm-dm-kutu">
     <!-- Başlık -->
     <div id="adm-dm-baslik">
@@ -8060,6 +8072,177 @@ window.addEventListener('load', ()=>{
       window._admDmT = setTimeout(()=>notif.style.display='none', 8000);
     });
   };
+
+  // ── CHAT İÇİ DM POPUP (sadece admin görür) ──
+  (function(){
+    const RENKLER2 = ['#e8eaf0','#74c0fc','#f5c842','#e8373d','#2ecc71','#a855f7','#fb923c','#f472b6','#22d3ee','#a3e635','#ff6b6b','#818cf8','#34d399','#e879f9','#fbbf24','#94a3b8'];
+    const GIF2 = {
+      'tepki':   [{l:'😂 LOL',u:'https://media.giphy.com/media/ZqlvCTNHpqrio/giphy.gif'},{l:'🤣 Kahkaha',u:'https://media.giphy.com/media/3o7aTskHEUdgCQAXde/giphy.gif'},{l:'😎 Harika',u:'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif'},{l:'😱 Şok',u:'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif'}],
+      'kutlama': [{l:'🎉 Parti',u:'https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif'},{l:'🥳 Kutlama',u:'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif'},{l:'🎊 Konfeti',u:'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif'},{l:'👏 Alkış',u:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif'}],
+      'dans':    [{l:'💃 Dans',u:'https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif'},{l:'🕺 Groove',u:'https://media.giphy.com/media/5n67EasiMSwWc/giphy.gif'},{l:'🎵 Müzik',u:'https://media.giphy.com/media/l0MYEqEzwMWFCg8rm/giphy.gif'},{l:'🪩 Disko',u:'https://media.giphy.com/media/5xaOcLDE41PFjuNjkk/giphy.gif'}],
+      'hayvan':  [{l:'🐶 Köpek',u:'https://media.giphy.com/media/mCRJDo24UvJMA/giphy.gif'},{l:'🐱 Kedi',u:'https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif'},{l:'🐼 Panda',u:'https://media.giphy.com/media/EatwJZRUIv41G/giphy.gif'},{l:'🐹 Hamster',u:'https://media.giphy.com/media/6BFHX7uRLkfGE/giphy.gif'}],
+      'spor':    [{l:'⚽ Gol',u:'https://media.giphy.com/media/26tPghhkRON21k0iY/giphy.gif'},{l:'🏀 Basket',u:'https://media.giphy.com/media/l0HlFZ3pBnVEEEbWU/giphy.gif'},{l:'🥊 Boks',u:'https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif'},{l:'🏃 Koş',u:'https://media.giphy.com/media/l0HlPwMAzh13pcZ20/giphy.gif'}],
+      'film':    [{l:'🎬 Aksiyon',u:'https://media.giphy.com/media/3oEjHI8WJv4x6UPD68/giphy.gif'},{l:'⭐ Yıldız',u:'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'},{l:'🎥 Kamera',u:'https://media.giphy.com/media/l0HlCCeBhe3ubOZSo/giphy.gif'},{l:'🍿 Sinema',u:'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif'}]
+    };
+
+    let _hedef2='', _renk2='#e8eaf0', _listener2=null, _gifKat2='tepki';
+
+    // Renk grid oluştur
+    const rg = document.getElementById('admDmPopupRenkGrid');
+    if(rg) RENKLER2.forEach((r,i)=>{
+      const b=document.createElement('button');
+      b.style.cssText=`width:100%;aspect-ratio:1;border-radius:50%;background:${r};border:2px solid ${i===0?'#fff':'transparent'};cursor:pointer;`;
+      b.onclick=()=>{
+        _renk2=r;
+        const d=document.getElementById('admDmPopupRenkDot');
+        const inp=document.getElementById('admDmPopupInput');
+        if(d) d.style.background=r;
+        if(inp) inp.style.color=r;
+        rg.querySelectorAll('button').forEach(x=>x.style.border='2px solid transparent');
+        b.style.border='2px solid #fff';
+        document.getElementById('admDmPopupRenk').style.display='none';
+      };
+      rg.appendChild(b);
+    });
+
+    // GIF kategorileri
+    const gc=document.getElementById('admDmPopupGifCats');
+    if(gc) Object.keys(GIF2).forEach((kat,i)=>{
+      const labels={tepki:'😂 Tepki',kutlama:'🎉 Kutlama',dans:'💃 Dans',hayvan:'🐾 Hayvan',spor:'⚽ Spor',film:'🎬 Film'};
+      const b=document.createElement('button');
+      b.textContent=labels[kat];
+      b.style.cssText=`background:${i===0?'#e8373d':'rgba(255,255,255,.07)'};border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 3px;font-size:9px;font-weight:700;color:${i===0?'#fff':'#b0b8cc'};cursor:pointer;`;
+      b.onclick=()=>{
+        _gifKat2=kat;
+        gc.querySelectorAll('button').forEach(x=>{x.style.background='rgba(255,255,255,.07)';x.style.color='#b0b8cc';});
+        b.style.background='#e8373d';b.style.color='#fff';
+        _gifGrid2();
+      };
+      gc.appendChild(b);
+    });
+
+    function _gifGrid2(){
+      const grid=document.getElementById('admDmPopupGifGrid');
+      if(!grid) return;
+      grid.innerHTML='';
+      (GIF2[_gifKat2]||[]).forEach(g=>{
+        const img=document.createElement('img');
+        img.src=g.u; img.title=g.l;
+        img.style.cssText='width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;';
+        img.onmouseover=()=>img.style.border='2px solid #e8373d';
+        img.onmouseout=()=>img.style.border='2px solid transparent';
+        img.onclick=()=>{
+          _gonder2('<img src="'+g.u+'" style="max-width:120px;border-radius:7px;display:block;">', true);
+          document.getElementById('admDmPopupGif').style.display='none';
+        };
+        grid.appendChild(img);
+      });
+    }
+
+    function _saat2(){
+      const n=new Date();
+      return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    }
+
+    function _mesajEkle2(m){
+      const kutu=document.getElementById('admDmPopupMsgs');
+      if(!kutu) return;
+      if(kutu.querySelector('[data-bos]')) kutu.innerHTML='';
+      const benim = m.from===(window.currentUser&&window.currentUser.username);
+      const wrap=document.createElement('div');
+      wrap.style.cssText='display:flex;flex-direction:column;align-items:'+(benim?'flex-end':'flex-start')+';';
+      const balon=document.createElement('div');
+      balon.style.cssText=benim
+        ? 'align-self:flex-end;background:rgba(116,192,252,.15);border:1px solid rgba(116,192,252,.2);border-radius:12px 12px 3px 12px;padding:6px 10px;max-width:85%;font-size:12px;font-weight:600;color:#74c0fc;word-break:break-word;'
+        : 'align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px 12px 12px 3px;padding:6px 10px;max-width:85%;font-size:12px;font-weight:600;word-break:break-word;';
+      if(m.isHtml) balon.innerHTML=m.m;
+      else { balon.style.color=m.c||'#e8eaf0'; balon.textContent=m.m; }
+      const zaman=document.createElement('div');
+      zaman.style.cssText='font-size:9px;color:#5a6478;margin-top:2px;'+(benim?'text-align:right;':'');
+      zaman.textContent=(benim?'Sen':'👤 '+m.from)+' · '+(m.t||'');
+      wrap.appendChild(balon); wrap.appendChild(zaman);
+      kutu.appendChild(wrap);
+      kutu.scrollTop=kutu.scrollHeight;
+    }
+
+    function _yukle2(){
+      const kutu=document.getElementById('admDmPopupMsgs');
+      if(!kutu||!_hedef2) return;
+      kutu.innerHTML='<div data-bos style="text-align:center;color:#5a6478;font-size:11px;padding:14px 0;">Yükleniyor...</div>';
+      if(!window.firebaseReady||!window.dmDbRef) return;
+      const key=_hedef2.replace(/[.#$\/\[\]]/g,'_');
+      if(_listener2) window.dmDbRef.child(key).off('value',_listener2);
+      _listener2=window.dmDbRef.child(key).limitToLast(50).on('value',snap=>{
+        kutu.innerHTML='';
+        const msgs=[];
+        snap.forEach(ch=>msgs.push(ch.val()));
+        if(!msgs.length){
+          kutu.innerHTML='<div data-bos style="text-align:center;color:#5a6478;font-size:11px;padding:14px 0;">Henüz mesaj yok. 👇</div>';
+          return;
+        }
+        msgs.forEach(_mesajEkle2);
+      });
+    }
+
+    function _gonder2(metin, isHtml){
+      if(!metin||!_hedef2) return;
+      const msg={from:window.currentUser.username, to:_hedef2, m:metin, t:_saat2(), ts:Date.now(), c:_renk2, isHtml:!!isHtml};
+      const key=_hedef2.replace(/[.#$\/\[\]]/g,'_');
+      if(window.firebaseReady&&window.dmDbRef) window.dmDbRef.child(key).push(msg);
+    }
+
+    window.admDmPopupAc=function(safeNick){
+      if(!window.currentUser||window.currentUser.role!=='admin') return;
+      _hedef2=decodeURIComponent(safeNick);
+      _renk2='#e8eaf0';
+      const popup=document.getElementById('admDmPopup');
+      const ad=document.getElementById('admDmPopupAd');
+      const inp=document.getElementById('admDmPopupInput');
+      const dot=document.getElementById('admDmPopupRenkDot');
+      if(ad) ad.textContent=_hedef2;
+      if(inp){ inp.value=''; inp.style.color='#e8eaf0'; }
+      if(dot) dot.style.background='#e8eaf0';
+      document.getElementById('admDmPopupGif').style.display='none';
+      document.getElementById('admDmPopupRenk').style.display='none';
+      if(popup){ popup.style.display='flex'; }
+      _yukle2();
+      setTimeout(()=>{ if(inp) inp.focus(); },100);
+    };
+
+    window.admDmPopupKapat=function(){
+      const popup=document.getElementById('admDmPopup');
+      if(popup) popup.style.display='none';
+      if(_listener2&&window.dmDbRef&&_hedef2){
+        window.dmDbRef.child(_hedef2.replace(/[.#$\/\[\]]/g,'_')).off('value',_listener2);
+        _listener2=null;
+      }
+      _hedef2='';
+    };
+
+    window.admDmPopupGonder=function(){
+      const inp=document.getElementById('admDmPopupInput');
+      const val=inp&&inp.value.trim();
+      if(!val) return;
+      _gonder2(val,false);
+      inp.value=''; inp.focus();
+    };
+
+    window.admDmPopupGifToggle=function(){
+      const gp=document.getElementById('admDmPopupGif');
+      const rp=document.getElementById('admDmPopupRenk');
+      rp.style.display='none';
+      const ac=gp.style.display==='none';
+      gp.style.display=ac?'flex':'none';
+      if(ac) _gifGrid2();
+    };
+
+    window.admDmPopupRenkToggle=function(){
+      const rp=document.getElementById('admDmPopupRenk');
+      const gp=document.getElementById('admDmPopupGif');
+      gp.style.display='none';
+      rp.style.display=rp.style.display==='none'?'block':'none';
+    };
+  })();
 })();
 </script>
 </body>
