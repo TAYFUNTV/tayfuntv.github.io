@@ -43,12 +43,9 @@ function _startFirebase() {
     window.mutedDbRef  = firebase.database().ref('tayfuntv_muted');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
-    // Susturulmuş kullanıcıları gerçek zamanlı dinle
-    window.mutedDbRef.on('value', snap => {
-      window._mutedSet = {};
-      snap.forEach(child => { window._mutedSet[child.key] = child.val(); });
-      renderChat();
-    });
+    // Muted dinleyici _initMutedListener tarafından yönetilir (chat açıldığında)
+    // Erken çağrı: eğer currentUser zaten varsa hemen başlat
+    if(typeof _initMutedListener === 'function') _initMutedListener();
     // localStorage'daki eski kullanıcıları Firebase'e migrate et (bir kerelik)
     _migrateLocalUsersToFirebase();
     firebase.database().ref('.info/connected').on('value', snap => {
@@ -3635,6 +3632,11 @@ function _doLoginSuccess(user){
     _kickListenerAttached = false;
     setTimeout(_listenKick, 1500);
   }
+  // Muted dinleyiciyi her girişte sıfırla ve yeniden başlat
+  _mutedListenerAttached = false;
+  setTimeout(_initMutedListener, 1200);
+  // Mevcut mute durumunu hemen input'lara yansıt
+  setTimeout(function(){ if(typeof _applyMuteToInput==='function') _applyMuteToInput(); }, 1500);
 }
 function doLogout(){
   removeOnlinePresence();
@@ -5297,22 +5299,24 @@ function chatMuteUser(username){
   if(!username || username === _d(_un)) return;
   const key = username.replace(/[.#$\/\[\]]/g,'_');
   if(_isMuted(username)){
-    if(window.mutedDbRef) window.mutedDbRef.child(key).remove();
-    else {
-      const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-      delete l[key]; localStorage.setItem('cltv_muted',JSON.stringify(l));
-      delete window._mutedSet[key]; renderChat(); renderOnlineUsers(_lastOnlineUsers||[]);
-    }
+    // Susturmayı kaldır — hem Firebase hem localStorage
+    if(window.mutedDbRef && firebaseReady) window.mutedDbRef.child(key).remove();
+    const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+    delete l[key]; localStorage.setItem('cltv_muted', JSON.stringify(l));
+    delete window._mutedSet[key];
+    if(typeof renderChat === 'function') renderChat();
+    if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
     _chatSystemMsg('🔊 ' + username + ' artık konuşabilir.');
     showToast('🔊 ' + username + ' susturma kaldırıldı','success');
   } else {
+    // Sustur — hem Firebase hem localStorage
     const data = { username, mutedAt: Date.now(), mutedBy: currentUser.username };
-    if(window.mutedDbRef) window.mutedDbRef.child(key).set(data);
-    else {
-      const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
-      l[key] = data; localStorage.setItem('cltv_muted',JSON.stringify(l));
-      window._mutedSet[key] = data; renderChat(); renderOnlineUsers(_lastOnlineUsers||[]);
-    }
+    if(window.mutedDbRef && firebaseReady) window.mutedDbRef.child(key).set(data);
+    const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+    l[key] = data; localStorage.setItem('cltv_muted', JSON.stringify(l));
+    window._mutedSet[key] = data;
+    if(typeof renderChat === 'function') renderChat();
+    if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
     _chatSystemMsg('🔇 ' + username + ' susturuldu. Mesaj gönderemez.');
     showToast('🔇 ' + username + ' susturuldu','warning');
   }
@@ -5409,25 +5413,51 @@ function _listenKick(){
 }
 
 /* ── Muted dinleyici — Firebase gerçek zamanlı ── */
+let _mutedListenerAttached = false;
 function _initMutedListener(){
-  if(!window.mutedDbRef) return;
+  // Firebase hazır değilse veya mutedDbRef yoksa ertelenecek
+  if(!window.mutedDbRef || !firebaseReady){
+    // Firebase henüz hazır değil, 1 sn sonra tekrar dene
+    setTimeout(_initMutedListener, 1000);
+    return;
+  }
+  // Dinleyiciyi sadece bir kez ekle
+  if(_mutedListenerAttached) return;
+  _mutedListenerAttached = true;
+
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-    renderChat();
-    if(typeof _lastOnlineUsers !== 'undefined') renderOnlineUsers(_lastOnlineUsers);
-    // Eğer bu kullanıcı susturulduysa input'u disable et
-    if(currentUser && currentUser.role !== 'admin'){
-      const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-      const muted = !!window._mutedSet[key];
-      ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
-        const el = document.getElementById(id);
-        if(!el) return;
-        el.disabled = muted;
-        el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
-        el.style.opacity = muted ? '.4' : '1';
-      });
+
+    // Chat render
+    if(typeof renderChat === 'function') renderChat();
+    if(typeof _lastOnlineUsers !== 'undefined' && typeof renderOnlineUsers === 'function'){
+      renderOnlineUsers(_lastOnlineUsers);
     }
+
+    // Eğer bu kullanıcı susturulduysa input'u disable et
+    _applyMuteToInput();
+  });
+}
+
+/* ── Susturma durumunu input'lara yansıt ── */
+function _applyMuteToInput(){
+  if(!currentUser || currentUser.role === 'admin') return;
+  const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
+  const muted = !!(window._mutedSet && window._mutedSet[key]);
+  ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = muted;
+    el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
+    el.style.opacity = muted ? '.4' : '1';
+  });
+  // Gönder butonlarını da güncelle
+  ['chatSendBtn','chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.disabled = muted;
+    el.style.opacity = muted ? '.4' : '1';
   });
 }
 
