@@ -4695,30 +4695,14 @@ function removeOnlinePresence(){
 
 function listenOnlineUsers(){
   if(!firebaseReady || !onlineRef) return;
-  if(currentUser && currentUser.role === 'admin'){
-    // Admin: her iki platformun online listesini birleştir
-    let desktopUsers = [], mobileUsers = [];
-    window.onlineRefDesktop.on('value', snap => {
-      desktopUsers = [];
-      snap.forEach(ch => { const v=ch.val(); v._plat='💻'; desktopUsers.push(v); });
-      _lastOnlineUsers = [...desktopUsers, ...mobileUsers];
-      renderOnlineUsers(_lastOnlineUsers);
-    });
-    window.onlineRefMobile.on('value', snap => {
-      mobileUsers = [];
-      snap.forEach(ch => { const v=ch.val(); v._plat='📱'; mobileUsers.push(v); });
-      _lastOnlineUsers = [...desktopUsers, ...mobileUsers];
-      renderOnlineUsers(_lastOnlineUsers);
-    });
-  } else {
-    // Normal kullanıcı: sadece kendi platformu
-    onlineRef.on('value', snapshot => {
-      const users = [];
-      snapshot.forEach(child => { users.push(child.val()); });
-      _lastOnlineUsers = users;
-      renderOnlineUsers(users);
-    });
-  }
+  // Laptop (desktop): sadece kendi online listesini dinle — orijinal davranış
+  // Mobil: sadece mobil online listesini dinle
+  onlineRef.on('value', function(snapshot){
+    const users = [];
+    snapshot.forEach(function(child){ users.push(child.val()); });
+    _lastOnlineUsers = users;
+    renderOnlineUsers(users);
+  });
 }
 
 function renderOnlineUsers(users){
