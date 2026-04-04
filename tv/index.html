@@ -5891,13 +5891,12 @@ function _isMobMuted(){
 }
 
 function sendMobChat(){
-  if(!currentUser){ return; }
+  if(!currentUser) return;
   const input = document.getElementById('mobChatInput');
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
 
-  // Admin değilse kural uyarısı
   if(currentUser.role !== 'admin'){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
       document.getElementById('chatWarning').style.display = 'flex';
@@ -5908,53 +5907,38 @@ function sendMobChat(){
   const displayName = currentUser.username;
   const _bKey = displayName.replace(/[.#$\/\[\]]/g,'_');
 
-  // Ban kontrolü
   if(window._bannedSet && window._bannedSet[_bKey]){
-    showToast('\uD83D\uDD28 Banland\u0131n\u0131z.','warning');
+    showToast('Banlandnz.','warning');
     input.value='';
     return;
   }
 
-  // SUSTURMA: Firebase'den anlık oku, sonra karar ver
-  if(!firebaseReady || !window.mutedDbRef){
-    // Firebase yoksa gönder
-    input.value = '';
-    const now = new Date();
-    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
+  if(firebaseReady && window.mutedDbRef){
+    window.mutedDbRef.child(_bKey).once('value', function(snap){
+      if(snap.exists()){
+        showToast('Susturuldunuz, mesaj gonderemezsiniz.','warning');
+        input.value = '';
+        input.disabled = true;
+        input.readOnly = true;
+        input.placeholder = 'Susturuldunuz';
+        input.style.opacity = '.35';
+        const btn = document.getElementById('mobChatSendBtn');
+        if(btn){ btn.disabled=true; btn.style.opacity='.25'; btn.style.pointerEvents='none'; }
+        return;
+      }
+      input.value = '';
+      const now = new Date();
+      const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
+    });
     return;
   }
 
-  // Firebase'den bu kullanıcının muted kaydını anlık oku
-  window.mutedDbRef.child(_bKey).once('value').then(snap => {
-    const isMuted = snap.exists();
-    // DEBUG: ekranda göster — kullanıcı adı ve Firebase key
-    alert('DEBUG\nKullanici: ' + displayName + '\nFirebase key: ' + _bKey + '\nMuted: ' + isMuted + '\nmutedDbRef: ' + (window.mutedDbRef ? 'VAR' : 'YOK'));
-    if(isMuted){
-      window._mutedSet[_bKey] = snap.val();
-      input.value = '';
-      input.disabled = true;
-      input.readOnly = true;
-      input.placeholder = '\uD83D\uDD07 Susturuldunuz';
-      input.style.opacity = '.35';
-      const btn = document.getElementById('mobChatSendBtn');
-      if(btn){ btn.disabled=true; btn.style.opacity='.25'; btn.style.pointerEvents='none'; }
-      return;
-    }
-    delete window._mutedSet[_bKey];
-    input.value = '';
-    const now = new Date();
-    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
-  }).catch(err => {
-    showToast('Firebase HATA: ' + err.message, 'warning');
-    input.value = '';
-    const now = new Date();
-    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
-  });
+  input.value = '';
+  const now = new Date();
+  const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
 }
-
 
 function sendChatSide(){
   // İlk kez yazmadan önce kural uyarısı göster
