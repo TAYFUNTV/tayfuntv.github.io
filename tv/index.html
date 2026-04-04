@@ -5504,6 +5504,7 @@ function chatMuteUser(username){
     delete window._mutedSet[key];
     if(typeof renderChat === 'function') renderChat();
     if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
     _chatSystemMsg('🔊 ' + username + ' artık konuşabilir.');
     showToast('🔊 ' + username + ' susturma kaldırıldı','success');
   } else {
@@ -5515,6 +5516,7 @@ function chatMuteUser(username){
     window._mutedSet[key] = data;
     if(typeof renderChat === 'function') renderChat();
     if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers||[]);
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
     _chatSystemMsg('🔇 ' + username + ' susturuldu. Mesaj gönderemez.');
     showToast('🔇 ' + username + ' susturuldu','warning');
   }
@@ -5736,20 +5738,25 @@ function _initMutedListener(){
 function _applyMuteToInput(){
   if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-  const muted = !!(window._mutedSet && window._mutedSet[key]);
+  const muted = !!(window._mutedSet && window._mutedSet[key])
+             || !!(JSON.parse(localStorage.getItem('cltv_muted')||'{}')[key]);
   ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
+    el.readOnly = muted;
     el.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...';
     el.style.opacity = muted ? '.4' : '1';
+    el.style.pointerEvents = muted ? 'none' : '';
+    el.style.cursor = muted ? 'not-allowed' : '';
   });
-  // Gönder butonlarını da güncelle
   ['chatSendBtn','chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
     el.style.opacity = muted ? '.4' : '1';
+    el.style.pointerEvents = muted ? 'none' : '';
+    el.style.cursor = muted ? 'not-allowed' : '';
   });
 }
 
@@ -5854,6 +5861,23 @@ function sendMobChat(){
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
+  // Susturulmuş veya banlı kullanıcıyı en başta durdur
+  if(currentUser && currentUser.role !== 'admin'){
+    const _ck = currentUser.username.replace(/[.#$\\/\[\]]/g,'_');
+    if(window._mutedSet && window._mutedSet[_ck]){
+      showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+      input.value = '';
+      _applyMuteToInput();
+      return;
+    }
+    const _localMuted = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
+    if(_localMuted[_ck]){
+      showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+      input.value = '';
+      _applyMuteToInput();
+      return;
+    }
+  }
   // Admin değilse kural uyarısı göster
   if(!(currentUser && currentUser.role === 'admin')){
     if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
