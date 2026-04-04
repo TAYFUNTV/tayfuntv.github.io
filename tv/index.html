@@ -2889,61 +2889,68 @@ tr:last-child td{border:none;}
           </div>
           <div id="mobCatContent" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;position:relative;">
             <div id="channelListBottom" style="display:flex;flex-direction:column;gap:0;padding:0;"></div>
-            <!-- Mobil chat alanı — laptop sistemi birebir entegre -->
+            <!-- Mobil chat alanı -->
             <div id="mobChatWrap" style="display:none;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
-              <span id="chatUserAvatarSide" style="display:none;"></span>
-              <span id="chatUserNameSide" style="display:none;"></span>
-              <!-- Çevrimiçi kullanıcılar -->
+              <!-- Mobil çevrimiçi kullanıcılar -->
               <div style="flex-shrink:0;margin-bottom:6px;">
                 <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:4px;padding:0 2px;">🟢 ÇEVRİMİÇİ KULLANICILAR</div>
-                <div id="onlineUsersBar" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
+                <div id="mobOnlineUsersBar" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
               </div>
-              <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
+              <div id="mobChatMessages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
                 <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
               </div>
-              <!-- GIF Paneli -->
-              <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);">
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
-                  <button onclick="setGifCat('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
-                  <button onclick="setGifCat('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
-                  <button onclick="setGifCat('dans',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
-                  <button onclick="setGifCat('hayvan',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
-                  <button onclick="setGifCat('spor',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
-                  <button onclick="setGifCat('film',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+              <!-- Mobil Emoji Paneli -->
+              <div id="mobEmojiPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1e2530;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.6);">
+                <div style="display:flex;gap:5px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px;">
+                  <button onclick="setMobEmojiCat(0,this)" class="mecatbtn" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Yüzler">😀</button>
+                  <button onclick="setMobEmojiCat(1,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Smiley Set">😊</button>
+                  <button onclick="setMobEmojiCat(2,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Eller & Kalpler">👍</button>
+                  <button onclick="setMobEmojiCat(3,this)" class="mecatbtn" style="flex:1;background:rgba(255,255,255,.08);border:none;border-radius:8px;padding:5px;font-size:15px;cursor:pointer;line-height:1;" title="Semboller">🔥</button>
                 </div>
-                <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
+                <div id="mobEmojiGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:140px;overflow-y:auto;"></div>
               </div>
-              <!-- Renk Paleti Paneli -->
-              <div id="colorPalettePanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:101;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+              <!-- Mobil GIF Paneli -->
+              <div id="mobGifPanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
+                  <button onclick="setMobGifCat('tepki',this)" class="mob-gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+                  <button onclick="setMobGifCat('kutlama',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+                  <button onclick="setMobGifCat('dans',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+                  <button onclick="setMobGifCat('hayvan',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+                  <button onclick="setMobGifCat('spor',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+                  <button onclick="setMobGifCat('film',this)" class="mob-gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+                </div>
+                <div id="mobGifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
+              </div>
+              <!-- Mobil Renk Paleti Paneli -->
+              <div id="mobColorPalettePanel" style="display:none;position:absolute;bottom:52px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:201;box-shadow:0 8px 32px rgba(0,0,0,.7);">
                 <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:8px;">🎨 YAZI RENGİ SEÇ</div>
                 <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;">
-                  <button onclick="setChatColor('#e8eaf0',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
-                  <button onclick="setChatColor('#74c0fc',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
-                  <button onclick="setChatColor('#f5c842',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
-                  <button onclick="setChatColor('#e8373d',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
-                  <button onclick="setChatColor('#2ecc71',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
-                  <button onclick="setChatColor('#a855f7',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
-                  <button onclick="setChatColor('#fb923c',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
-                  <button onclick="setChatColor('#f472b6',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
-                  <button onclick="setChatColor('#22d3ee',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
-                  <button onclick="setChatColor('#a3e635',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
-                  <button onclick="setChatColor('#fbbf24',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
-                  <button onclick="setChatColor('#ff6b6b',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
-                  <button onclick="setChatColor('#818cf8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
-                  <button onclick="setChatColor('#34d399',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
-                  <button onclick="setChatColor('#e879f9',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
-                  <button onclick="setChatColor('#94a3b8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
+                  <button onclick="setMobChatColor('#e8eaf0',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
+                  <button onclick="setMobChatColor('#74c0fc',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
+                  <button onclick="setMobChatColor('#f5c842',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
+                  <button onclick="setMobChatColor('#e8373d',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
+                  <button onclick="setMobChatColor('#2ecc71',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
+                  <button onclick="setMobChatColor('#a855f7',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
+                  <button onclick="setMobChatColor('#fb923c',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
+                  <button onclick="setMobChatColor('#f472b6',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
+                  <button onclick="setMobChatColor('#22d3ee',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
+                  <button onclick="setMobChatColor('#a3e635',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
+                  <button onclick="setMobChatColor('#fbbf24',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
+                  <button onclick="setMobChatColor('#ff6b6b',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
+                  <button onclick="setMobChatColor('#818cf8',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
+                  <button onclick="setMobChatColor('#34d399',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
+                  <button onclick="setMobChatColor('#e879f9',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
+                  <button onclick="setMobChatColor('#94a3b8',this)" class="mob-color-swatch" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
                 </div>
               </div>
               <div style="display:flex;gap:4px;flex-shrink:0;">
-                <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
-                <button id="colorPaletteBtn" onclick="toggleColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;position:relative;" title="Renk Paleti">
-                  <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="colorPaletteDot"></span>
+                <button onclick="toggleMobEmojiPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:15px;cursor:pointer;flex-shrink:0;" title="Emoji">😊</button>
+                <button onclick="toggleMobGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
+                <button id="mobColorPaletteBtn" onclick="toggleMobColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;" title="Renk Paleti">
+                  <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="mobColorPaletteDot"></span>
                 </button>
-                <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
-                  style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
-                  onkeydown="if(event.key==='Enter')sendChatSide()">
-                <button id="chatSendBtnSide" onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+                <input type="text" id="mobChatInput" placeholder="Mesaj yaz..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;" onkeydown="if(event.key==='Enter')sendMobChat()">
+                <button id="mobChatSendBtn" onclick="sendMobChat()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
               </div>
             </div>
           </div>
@@ -3095,63 +3102,63 @@ tr:last-child td{border:none;}
           </div>
           <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;padding:8px;position:relative;">
             <!-- kullanıcı badge kaldırıldı, online listede görünüyor -->
-            <span id="chatUserAvatarSide_desk" style="display:none;"></span>
-            <span id="chatUserNameSide_desk" style="display:none;"></span>
+            <span id="chatUserAvatarSide" style="display:none;"></span>
+            <span id="chatUserNameSide" style="display:none;"></span>
             <!-- Çevrimiçi kullanıcılar -->
             <div style="flex-shrink:0;margin-bottom:6px;">
               <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:4px;padding:0 2px;">🟢 ÇEVRİMİÇİ KULLANICILAR</div>
-              <div id="onlineUsersBar_desk" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
+              <div id="onlineUsersBar" style="display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;align-items:center;"></div>
             </div>
-            <div id="chatBoxSide_desk" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
+            <div id="chatBoxSide" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;min-height:0;margin-bottom:4px;">
               <div style="text-align:center;color:var(--muted);font-size:11px;padding:20px 0;">💬 Henüz mesaj yok.</div>
             </div>
             <!-- GIF Paneli -->
-            <div id="gifPanel_desk" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+            <div id="gifPanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,.7);">
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;">
-                <button onclick="setGifCat_desk('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
-                <button onclick="setGifCat_desk('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
-                <button onclick="setGifCat_desk('dans',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
-                <button onclick="setGifCat_desk('hayvan',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
-                <button onclick="setGifCat_desk('spor',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
-                <button onclick="setGifCat_desk('film',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
+                <button onclick="setGifCat('tepki',this)" class="gif-cat-btn" style="background:var(--accent);border:none;border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:#fff;cursor:pointer;">😂 Tepki</button>
+                <button onclick="setGifCat('kutlama',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎉 Kutlama</button>
+                <button onclick="setGifCat('dans',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">💃 Dans</button>
+                <button onclick="setGifCat('hayvan',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🐾 Hayvan</button>
+                <button onclick="setGifCat('spor',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">⚽ Spor</button>
+                <button onclick="setGifCat('film',this)" class="gif-cat-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 4px;font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;">🎬 Film</button>
               </div>
-              <div id="gifGrid_desk" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
+              <div id="gifGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:140px;overflow-y:auto;scrollbar-width:thin;"></div>
             </div>
 
 
             <!-- Renk Paleti Paneli (Desktop) -->
-            <div id="colorPalettePanel_desk" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:101;box-shadow:0 8px 32px rgba(0,0,0,.7);">
+            <div id="colorPalettePanel" style="display:none;position:absolute;bottom:58px;left:8px;right:8px;background:#1a2130;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;z-index:101;box-shadow:0 8px 32px rgba(0,0,0,.7);">
               <div style="font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;margin-bottom:8px;">🎨 YAZI RENGİ SEÇ</div>
               <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;">
-                <button onclick="setChatColor_desk('#e8eaf0',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
-                <button onclick="setChatColor_desk('#74c0fc',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
-                <button onclick="setChatColor_desk('#f5c842',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
-                <button onclick="setChatColor_desk('#e8373d',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
-                <button onclick="setChatColor_desk('#2ecc71',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
-                <button onclick="setChatColor_desk('#a855f7',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
-                <button onclick="setChatColor_desk('#fb923c',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
-                <button onclick="setChatColor_desk('#f472b6',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
-                <button onclick="setChatColor_desk('#22d3ee',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
-                <button onclick="setChatColor_desk('#a3e635',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
-                <button onclick="setChatColor_desk('#fbbf24',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
-                <button onclick="setChatColor_desk('#ff6b6b',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
-                <button onclick="setChatColor_desk('#818cf8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
-                <button onclick="setChatColor_desk('#34d399',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
-                <button onclick="setChatColor_desk('#e879f9',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
-                <button onclick="setChatColor_desk('#94a3b8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
+                <button onclick="setChatColor('#e8eaf0',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8eaf0;border:2px solid var(--accent);cursor:pointer;transition:transform .15s;" title="Beyaz"></button>
+                <button onclick="setChatColor('#74c0fc',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#74c0fc;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mavi"></button>
+                <button onclick="setChatColor('#f5c842',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f5c842;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Altın"></button>
+                <button onclick="setChatColor('#e8373d',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e8373d;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Kırmızı"></button>
+                <button onclick="setChatColor('#2ecc71',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#2ecc71;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Yeşil"></button>
+                <button onclick="setChatColor('#a855f7',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a855f7;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mor"></button>
+                <button onclick="setChatColor('#fb923c',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fb923c;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Turuncu"></button>
+                <button onclick="setChatColor('#f472b6',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#f472b6;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Pembe"></button>
+                <button onclick="setChatColor('#22d3ee',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#22d3ee;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Cyan"></button>
+                <button onclick="setChatColor('#a3e635',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#a3e635;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Limon"></button>
+                <button onclick="setChatColor('#fbbf24',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#fbbf24;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Sarı"></button>
+                <button onclick="setChatColor('#ff6b6b',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#ff6b6b;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Mercan"></button>
+                <button onclick="setChatColor('#818cf8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#818cf8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="İndigo"></button>
+                <button onclick="setChatColor('#34d399',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#34d399;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Nane"></button>
+                <button onclick="setChatColor('#e879f9',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#e879f9;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Fuşya"></button>
+                <button onclick="setChatColor('#94a3b8',this)" class="color-swatch-btn" style="width:100%;aspect-ratio:1;border-radius:50%;background:#94a3b8;border:2px solid transparent;cursor:pointer;transition:transform .15s;" title="Gri"></button>
               </div>
             </div>
             </div>
 
             <div style="display:flex;gap:4px;flex-shrink:0;">
-              <button onclick="toggleGifPanel_desk()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
-              <button id="colorPaletteBtn_desk" onclick="toggleColorPalette_desk()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;position:relative;" title="Renk Paleti">
-                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="colorPaletteDot_desk"></span>
+              <button onclick="toggleGifPanel()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;flex-shrink:0;" title="GIF">GIF</button>
+              <button id="colorPaletteBtn" onclick="toggleColorPalette()" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 7px;font-size:13px;cursor:pointer;flex-shrink:0;position:relative;" title="Renk Paleti">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:#e8eaf0;border:2px solid rgba(255,255,255,.3);vertical-align:middle;" id="colorPaletteDot"></span>
               </button>
-              <input type="text" id="chatInputSide_desk" placeholder="Mesaj yaz..."
+              <input type="text" id="chatInputSide" placeholder="Mesaj yaz..."
                 style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:#e8eaf0;font-size:13px;font-weight:600;outline:none;min-width:0;caret-color:#fff;"
-                onkeydown="if(event.key==='Enter')sendChatSide_desk()">
-              <button id="chatSendBtnSide_desk" onclick="sendChatSide_desk()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
+                onkeydown="if(event.key==='Enter')sendChatSide()">
+              <button id="chatSendBtnSide" onclick="sendChatSide()" style="background:var(--accent);border:none;border-radius:8px;padding:7px 11px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">↑</button>
             </div>
           </div>
         </div>
@@ -6184,153 +6191,6 @@ function closeMoviePlayer() {
 
 
 /* ─── YD DATA & LOGIC ─── */
-
-/* ════════════════════════════════════════════════
-   LAPTOP SIDEBAR CHAT (_desk) — wrapper fonksiyonlar
-   Mobil chat ile aynı JS'i paylaşmak yerine,
-   laptop sidebar kendi _desk ID'lerine bakıyor.
-   ════════════════════════════════════════════════ */
-window._chatColor_desk = '#e8eaf0';
-
-function sendChatSide_desk(){
-  if(currentUser && (currentUser.role==='admin' || currentUser.guest)){
-    // geç
-  } else if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
-    document.getElementById('chatWarning').style.display = 'flex';
-    return;
-  }
-  const input = document.getElementById('chatInputSide_desk');
-  if(!input) return;
-  const val = input.value.trim();
-  if(!val) return;
-  const _bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
-  const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
-  if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
-  if(_isMuted(currentUser?.username)){ showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning'); input.value=''; return; }
-  const now = new Date();
-  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  pushChatMessage({u: currentUser?.username||'Sen', m:val, t:t2, c: window._chatColor_desk || null});
-  input.value = '';
-}
-
-function toggleGifPanel_desk(){
-  const gp = document.getElementById('gifPanel_desk');
-  const cp = document.getElementById('colorPalettePanel_desk');
-  if(cp) cp.style.display = 'none';
-  if(!gp) return;
-  if(gp.style.display === 'none'){
-    renderGifGrid_desk();
-    gp.style.display = 'block';
-  } else {
-    gp.style.display = 'none';
-  }
-}
-
-function renderGifGrid_desk(){
-  const list = GIF_CATS[currentGifCat] || [];
-  const grid = document.getElementById('gifGrid_desk');
-  if(!grid) return;
-  grid.innerHTML = list.map(g =>
-    `<img src="${g.url}" title="${g.label}" onclick="sendGif_desk('${g.url}','${g.label}')"
-      style="width:100%;border-radius:6px;cursor:pointer;object-fit:cover;height:65px;transition:transform .15s;"
-      onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
-      loading="lazy">`
-  ).join('');
-}
-
-function setGifCat_desk(cat, el){
-  currentGifCat = cat;
-  document.querySelectorAll('#gifPanel_desk .gif-cat-btn').forEach(b=>{
-    b.style.background = 'var(--bg3)';
-    b.style.border = '1px solid var(--border)';
-    b.style.color = 'var(--text2)';
-  });
-  if(el){ el.style.background = 'var(--accent)'; el.style.border = 'none'; el.style.color = '#fff'; }
-  renderGifGrid_desk();
-}
-
-function sendGif_desk(url, label){
-  const now = new Date();
-  const t2 = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  pushChatMessage({u: currentUser?.username||'Sen', m:`🎞️ GIF: ${label} <img src="${url}" style="max-width:120px;border-radius:6px;display:block;margin-top:4px;">`, t:t2, isHtml:true});
-  const gp = document.getElementById('gifPanel_desk');
-  if(gp) gp.style.display = 'none';
-}
-
-function toggleColorPalette_desk(){
-  const gp = document.getElementById('gifPanel_desk');
-  const cp = document.getElementById('colorPalettePanel_desk');
-  if(gp) gp.style.display = 'none';
-  if(!cp) return;
-  cp.style.display = cp.style.display === 'none' ? 'block' : 'none';
-}
-
-function setChatColor_desk(color, btn){
-  window._chatColor_desk = color;
-  const input = document.getElementById('chatInputSide_desk');
-  if(input) input.style.color = color;
-  const dot = document.getElementById('colorPaletteDot_desk');
-  if(dot) dot.style.background = color;
-  document.querySelectorAll('#colorPalettePanel_desk .color-swatch-btn').forEach(b => b.style.border = '2px solid transparent');
-  if(btn) btn.style.border = '2px solid #fff';
-  const cp = document.getElementById('colorPalettePanel_desk');
-  if(cp) cp.style.display = 'none';
-}
-
-// Laptop sidebar patch'leri — tüm fonksiyonlar yüklendikten sonra
-window.addEventListener('load', function(){
-  // renderChat: laptop sidebar'ını da güncelle
-  const _origRC = window.renderChat;
-  if(typeof _origRC === 'function'){
-    window.renderChat = function(){
-      _origRC.apply(this, arguments);
-      const deskBox = document.getElementById('chatBoxSide_desk');
-      const mobBox  = document.getElementById('chatBoxSide');
-      if(deskBox && mobBox) deskBox.innerHTML = mobBox.innerHTML;
-    };
-  }
-
-  // renderOnlineUsers: laptop online bar'ını da güncelle
-  const _origOU = window.renderOnlineUsers;
-  if(typeof _origOU === 'function'){
-    window.renderOnlineUsers = function(users){
-      _origOU.apply(this, arguments);
-      const deskBar = document.getElementById('onlineUsersBar_desk');
-      const mobBar  = document.getElementById('onlineUsersBar');
-      if(deskBar && mobBar) deskBar.innerHTML = mobBar.innerHTML;
-    };
-  }
-
-  // _applyMuteToInput: laptop input'unu da disable et
-  const _origMute = window._applyMuteToInput;
-  if(typeof _origMute === 'function'){
-    window._applyMuteToInput = function(){
-      _origMute.apply(this, arguments);
-      const inp = document.getElementById('chatInputSide_desk');
-      const btn = document.getElementById('chatSendBtnSide_desk');
-      if(!currentUser || currentUser.role === 'admin') return;
-      const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-      const muted = !!(window._mutedSet && window._mutedSet[key]);
-      if(inp){ inp.disabled = muted; inp.placeholder = muted ? '🔇 Susturuldunuz' : 'Mesaj yaz...'; inp.style.opacity = muted ? '.4' : '1'; }
-      if(btn){ btn.disabled = muted; btn.style.opacity = muted ? '.4' : '1'; }
-    };
-  }
-
-  // _applyBanToInput: laptop input'unu da disable et
-  const _origBan = window._applyBanToInput;
-  if(typeof _origBan === 'function'){
-    window._applyBanToInput = function(){
-      _origBan.apply(this, arguments);
-      const inp = document.getElementById('chatInputSide_desk');
-      const btn = document.getElementById('chatSendBtnSide_desk');
-      if(!currentUser) return;
-      const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-      const banned = !!(window._bannedSet && window._bannedSet[key]);
-      if(inp){ inp.disabled = banned; inp.placeholder = banned ? '🔨 Banlandınız' : 'Mesaj yaz...'; inp.style.opacity = banned ? '.4' : '1'; }
-      if(btn){ btn.disabled = banned; btn.style.opacity = banned ? '.4' : '1'; }
-    };
-  }
-});
 </script>
 
 <script>
