@@ -5758,27 +5758,25 @@ function _initMutedListener(){
 function _applyMuteToInput(){
   if(!currentUser || currentUser.role === 'admin') return;
   const key = currentUser.username.replace(/[.#$\/\[\]]/g,'_');
-  // Sadece Firebase _mutedSet'e bak (en güvenilir kaynak)
   const muted = !!(window._mutedSet && window._mutedSet[key]);
   ['chatInputSide','mobChatInput','chatInput'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
     el.readOnly = muted;
-    el.placeholder = muted ? '\uD83D\uDD07 Susturuldunuz — mesaj g\xF6nderemezsiniz' : 'Mesaj yaz...';
+    el.placeholder = muted ? 'Susturuldunuz' : 'Mesaj yaz...';
     el.style.opacity = muted ? '.35' : '1';
-    el.style.cursor = muted ? 'not-allowed' : '';
-    el.style.pointerEvents = muted ? 'none' : '';
+    el.style.cursor = muted ? 'not-allowed' : 'text';
+    el.style.pointerEvents = muted ? 'none' : 'auto';
     if(muted) el.blur();
   });
-  // Gönder butonlarını da engelle
   ['chatSendBtn','chatSendBtnSide','mobChatSendBtn'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.disabled = muted;
     el.style.opacity = muted ? '.25' : '1';
-    el.style.pointerEvents = muted ? 'none' : '';
-    el.style.cursor = muted ? 'not-allowed' : '';
+    el.style.pointerEvents = muted ? 'none' : 'auto';
+    el.style.cursor = muted ? 'not-allowed' : 'pointer';
   });
 }
 
@@ -5926,6 +5924,14 @@ function sendMobChat(){
         if(btn){ btn.disabled=true; btn.style.opacity='.25'; btn.style.pointerEvents='none'; }
         return;
       }
+      // Susturulmamiş — input'u aç ve mesajı gönder
+      input.disabled = false;
+      input.readOnly = false;
+      input.style.opacity = '1';
+      input.style.pointerEvents = 'auto';
+      input.style.cursor = 'text';
+      const btn2 = document.getElementById('mobChatSendBtn');
+      if(btn2){ btn2.disabled=false; btn2.style.opacity='1'; btn2.style.pointerEvents='auto'; }
       input.value = '';
       const now = new Date();
       const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
