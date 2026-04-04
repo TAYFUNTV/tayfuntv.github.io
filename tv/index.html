@@ -36,21 +36,28 @@ function _startFirebase() {
     firebaseApp = (firebase.apps && firebase.apps.length > 0)
       ? firebase.apps[0]
       : firebase.initializeApp(firebaseConfig);
-    // Platform tespiti: mobil mi laptop mi?
+    // Platform tespiti
     window._platform = (window.innerWidth <= 768) ? 'mobile' : 'desktop';
-    console.log('Platform:', window._platform);
 
-    chatDbRef  = firebase.database().ref('tayfuntv_chat_' + window._platform);
-    onlineRef  = firebase.database().ref('tayfuntv_online_' + window._platform);
+    // Laptop = orijinal ref'ler (tayfuntv_chat, tayfuntv_online, tayfuntv_muted)
+    // Mobil  = ayrı ref'ler (tayfuntv_chat_mobile, tayfuntv_online_mobile, tayfuntv_muted_mobile)
+    if(window._platform === 'mobile'){
+      chatDbRef = firebase.database().ref('tayfuntv_chat_mobile');
+      onlineRef = firebase.database().ref('tayfuntv_online_mobile');
+      window.mutedDbRef = firebase.database().ref('tayfuntv_muted_mobile');
+    } else {
+      chatDbRef = firebase.database().ref('tayfuntv_chat');
+      onlineRef = firebase.database().ref('tayfuntv_online');
+      window.mutedDbRef = firebase.database().ref('tayfuntv_muted');
+    }
     window.usersDbRef  = firebase.database().ref('tayfuntv_users');
     window.bannedDbRef = firebase.database().ref('tayfuntv_banned');
-    window.mutedDbRef  = firebase.database().ref('tayfuntv_muted_' + window._platform);
-    // Admin her iki platformu da görebilsin
-    window.chatDbRefDesktop = firebase.database().ref('tayfuntv_chat_desktop');
-    window.chatDbRefMobile  = firebase.database().ref('tayfuntv_chat_mobile');
-    window.onlineRefDesktop = firebase.database().ref('tayfuntv_online_desktop');
-    window.onlineRefMobile  = firebase.database().ref('tayfuntv_online_mobile');
-    window.mutedDbRefDesktop = firebase.database().ref('tayfuntv_muted_desktop');
+    // Platform ref'leri (admin her ikisini yönetsin)
+    window.chatDbRefDesktop  = firebase.database().ref('tayfuntv_chat');
+    window.chatDbRefMobile   = firebase.database().ref('tayfuntv_chat_mobile');
+    window.onlineRefDesktop  = firebase.database().ref('tayfuntv_online');
+    window.onlineRefMobile   = firebase.database().ref('tayfuntv_online_mobile');
+    window.mutedDbRefDesktop = firebase.database().ref('tayfuntv_muted');
     window.mutedDbRefMobile  = firebase.database().ref('tayfuntv_muted_mobile');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
