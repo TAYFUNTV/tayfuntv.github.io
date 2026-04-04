@@ -5927,10 +5927,11 @@ function sendMobChat(){
 
   // Firebase'den bu kullanıcının muted kaydını anlık oku
   window.mutedDbRef.child(_bKey).once('value').then(snap => {
-    if(snap.exists()){
-      // Susturulmuş — gönderme, input'u kapat
+    const isMuted = snap.exists();
+    // DEBUG: ekranda göster
+    showToast('Firebase kontrol: key=' + _bKey + ' muted=' + isMuted, isMuted ? 'warning' : 'info');
+    if(isMuted){
       window._mutedSet[_bKey] = snap.val();
-      showToast('\uD83D\uDD07 Susturuldunuz, mesaj g\xF6nderemezsiniz.','warning');
       input.value = '';
       input.disabled = true;
       input.readOnly = true;
@@ -5940,14 +5941,13 @@ function sendMobChat(){
       if(btn){ btn.disabled=true; btn.style.opacity='.25'; btn.style.pointerEvents='none'; }
       return;
     }
-    // Susturulmamış — gönder
     delete window._mutedSet[_bKey];
     input.value = '';
     const now = new Date();
     const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
     pushChatMessage({u: displayName, m: msg, t: t2, c: window._mobChatColor||null});
-  }).catch(() => {
-    // Hata olursa yine de gönder
+  }).catch(err => {
+    showToast('Firebase HATA: ' + err.message, 'warning');
     input.value = '';
     const now = new Date();
     const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
