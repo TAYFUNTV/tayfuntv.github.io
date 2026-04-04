@@ -4039,6 +4039,9 @@ function switchMobTab(tab, btn){
     if(chatWrap) chatWrap.style.display = 'flex';
     // Firebase mesajlarını ve çevrimiçi listeyi doğrudan render et
     renderChat();
+    // Susturma / ban durumunu input'a yansıt
+    if(typeof _applyMuteToInput === 'function') _applyMuteToInput();
+    if(typeof _applyBanToInput  === 'function') _applyBanToInput();
   } else {
     if(chatWrap) chatWrap.style.display = 'none';
     if(chList)   chList.style.display   = 'flex';
@@ -5866,9 +5869,11 @@ function sendMobChat(){
     const _banned = (window._bannedSet&&window._bannedSet[_bKey])||!!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[_bKey];
     if(_banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
   }
-  if(_isMuted(displayName)){
+  const muteKey = (currentUser?.username || displayName);
+  if(_isMuted(muteKey)){
     showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
     input.value = '';
+    _applyMuteToInput();
     return;
   }
   input.value = '';
