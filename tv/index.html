@@ -836,7 +836,7 @@ function doLogin(){
     const found = users.find(u => u.username === user && u.password === pass);
     if(!found){ err.textContent = '❌ Kullanıcı adı veya şifre hatalı.'; return; }
     // Ban kontrolü
-    const bKey = user.replace(/[.#$\/\[\]]/g,'_');
+    const bKey = user.replace(/[.#$\/\[\] ]/g,'_');
     const banned = (window._bannedSet && window._bannedSet[bKey]) ||
                    !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[bKey];
     if(banned){ err.textContent = '🔨 Hesabınız banlanmıştır.'; _showBanScreen(); return; }
@@ -878,7 +878,7 @@ function _showBanScreen(){
 
 function _applyBanToInput(){
   if(!currentUser) return;
-  const bKey = (currentUser.username||'').replace(/[.#$\/\[\]]/g,'_');
+  const bKey = (currentUser.username||'').replace(/[.#$\/\[\] ]/g,'_');
   const banned = (window._bannedSet && window._bannedSet[bKey]) ||
                  !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[bKey];
   if(banned) _showBanScreen();
@@ -924,7 +924,7 @@ function renderOnlineUsers(users){
   if(countEl) countEl.textContent = users.length + ' çevrimiçi';
   bar.innerHTML = users.map(u => {
     const isAdmin = u.role === 'admin';
-    const isBanned = window._bannedSet && window._bannedSet[(u.username||'').replace(/[.#$\/\[\]]/g,'_')];
+    const isBanned = window._bannedSet && window._bannedSet[(u.username||'').replace(/[.#$\/\[\] ]/g,'_')];
     const banMark = isBanned ? ' 🔨' : '';
     const muteMark = _isMuted(u.username) ? ' 🔇' : '';
     return `<div class="online-pill ${isAdmin?'admin-pill':''}" 
@@ -1014,13 +1014,13 @@ function _initMutedListener(){
 
 function _isMuted(username){
   if(!username) return false;
-  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const key = username.replace(/[.#$\/\[\] ]/g,'_');
   return !!(window._mutedSet && window._mutedSet[key]);
 }
 
 function _initKickListener(){
   if(!currentUser || !firebaseReady) return;
-  const key = (currentUser.username||'').replace(/[.#$\/\[\]]/g,'_');
+  const key = (currentUser.username||'').replace(/[.#$\/\[\] ]/g,'_');
   firebase.database().ref('tayfuntv_kicks/' + key).on('value', snap => {
     const v = snap.val();
     if(!v) return;
@@ -1140,19 +1140,55 @@ function pushChatMessage(msgObj){
 }
 
 function sendMobChat(){
-  // ── HARD BLOCK: susturulmuş veya banlı kullanıcı hiçbir şekilde gönderemesin ──
-  if(currentUser && _isMuted(currentUser.username)){
-    _shakeMutedBar();
-    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
-    const inp = document.getElementById('mobChatInput');
-    if(inp) inp.value = '';
-    return;
-  }
-
   const input = document.getElementById('mobChatInput');
   if(!input) return;
   const msg = input.value.trim();
   if(!msg) return;
+
+  // HARD BLOCK — önce local cache kontrol, sonra Firebase'den anlık doğrula
+  if(!currentUser){ return; }
+  const _muteKey = currentUser.username.replace(/[.#$\/\[\] ]/g,'_');
+
+  function _doSend(){
+    // Ban kontrolü
+    const bKey = (currentUser.username||'').replace(/[.#$\/\[\] ]/g,'_');
+    const banned = (window._bannedSet && window._bannedSet[bKey]) ||
+                   !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[bKey];
+    if(banned){ showToast('🔨 Banlandınız.','warning'); input.value=''; return; }
+
+    // Kural uyarısı
+    if(!(currentUser.role === 'admin' || currentUser.guest)){
+      if(!localStorage.getItem('chat_accepted') && !chatWarningShown){
+        document.getElementById('chatWarning').style.display = 'flex';
+        chatWarningShown = true;
+        return;
+      }
+    }
+    input.value = '';
+    const now = new Date();
+    const t2 = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    pushChatMessage({ u: currentUser.username, m: msg, t: t2, c: window._mobChatColor||null, role: currentUser.role||'user' });
+  }
+
+  // Firebase varsa anlık kontrol et, yoksa local cache'e bak
+  if(window.mutedDbRef && firebaseReady){
+    window.mutedDbRef.child(_muteKey).once('value', snap => {
+      if(snap.exists()){
+        showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+        input.value = '';
+        _updateInputMuteState();
+        return;
+      }
+      _doSend();
+    });
+  } else {
+    if(_isMuted(currentUser.username)){
+      showToast('🔇 Susturuldunuz.','warning');
+      input.value='';
+      return;
+    }
+    _doSend();
+  }
 
   // Kural uyarısı (admin ve misafire yok)
   if(!(currentUser && (currentUser.role === 'admin' || currentUser.guest))){
@@ -1164,7 +1200,7 @@ function sendMobChat(){
   }
 
   // Ban kontrolü
-  const bKey = (currentUser?.username||'').replace(/[.#$\/\[\]]/g,'_');
+  const bKey = (currentUser?.username||'').replace(/[.#$\/\[\] ]/g,'_');
   const banned = (window._bannedSet && window._bannedSet[bKey]) ||
                  !!JSON.parse(localStorage.getItem('cltv_banned')||'{}')[bKey];
   if(banned){ showToast('🔨 Banlandınız, mesaj gönderemezsiniz.','warning'); input.value=''; _applyBanToInput(); return; }
@@ -1191,6 +1227,7 @@ function _updateInputMuteState(){
   const sendBtn    = document.getElementById('mobChatSendBtn');
   const warningBar = document.getElementById('mutedWarningBar');
   const muted      = _isMuted(currentUser.username);
+  if(muted) showToast('🔇 Susturuldunuz — mesaj gönderemezsiniz.','warning');
 
   if(warningBar) warningBar.style.display = muted ? 'flex' : 'none';
 
@@ -1279,7 +1316,8 @@ function ctxAction(action){
 
 function chatMuteUser(username){
   if(!username || username === _d(window._un)) return;
-  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const key = username.replace(/[.#$\/\[\] ]/g,'_');
+  console.log('[MUTE] username:', username, '| key:', key, '| şu an muted mi:', _isMuted(username));
   if(_isMuted(username)){
     if(window.mutedDbRef && firebaseReady) window.mutedDbRef.child(key).remove();
     const l = JSON.parse(localStorage.getItem('cltv_muted')||'{}');
@@ -1305,7 +1343,7 @@ function chatMuteUser(username){
 function chatKickUser(username){
   if(!username || username === _d(window._un)) return;
   if(!confirm(username + ' kullanıcısını atmak istiyor musunuz?')) return;
-  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const key = username.replace(/[.#$\/\[\] ]/g,'_');
   const kickData = { kickedAt: Date.now(), kickedBy: currentUser.username, reason: 'kick' };
   localStorage.setItem('cltv_kick_' + key, JSON.stringify(kickData));
   if(firebaseReady) firebase.database().ref('tayfuntv_kicks/' + key).set(kickData);
@@ -1316,7 +1354,7 @@ function chatKickUser(username){
 function chatBanUser(username){
   if(!username || username === _d(window._un)) return;
   if(!confirm(username + ' kullanıcısını banlamak istiyor musunuz?')) return;
-  const key = username.replace(/[.#$\/\[\]]/g,'_');
+  const key = username.replace(/[.#$\/\[\] ]/g,'_');
   const banData = { username, bannedAt: Date.now(), bannedBy: currentUser.username };
   if(window.bannedDbRef && firebaseReady) window.bannedDbRef.child(key).set(banData);
   const l = JSON.parse(localStorage.getItem('cltv_banned')||'{}');
