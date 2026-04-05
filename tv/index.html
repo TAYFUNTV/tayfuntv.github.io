@@ -49,14 +49,32 @@ function _startFirebase() {
     window.mutedDbRef  = firebase.database().ref('tayfuntv_muted');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
-    if(typeof _initMutedListener === 'function') _initMutedListener();
+
+    // Firebase hazır olunca banned listesini dinle
     window.bannedDbRef.on('value', snap => {
       window._bannedSet = {};
       snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
       localStorage.setItem('cltv_banned', JSON.stringify(window._bannedSet));
       if(typeof _applyBanToInput === 'function') _applyBanToInput();
       if(typeof renderChat === 'function') renderChat();
+      if(typeof renderOnlineUsers === 'function' && window._lastOnlineUsers) renderOnlineUsers(window._lastOnlineUsers);
     });
+
+    // Firebase hazır olunca muted listesini dinle (en kritik)
+    window.mutedDbRef.on('value', snap => {
+      window._mutedSet = {};
+      snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
+      localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
+      if(typeof _applyMuteToInput === 'function' && currentUser) _applyMuteToInput();
+      if(typeof renderChat === 'function') renderChat();
+      if(typeof renderOnlineUsers === 'function' && window._lastOnlineUsers) renderOnlineUsers(window._lastOnlineUsers);
+    });
+
+    // Eğer kullanıcı zaten giriş yaptıysa kick listener'ı şimdi kur
+    if(currentUser) {
+      _setupKickListener();
+    }
+
     firebase.database().ref('.info/connected').on('value', snap => {
       console.log(snap.val() ? '🟢 Firebase bağlı' : '🔴 Firebase bağlantısı kesildi');
     });
@@ -812,8 +830,8 @@ function _startChat(){
   document.getElementById('chatApp').style.display = 'flex';
   _initOnline();
   _initChatListener();
-  _initMutedListener();
-  _initKickListener();
+  _initMutedListener(); // artık sadece fallback
+  _initKickListener();  // Firebase hazırsa direkt kurar, değilse _startFirebase kurar
   // Ban ve mute durumunu hemen uygula
   _applyBanToInput();
   _applyMuteToInput();
@@ -856,6 +874,7 @@ function _applyMuteToInput(){
 // ═══════════════════════════════════════════
 
 let _lastOnlineUsers = [];
+window._lastOnlineUsers = _lastOnlineUsers;
 let myOnlineKey2 = null;
 
 function _initOnline(){
@@ -871,6 +890,7 @@ function _initOnline(){
     const users = [];
     snap.forEach(ch => { const v = ch.val(); if(v && v.username) users.push(v); });
     _lastOnlineUsers = users;
+    window._lastOnlineUsers = users;
     renderOnlineUsers(users);
   });
 }
@@ -913,16 +933,9 @@ function renderOnlineUsers(users){
 window._mutedSet = {};
 
 function _initMutedListener(){
-  if(!window.mutedDbRef) return;
-  window.mutedDbRef.on('value', snap => {
-    window._mutedSet = {};
-    snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
-    localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-    // Eğer biz susturulduysak/susturma kaldırıldıysa inputu anında güncelle
-    if(currentUser) _applyMuteToInput();
-    renderChat();
-    renderOnlineUsers(_lastOnlineUsers);
-  });
+  // Artık _startFirebase içinde kuruluyor, burada sadece fallback
+  if(!window.mutedDbRef || !firebaseReady) return;
+  // Zaten _startFirebase'de kuruldu, tekrar bağlanma
 }
 
 function _isMuted(username){
@@ -932,14 +945,48 @@ function _isMuted(username){
 }
 
 function _initKickListener(){
+  if(!currentUser) return;
+  if(firebaseReady){
+    _setupKickListener();
+  }
+  // firebaseReady değilse _startFirebase içinde kurulacak
+}
+
+function _setupKickListener(){
   if(!currentUser || !firebaseReady) return;
   const key = (currentUser.username||'').replace(/[.#$\/\[\]]/g,'_');
-  firebase.database().ref('tayfuntv_kicks/' + key).on('value', snap => {
+  const kickRef = firebase.database().ref('tayfuntv_kicks/' + key);
+  // Önce eski kick verisini sil (önceki oturumdan kalmış olabilir)
+  kickRef.once('value', snap => {
     const v = snap.val();
-    if(!v) return;
-    const data = typeof v === 'object' ? v : {};
-    if(data.reason === 'ban'){ _showBanScreen(); }
-    else { doLogout(); showToast('👢 Sohbetten atıldınız.','warning'); }
+    if(v){
+      const data = typeof v === 'object' ? v : {};
+      const kickTime = data.kickedAt || 0;
+      // 10 saniyeden eski kick verisi = eski oturumdan kalma, sil
+      if(Date.now() - kickTime > 10000){
+        kickRef.remove();
+        return;
+      }
+      // Yeni kick — uygula
+      if(data.reason === 'ban'){ _showBanScreen(); }
+      else { doLogout(); showToast('👢 Sohbetten atıldınız.','warning'); }
+      return;
+    }
+    // Kick verisi yoksa gerçek zamanlı dinlemeye başla
+    kickRef.on('value', snap2 => {
+      const v2 = snap2.val();
+      if(!v2) return;
+      const data2 = typeof v2 === 'object' ? v2 : {};
+      if(data2.reason === 'ban'){
+        _showBanScreen();
+      } else {
+        // At işlemi: önce veriyi sil sonra logout
+        kickRef.remove().then(() => {
+          doLogout();
+          showToast('👢 Sohbetten atıldınız.','warning');
+        });
+      }
+    });
   });
 }
 
