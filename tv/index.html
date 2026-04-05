@@ -7786,10 +7786,18 @@ function _pmRoomKey(a, b) {
   return [a, b].map(n => n.replace(/[.#$\/\[\] ]/g,'_')).sort().join('__PM__');
 }
 
-// Admin girişinde 💬 butonunu göster
-function _pmShowBtn() {
+// Admin girişinde 💬 butonunu göster; kullanıcıya PM gelince de göster
+function _pmShowBtn(forceShow) {
   const btn = document.getElementById('pmChatBtn');
-  if(btn) btn.style.display = (currentUser && currentUser.role === 'admin') ? 'flex' : 'none';
+  if(!btn) return;
+  if(currentUser && currentUser.role === 'admin') {
+    btn.style.display = 'flex';
+  } else if(forceShow) {
+    // Kullanıcıya admin mesaj gönderince butonu göster
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+  }
 }
 
 // GIF butonunun yanındaki 💬 toggle
@@ -7804,11 +7812,26 @@ function togglePmPanel() {
     panel.style.display = 'none';
   } else {
     panel.style.display = 'flex';
-    if(!window._pmTarget) {
+    if(window._pmTarget) {
+      // Mevcut sohbeti göster — başlık ve mesajlar zaten yüklü
+      document.getElementById('pmPanelTitle').textContent =
+        (currentUser && currentUser.role !== 'admin' ? '👑 ' : '') + window._pmTarget;
+      document.getElementById('pmPanelDot').style.display = 'inline-block';
+      // Dinleyici hâlâ aktifse mesajlar otomatik gelir, yoksa yeniden kur
+      if(!window._pmDbRef && window._pmRoomKey2 && firebaseReady) {
+        window._pmDbRef = firebase.database().ref('tayfuntv_pm/' + window._pmRoomKey2);
+        window._pmDbRef.limitToLast(80).on('value', snap => {
+          const msgs = [];
+          snap.forEach(ch => msgs.push(ch.val()));
+          _renderPmMessages(msgs);
+        });
+      }
+    } else {
       document.getElementById('pmPanelTitle').textContent = 'Özel Mesaj';
       document.getElementById('pmPanelMessages').innerHTML =
         '<div style="color:#5a6478;font-size:11px;text-align:center;padding:18px 10px;">Bir kullanıcıya sağ tıklayıp<br>💬 Mesaj Gönder\'e basın.</div>';
     }
+    setTimeout(()=>{ const i=document.getElementById('pmPanelInput'); if(i) i.focus(); }, 80);
   }
 }
 
@@ -7909,6 +7932,7 @@ function _pmEsc(s){
 }
 
 // ── Kullanıcı tarafı: admin yazdığında bildirim dinleyici ──
+// Panel açılır, _pmDbRef set edilir → kullanıcı da cevap yazabilir
 function _initPmUserListener() {
   if(!currentUser || currentUser.role === 'admin') return;
   if(!firebaseReady) return;
@@ -7916,21 +7940,32 @@ function _initPmUserListener() {
   firebase.database().ref('tayfuntv_pm_notify/' + uKey).on('value', snap => {
     const data = snap.val();
     if(!data || !data.roomKey) return;
+
+    // Zaten aynı oda açıksa tekrar kurma, sadece görünür yap
     if(window._pmRoomKey2 === data.roomKey) {
       const p = document.getElementById('pmMiniPanel');
-      if(p && p.style.display === 'flex') return;
+      if(p) p.style.display = 'flex';
+      return;
     }
-    window._pmTarget   = data.from;
+
+    // Yeni oda — dinleyiciyi sıfırla
+    if(window._pmDbRef) { window._pmDbRef.off(); window._pmDbRef = null; }
+
+    window._pmTarget   = data.from;   // admin'in adı = kullanıcının hedefi
     window._pmRoomKey2 = data.roomKey;
+
+    // 💬 butonunu kullanıcıya da göster
+    _pmShowBtn(true);
+
+    // Panel'i aç ve başlığı güncelle
     const panel = document.getElementById('pmMiniPanel');
     if(panel) {
       panel.style.display = 'flex';
       document.getElementById('pmPanelTitle').textContent = '👑 ' + data.from;
       document.getElementById('pmPanelDot').style.display = 'inline-block';
-      document.getElementById('pmPanelMessages').innerHTML =
-        '<div style="color:#5a6478;font-size:11px;text-align:center;padding:10px;">Admin sana mesaj gönderdi…</div>';
     }
-    if(window._pmDbRef) { window._pmDbRef.off(); window._pmDbRef = null; }
+
+    // Firebase dinleyicisini kur — mesajlar her iki taraf için ortak
     window._pmDbRef = firebase.database().ref('tayfuntv_pm/' + data.roomKey);
     window._pmDbRef.limitToLast(80).on('value', snap2 => {
       const msgs = [];
