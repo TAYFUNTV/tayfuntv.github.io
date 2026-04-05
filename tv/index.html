@@ -49,7 +49,6 @@ function _startFirebase() {
     window.mutedDbRef  = firebase.database().ref('tayfuntv_muted');
     firebaseReady = true;
     console.log('✅ Firebase bağlantısı kuruldu');
-    if(typeof _initMutedListener === 'function') _initMutedListener();
     window.bannedDbRef.on('value', snap => {
       window._bannedSet = {};
       snap.forEach(ch => { window._bannedSet[ch.key] = ch.val(); });
@@ -855,6 +854,7 @@ function doGuestLogin(){
 function doLogout(){
   _removeOnline();
   currentUser = null;
+  _mutedListenerOn = false; // tekrar giriş için listener'ı sıfırla
   document.getElementById('chatApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginUser').value = '';
@@ -998,14 +998,17 @@ document.addEventListener('click', e => {
 
 window._mutedSet = {};
 
+let _mutedListenerOn = false;
 function _initMutedListener(){
-  if(!window.mutedDbRef) return;
+  if(!window.mutedDbRef || _mutedListenerOn) return;
+  _mutedListenerOn = true;
   window.mutedDbRef.on('value', snap => {
     window._mutedSet = {};
     snap.forEach(ch => { window._mutedSet[ch.key] = ch.val(); });
     localStorage.setItem('cltv_muted', JSON.stringify(window._mutedSet));
-    renderChat();
-    _updateInputMuteState();
+    if(typeof renderChat === 'function') renderChat();
+    if(typeof _updateInputMuteState === 'function') _updateInputMuteState();
+    if(typeof renderOnlineUsers === 'function') renderOnlineUsers(_lastOnlineUsers || []);
   });
 }
 
@@ -1137,6 +1140,15 @@ function pushChatMessage(msgObj){
 }
 
 function sendMobChat(){
+  // ── HARD BLOCK: susturulmuş veya banlı kullanıcı hiçbir şekilde gönderemesin ──
+  if(currentUser && _isMuted(currentUser.username)){
+    _shakeMutedBar();
+    showToast('🔇 Susturuldunuz, mesaj gönderemezsiniz.','warning');
+    const inp = document.getElementById('mobChatInput');
+    if(inp) inp.value = '';
+    return;
+  }
+
   const input = document.getElementById('mobChatInput');
   if(!input) return;
   const msg = input.value.trim();
@@ -1184,15 +1196,17 @@ function _updateInputMuteState(){
 
   if(input){
     input.disabled    = muted;
-    input.placeholder = muted ? '🔇 Susturuldunuz...' : 'Mesaj yaz...';
+    if(muted) input.value = ''; // yazıyı temizle
+    input.placeholder = muted ? '🔇 Susturuldunuz — mesaj gönderemezsiniz' : 'Mesaj yaz...';
     input.style.opacity    = muted ? '0.4' : '1';
     input.style.cursor     = muted ? 'not-allowed' : '';
     input.style.color      = muted ? '#ff6b6b' : '';
-    // Susturulmuş kullanıcı input'a tıklayınca uyarı barı salla
+    input.style.background = muted ? 'rgba(255,100,100,0.06)' : '';
     if(muted){
       input.onclick = () => _shakeMutedBar();
     } else {
       input.onclick = null;
+      input.style.background = '';
     }
   }
   if(sendBtn){
