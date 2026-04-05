@@ -3753,9 +3753,20 @@ function _doLoginSuccess(user){
   // DM bildirim dinleyici (sadece normal kullanıcı)
   setTimeout(function(){ if(typeof window._admDmDinle==='function') window._admDmDinle(); }, 2000);
   // Özel mesaj (PM) dinleyici — kullanıcı için admin bildirimini dinle
-  setTimeout(function(){ if(typeof _initPmUserListener==='function') _initPmUserListener(); }, 1800);
-  // PM butonunu göster (sadece admin)
-  setTimeout(function(){ if(currentUser && currentUser.role==='admin' && typeof _pmShowBtn==='function') _pmShowBtn(true); }, 500);
+  window._pmListening = false;
+  window._pmAdminListening = false;
+  window._pmTarget = null;
+  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
+  window._pmRoomKey2 = null;
+  if(user.role !== 'admin'){
+    setTimeout(function(){ if(typeof _initPmUserListener==='function') _initPmUserListener(); }, 1800);
+  } else {
+    // Admin için hem PM butonunu göster hem bildirim dinleyicisini başlat
+    setTimeout(function(){
+      if(typeof _pmShowBtn==='function') _pmShowBtn(true);
+      if(typeof _initPmAdminListener==='function') _initPmAdminListener();
+    }, 1000);
+  }
   // Mevcut mute/ban durumunu hemen input'lara yansıt
   setTimeout(function(){
     if(typeof _applyMuteToInput==='function') _applyMuteToInput();
@@ -3768,6 +3779,12 @@ function doLogout(){
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
   _banListenerAttached = false;
+  // PM listener'ları sıfırla
+  window._pmListening = false;
+  window._pmAdminListening = false;
+  window._pmTarget = null;
+  window._pmRoomKey2 = null;
+  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
   clearInterval(_kickPollTimer);
   currentUser = null;
   localStorage.removeItem('cltv_remember');
@@ -7886,7 +7903,11 @@ function closePrivateChat() { closePmPanel(); }
 // Firebase dinleyicisini kur
 function _pmAttachListener(roomKey) {
   if(window._pmDbRef) { window._pmDbRef.off(); window._pmDbRef = null; }
-  if(!firebaseReady) return;
+  if(!firebaseReady) {
+    // Firebase henüz hazır değil — 500ms sonra tekrar dene
+    setTimeout(() => { if(window._pmRoomKey2 === roomKey) _pmAttachListener(roomKey); }, 500);
+    return;
+  }
   window._pmDbRef = firebase.database().ref('tayfuntv_pm/' + roomKey);
   window._pmDbRef.limitToLast(80).on('value', snap => {
     const msgs = [];
@@ -7921,13 +7942,15 @@ function openPrivateChat(encodedNick) {
 
 // Mesaj gönder (admin veya kullanıcı)
 function sendPrivateMsg() {
-  // Aktif input'u bul
+  // Aktif input'u bul — hem desktop hem mobil paneli destekle
   const inp1 = document.getElementById('pmPanelInput');
   const inp2 = document.getElementById('mobPmPanelInput');
   let input = null;
-  if(inp1 && inp1.value.trim()) input = inp1;
+  if(inp1 && document.activeElement === inp1 && inp1.value.trim()) input = inp1;
+  else if(inp2 && document.activeElement === inp2 && inp2.value.trim()) input = inp2;
+  else if(inp1 && inp1.value.trim()) input = inp1;
   else if(inp2 && inp2.value.trim()) input = inp2;
-  else input = inp1 || inp2; // boşsa da bir tane seç
+  else input = (inp1 && inp1.offsetParent !== null) ? inp1 : (inp2 || inp1);
 
   const text = (input ? input.value : '').trim();
   if(!text || !window._pmTarget || !currentUser) return;
@@ -7941,8 +7964,28 @@ function sendPrivateMsg() {
     role: currentUser.role || 'user'
   };
 
+  // Eğer _pmDbRef yoksa ama roomKey varsa dinleyiciyi yeniden kur
+  if(firebaseReady && !window._pmDbRef && window._pmRoomKey2) {
+    _pmAttachListener(window._pmRoomKey2);
+    // Kısa bekle sonra gönder
+    setTimeout(() => {
+      if(window._pmDbRef) window._pmDbRef.push(msg);
+    }, 400);
+    return;
+  }
+
   if(firebaseReady && window._pmDbRef) {
     window._pmDbRef.push(msg);
+
+    // Kullanıcı → admin'e bildirim gönder (admin tarafı güncel kalsın)
+    if(currentUser.role !== 'admin' && window._pmTarget) {
+      const adminKey = window._pmTarget.replace(/[.#$\/\[\] ]/g,'_');
+      firebase.database().ref('tayfuntv_pm_notify/' + adminKey).set({
+        from: currentUser.username,
+        roomKey: window._pmRoomKey2,
+        at: Date.now()
+      });
+    }
   } else {
     const arr = JSON.parse(localStorage.getItem('_pmlocal_'+window._pmTarget)||'[]');
     arr.push(msg);
@@ -7975,6 +8018,30 @@ function _pmEsc(s){
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ── Admin tarafı: kullanıcıdan bildirim dinle (kullanıcı cevap yazınca admin yenile) ──
+function _initPmAdminListener() {
+  if(!currentUser || currentUser.role !== 'admin') return;
+  if(window._pmAdminListening) return;
+  if(!firebaseReady) { setTimeout(_initPmAdminListener, 500); return; }
+
+  window._pmAdminListening = true;
+  const adminKey = currentUser.username.replace(/[.#$\/\[\] ]/g,'_');
+
+  firebase.database().ref('tayfuntv_pm_notify/' + adminKey).on('value', snap => {
+    const data = snap.val();
+    if(!data || !data.roomKey) return;
+    // Admin zaten o odayı dinliyorsa tekrar kur gerek yok
+    if(window._pmRoomKey2 === data.roomKey && window._pmDbRef) return;
+    // Farklı oda ya da dinleyici yok — güncelle
+    window._pmTarget   = data.from;
+    window._pmRoomKey2 = data.roomKey;
+    _pmAttachListener(data.roomKey);
+    _pmSetTitle(data.from);
+    _pmShowBtn(true);
+    _pmPanels().forEach(p => { p.style.display = 'flex'; });
+  });
+}
+
 // ── Kullanıcı tarafı: admin bildirimi dinle ──
 // Firebase hazır olmadan önce çağrılırsa tekrar dener
 function _initPmUserListener() {
@@ -7994,9 +8061,11 @@ function _initPmUserListener() {
     const data = snap.val();
     if(!data || !data.roomKey) return;
 
-    // Zaten bu oda açık ve dinleyici kuruluysa sadece paneli göster
+    // Zaten bu oda açık ve dinleyici kuruluysa sadece paneli görünür yap
     if(window._pmRoomKey2 === data.roomKey && window._pmDbRef) {
-      _pmPanels().forEach(p => { p.style.display = 'flex'; });
+      _pmPanels().forEach(p => {
+        if(p.style.display !== 'flex') p.style.display = 'flex';
+      });
       return;
     }
 
