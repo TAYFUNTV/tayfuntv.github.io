@@ -3752,11 +3752,11 @@ function _doLoginSuccess(user){
   setTimeout(_initBanListener, 1300);
   // DM bildirim dinleyici (sadece normal kullanıcı)
   setTimeout(function(){ if(typeof window._admDmDinle==='function') window._admDmDinle(); }, 2000);
-  // Özel mesaj (PM) dinleyici — her girişte sıfırla ve yeniden kur
+  // Özel mesaj (PM) dinleyici
   window._pmListening = false;
   window._pmTarget = null;
-  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
   window._pmRoomKey2 = null;
+  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
   if(user.role !== 'admin'){
     setTimeout(function(){ if(typeof _initPmUserListener==='function') _initPmUserListener(); }, 1800);
   } else {
@@ -3770,13 +3770,6 @@ function _doLoginSuccess(user){
 }
 function doLogout(){
   removeOnlinePresence();
-  // PM sıfırla
-  window._pmListening = false;
-  window._pmTarget = null;
-  window._pmRoomKey2 = null;
-  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
-  _pmPanels().forEach(p => { p.style.display = 'none'; });
-  _pmShowBtn(false);
   // Kick/mute/ban listener'ları sıfırla
   _kickListenerAttached = false;
   _mutedListenerAttached = false;
@@ -7899,7 +7892,10 @@ function closePrivateChat() { closePmPanel(); }
 // Firebase dinleyicisini kur
 function _pmAttachListener(roomKey) {
   if(window._pmDbRef) { window._pmDbRef.off(); window._pmDbRef = null; }
-  if(!firebaseReady) return;
+  if(!firebaseReady) {
+    setTimeout(function(){ _pmAttachListener(roomKey); }, 500);
+    return;
+  }
   window._pmDbRef = firebase.database().ref('tayfuntv_pm/' + roomKey);
   window._pmDbRef.limitToLast(80).on('value', snap => {
     const msgs = [];
@@ -7934,9 +7930,13 @@ function openPrivateChat(encodedNick) {
 
 // Mesaj gönder (admin veya kullanıcı)
 function sendPrivateMsg() {
+  // Aktif input'u bul
   const inp1 = document.getElementById('pmPanelInput');
   const inp2 = document.getElementById('mobPmPanelInput');
-  let input = (inp1 && inp1.value.trim()) ? inp1 : (inp2 && inp2.value.trim()) ? inp2 : (inp1 || inp2);
+  let input = null;
+  if(inp1 && inp1.value.trim()) input = inp1;
+  else if(inp2 && inp2.value.trim()) input = inp2;
+  else input = inp1 || inp2; // boşsa da bir tane seç
 
   const text = (input ? input.value : '').trim();
   if(!text || !window._pmTarget || !currentUser) return;
@@ -7950,23 +7950,13 @@ function sendPrivateMsg() {
     role: currentUser.role || 'user'
   };
 
-  function _doSend() {
-    if(firebaseReady && window._pmDbRef) {
-      window._pmDbRef.push(msg);
-    } else {
-      const arr = JSON.parse(localStorage.getItem('_pmlocal_'+window._pmTarget)||'[]');
-      arr.push(msg);
-      localStorage.setItem('_pmlocal_'+window._pmTarget, JSON.stringify(arr));
-      _renderPmMessages(arr);
-    }
-  }
-
-  // _pmDbRef yoksa önce dinleyiciyi kur, sonra gönder
-  if(firebaseReady && !window._pmDbRef && window._pmRoomKey2) {
-    _pmAttachListener(window._pmRoomKey2);
-    setTimeout(_doSend, 300);
+  if(firebaseReady && window._pmDbRef) {
+    window._pmDbRef.push(msg);
   } else {
-    _doSend();
+    const arr = JSON.parse(localStorage.getItem('_pmlocal_'+window._pmTarget)||'[]');
+    arr.push(msg);
+    localStorage.setItem('_pmlocal_'+window._pmTarget, JSON.stringify(arr));
+    _renderPmMessages(arr);
   }
 }
 
@@ -8012,20 +8002,15 @@ function _initPmUserListener() {
     const data = snap.val();
     if(!data || !data.roomKey) return;
 
-    // roomKey değişmemişse sadece paneli göster ve dbRef'i garantile
-    if(window._pmRoomKey2 === data.roomKey) {
-      if(!window._pmDbRef) _pmAttachListener(data.roomKey);
-      _pmPanels().forEach(p => { p.style.display = 'flex'; });
-      return;
-    }
-
-    // Yeni oda — her şeyi güncelle
     window._pmTarget   = data.from;
     window._pmRoomKey2 = data.roomKey;
 
-    _pmShowBtn(true);
-    _pmOpenPanels('\uD83D\uDC51 ' + data.from);
+    // Her zaman _pmDbRef'i yeniden kur
     _pmAttachListener(data.roomKey);
+
+    // Butonu göster ve paneli aç
+    _pmShowBtn(true);
+    _pmOpenPanels('\u{1F451} ' + data.from);
   });
 }
 </script>
