@@ -3753,14 +3753,11 @@ function _doLoginSuccess(user){
   // DM bildirim dinleyici (sadece normal kullanıcı)
   setTimeout(function(){ if(typeof window._admDmDinle==='function') window._admDmDinle(); }, 2000);
   // Özel mesaj (PM) dinleyici
-  window._pmListening = false;
-  window._pmTarget = null;
-  window._pmRoomKey2 = null;
-  if(window._pmDbRef){ window._pmDbRef.off(); window._pmDbRef = null; }
+  if(_pmRef){ _pmRef.off(); _pmRef = null; }
   if(user.role !== 'admin'){
-    setTimeout(function(){ if(typeof _initPmUserListener==='function') _initPmUserListener(); }, 1800);
+    setTimeout(function(){ _initPmUserListener(); }, 1500);
   } else {
-    setTimeout(function(){ if(typeof _pmShowBtn==='function') _pmShowBtn(true); }, 500);
+    setTimeout(function(){ _pmShowBtn(true); }, 500);
   }
   // Mevcut mute/ban durumunu hemen input'lara yansıt
   setTimeout(function(){
@@ -7805,18 +7802,15 @@ window.addEventListener('load', ()=>{
 <script>
 // ══════════════════════════════════════════════════════
 //  ÖZEL MESAJ SİSTEMİ  (Admin ↔ Kullanıcı)
-//  Hem Desktop hem Mobil chat panelini destekler
 // ══════════════════════════════════════════════════════
-window._pmTarget    = null;
-window._pmDbRef     = null;
-window._pmRoomKey2  = null;
-window._pmListening = false;
+
+var _pmRef = null;  // Firebase referansı — chatDbRef gibi
 
 function _pmRoomKey(a, b) {
-  return [a, b].map(n => n.replace(/[.#$\/\[\] ]/g,'_')).sort().join('__PM__');
+  return [a, b].map(function(n){ return n.replace(/[.#$\/\[\] ]/g,'_'); }).sort().join('__PM__');
 }
 
-// Hem desktop hem mobil panelleri döndürür
+// PM panellerini göster/gizle
 function _pmPanels() {
   return [
     document.getElementById('pmMiniPanel'),
@@ -7824,193 +7818,137 @@ function _pmPanels() {
   ].filter(Boolean);
 }
 
-// İki panel için aynı anda başlık/dot güncelle
-function _pmSetTitle(title) {
-  const t1 = document.getElementById('pmPanelTitle');
-  const t2 = document.getElementById('mobPmPanelTitle');
-  if(t1) t1.textContent = title;
-  if(t2) t2.textContent = title;
-  const d1 = document.getElementById('pmPanelDot');
-  const d2 = document.getElementById('mobPmPanelDot');
-  if(d1) d1.style.display = 'inline-block';
-  if(d2) d2.style.display = 'inline-block';
-}
-
-// 💬 butonunu göster/gizle (admin her zaman, kullanıcı bildirim gelince)
 function _pmShowBtn(show) {
-  ['pmChatBtn','mobPmChatBtn'].forEach(id => {
-    const b = document.getElementById(id);
+  ['pmChatBtn','mobPmChatBtn'].forEach(function(id){
+    var b = document.getElementById(id);
     if(b) b.style.display = show ? 'flex' : 'none';
   });
 }
 
-// Panel aç (her iki paneli de)
-function _pmOpenPanels(title) {
-  _pmSetTitle(title);
-  _pmPanels().forEach(p => { p.style.display = 'flex'; });
-  // GIF panellerini kapat
-  ['gifPanel','mobGifPanel'].forEach(id => {
-    const g = document.getElementById(id);
-    if(g) g.style.display = 'none';
-  });
-  // Input'a fokus
-  setTimeout(()=>{
-    const inp = document.getElementById('pmPanelInput') || document.getElementById('mobPmPanelInput');
-    if(inp) inp.focus();
-  }, 80);
-}
-
-// Toggle — GIF butonunun yanındaki 💬'ye basınca
-function togglePmPanel() {
-  const anyOpen = _pmPanels().some(p => p.style.display === 'flex');
-  if(anyOpen) {
-    _pmPanels().forEach(p => { p.style.display = 'none'; });
-    return;
-  }
-  // Aç
-  if(window._pmTarget) {
-    _pmOpenPanels((currentUser && currentUser.role !== 'admin' ? '👑 ' : '') + window._pmTarget);
-    // Dinleyici düşmüşse yeniden kur
-    if(!window._pmDbRef && window._pmRoomKey2 && firebaseReady) {
-      _pmAttachListener(window._pmRoomKey2);
-    }
-  } else {
-    _pmOpenPanels('Özel Mesaj');
-    const box1 = document.getElementById('pmPanelMessages');
-    const box2 = document.getElementById('mobPmPanelMessages');
-    const msg = '<div style="color:#5a6478;font-size:11px;text-align:center;padding:18px 10px;">Bir kullanıcıya sağ tıklayıp<br>💬 Mesaj Gönder\'e basın.</div>';
-    if(box1) box1.innerHTML = msg;
-    if(box2) box2.innerHTML = msg;
-  }
-}
-
-function closePmPanel() {
-  _pmPanels().forEach(p => { p.style.display = 'none'; });
-}
-function closePrivateChat() { closePmPanel(); }
-
-// Firebase dinleyicisini kur
-function _pmAttachListener(roomKey) {
-  if(window._pmDbRef) { window._pmDbRef.off(); window._pmDbRef = null; }
-  if(!firebaseReady) {
-    setTimeout(function(){ _pmAttachListener(roomKey); }, 500);
-    return;
-  }
-  window._pmDbRef = firebase.database().ref('tayfuntv_pm/' + roomKey);
-  window._pmDbRef.limitToLast(80).on('value', snap => {
-    const msgs = [];
-    snap.forEach(ch => msgs.push(ch.val()));
-    _renderPmMessages(msgs);
-  });
-}
-
-// Admin → sağ tık veya pill menüsünden açar
-function openPrivateChat(encodedNick) {
-  if(!currentUser || currentUser.role !== 'admin') return;
-  const targetNick = decodeURIComponent(encodedNick);
-  if(targetNick === currentUser.username) return;
-
-  window._pmTarget = targetNick;
-  const roomKey = _pmRoomKey(currentUser.username, targetNick);
-  window._pmRoomKey2 = roomKey;
-
-  _pmOpenPanels(targetNick);
-
-  // Firebase dinleyicisi
-  _pmAttachListener(roomKey);
-
-  // Kullanıcıya bildirim gönder (Firebase)
-  if(firebaseReady) {
-    const uKey = targetNick.replace(/[.#$\/\[\] ]/g,'_');
-    firebase.database().ref('tayfuntv_pm_notify/' + uKey).set({
-      from: currentUser.username, roomKey, at: Date.now()
-    });
-  }
-}
-
-// Mesaj gönder (admin veya kullanıcı)
-function sendPrivateMsg() {
-  // Aktif input'u bul
-  const inp1 = document.getElementById('pmPanelInput');
-  const inp2 = document.getElementById('mobPmPanelInput');
-  let input = null;
-  if(inp1 && inp1.value.trim()) input = inp1;
-  else if(inp2 && inp2.value.trim()) input = inp2;
-  else input = inp1 || inp2; // boşsa da bir tane seç
-
-  const text = (input ? input.value : '').trim();
-  if(!text || !window._pmTarget || !currentUser) return;
-  if(input) { input.value = ''; input.focus(); }
-
-  const msg = {
-    from: currentUser.username,
-    to:   window._pmTarget,
-    text: text,
-    at:   Date.now(),
-    role: currentUser.role || 'user'
-  };
-
-  if(firebaseReady && window._pmDbRef) {
-    window._pmDbRef.push(msg);
-  } else {
-    const arr = JSON.parse(localStorage.getItem('_pmlocal_'+window._pmTarget)||'[]');
-    arr.push(msg);
-    localStorage.setItem('_pmlocal_'+window._pmTarget, JSON.stringify(arr));
-    _renderPmMessages(arr);
-  }
-}
-
-// Mesajları her iki panele yendir
-function _renderPmMessages(msgs) {
-  const html = (!msgs || !msgs.length)
-    ? '<div style="color:#5a6478;font-size:11px;text-align:center;padding:12px;">Henüz mesaj yok.</div>'
-    : msgs.map(m => {
-        const isSent = m.from === (currentUser && currentUser.username);
-        const t = new Date(m.at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
-        return `<div class="pm-bubble ${isSent?'pm-sent':'pm-recv'}">
-          <div class="pm-nick">${isSent?'Sen':_pmEsc(m.from)}</div>
-          <div>${_pmEsc(m.text)}</div>
-          <div class="pm-time">${t}</div>
-        </div>`;
-      }).join('');
-
-  ['pmPanelMessages','mobPmPanelMessages'].forEach(id => {
-    const box = document.getElementById(id);
-    if(box) { box.innerHTML = html; box.scrollTop = box.scrollHeight; }
-  });
+function _pmSetTitle(title) {
+  var t1 = document.getElementById('pmPanelTitle');
+  var t2 = document.getElementById('mobPmPanelTitle');
+  if(t1) t1.textContent = title;
+  if(t2) t2.textContent = title;
 }
 
 function _pmEsc(s){
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Kullanıcı tarafı: admin bildirimi dinle ──
-// Firebase hazır olmadan önce çağrılırsa tekrar dener
-function _initPmUserListener() {
-  if(!currentUser || currentUser.role === 'admin') return;
-  if(window._pmListening) return;
+function _pmRenderMessages(msgs) {
+  var html = (!msgs || !msgs.length)
+    ? '<div style="color:#5a6478;font-size:11px;text-align:center;padding:12px;">Henüz mesaj yok.</div>'
+    : msgs.map(function(m){
+        var isSent = m.from === (currentUser && currentUser.username);
+        var t = new Date(m.at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+        return '<div class="pm-bubble ' + (isSent?'pm-sent':'pm-recv') + '">'
+          + '<div class="pm-nick">' + (isSent?'Sen':_pmEsc(m.from)) + '</div>'
+          + '<div>' + _pmEsc(m.text) + '</div>'
+          + '<div class="pm-time">' + t + '</div>'
+          + '</div>';
+      }).join('');
 
+  ['pmPanelMessages','mobPmPanelMessages'].forEach(function(id){
+    var box = document.getElementById(id);
+    if(box){ box.innerHTML = html; box.scrollTop = box.scrollHeight; }
+  });
+}
+
+// Firebase PM odasını dinle — chatDbRef.on('value') ile aynı
+function _pmConnect(roomKey) {
+  if(_pmRef) { _pmRef.off(); _pmRef = null; }
   if(!firebaseReady) {
-    setTimeout(_initPmUserListener, 500);
+    setTimeout(function(){ _pmConnect(roomKey); }, 600);
     return;
   }
+  _pmRef = firebase.database().ref('tayfuntv_pm/' + roomKey);
+  _pmRef.limitToLast(80).on('value', function(snap){
+    var msgs = [];
+    snap.forEach(function(ch){ msgs.push(ch.val()); });
+    _pmRenderMessages(msgs);
+  });
+}
 
-  window._pmListening = true;
-  const uKey = currentUser.username.replace(/[.#$\/\[\] ]/g,'_');
+// Admin sağ tıklayıp "Mesaj Gönder" dediğinde
+function openPrivateChat(encodedNick) {
+  if(!currentUser || currentUser.role !== 'admin') return;
+  var targetNick = decodeURIComponent(encodedNick);
+  if(targetNick === currentUser.username) return;
 
-  firebase.database().ref('tayfuntv_pm_notify/' + uKey).on('value', snap => {
-    const data = snap.val();
+  var roomKey = _pmRoomKey(currentUser.username, targetNick);
+
+  // Başlığı ayarla ve paneli aç
+  _pmSetTitle(targetNick);
+  _pmPanels().forEach(function(p){ p.style.display = 'flex'; });
+
+  // Firebase odasını bağla
+  _pmConnect(roomKey);
+
+  // Kullanıcıya bildirim yaz — kullanıcı bunu okuyunca paneli açar
+  if(firebaseReady) {
+    var uKey = targetNick.replace(/[.#$\/\[\] ]/g,'_');
+    firebase.database().ref('tayfuntv_pm_notify/' + uKey).set({
+      from: currentUser.username,
+      roomKey: roomKey,
+      at: Date.now()
+    });
+  }
+
+  // Gönder inputuna odaklan
+  setTimeout(function(){
+    var inp = document.getElementById('pmPanelInput') || document.getElementById('mobPmPanelInput');
+    if(inp) inp.focus();
+  }, 100);
+}
+
+// Mesaj gönder — her iki taraf da kullanır
+function sendPrivateMsg() {
+  var inp1 = document.getElementById('pmPanelInput');
+  var inp2 = document.getElementById('mobPmPanelInput');
+  var input = (inp1 && inp1.value.trim()) ? inp1 : inp2;
+  var text = input ? input.value.trim() : '';
+  if(!text || !currentUser || !_pmRef) return;
+  input.value = '';
+  input.focus();
+  _pmRef.push({
+    from: currentUser.username,
+    text: text,
+    at: Date.now(),
+    role: currentUser.role || 'user'
+  });
+}
+
+// Paneli kapat
+function closePmPanel() {
+  _pmPanels().forEach(function(p){ p.style.display = 'none'; });
+}
+function closePrivateChat() { closePmPanel(); }
+
+// Toggle butonu
+function togglePmPanel() {
+  var anyOpen = _pmPanels().some(function(p){ return p.style.display === 'flex'; });
+  if(anyOpen) { closePmPanel(); } else { _pmPanels().forEach(function(p){ p.style.display = 'flex'; }); }
+}
+
+// Kullanıcı giriş yapınca bu çalışır — admin bildirimini dinle
+function _initPmUserListener() {
+  if(!currentUser || currentUser.role === 'admin') return;
+  if(!firebaseReady) { setTimeout(_initPmUserListener, 600); return; }
+
+  var uKey = currentUser.username.replace(/[.#$\/\[\] ]/g,'_');
+
+  firebase.database().ref('tayfuntv_pm_notify/' + uKey).on('value', function(snap){
+    var data = snap.val();
     if(!data || !data.roomKey) return;
 
-    window._pmTarget   = data.from;
-    window._pmRoomKey2 = data.roomKey;
-
-    // Her zaman _pmDbRef'i yeniden kur
-    _pmAttachListener(data.roomKey);
+    // Firebase odasını bağla
+    _pmConnect(data.roomKey);
 
     // Butonu göster ve paneli aç
     _pmShowBtn(true);
-    _pmOpenPanels('\u{1F451} ' + data.from);
+    _pmSetTitle('\uD83D\uDC51 ' + data.from);
+    _pmPanels().forEach(function(p){ p.style.display = 'flex'; });
   });
 }
 </script>
