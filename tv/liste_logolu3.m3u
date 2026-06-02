@@ -410,3 +410,5 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://nextiptv.pro:8080/alper
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsfamily/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",BYZ BOX AKSIYON
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinemaaksiyon2/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",SINEMA YERLI 2
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinemayerli2/index.m3u8
