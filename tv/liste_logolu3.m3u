@@ -381,8 +381,8 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/box3/ind
 #EXTINF:-1 group-title="SİNEMA",SINEMA AILE
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemaaile/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA AKSIYON
-https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemaaksiyon/index.m3u8
-#EXTINF:-1 group-title="SİNEMA",SINEMA KOMEDI
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsaction1/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",SINEMA KOMEDI 2
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinemakomedi/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA TV
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/sinema1001/index.m3u8
