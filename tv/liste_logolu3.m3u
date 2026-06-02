@@ -412,3 +412,5 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsfam
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinemaaksiyon2/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SINEMA YERLI 2
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinemayerli2/index.m3u8
+#EXTINF:-1 group-title="SİNEMA",BIZ CINEMA
+https://bstelevision.com/proxy.php?mode=proxy&url=https://fl.biztv.media/cinema_720_EMfSyXgoRdiIHgldXTZICucKTIeCKO/tracks-v1a1/mono.m3u8
