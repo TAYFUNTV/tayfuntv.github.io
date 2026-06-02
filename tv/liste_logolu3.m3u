@@ -406,3 +406,5 @@ https://catcast.ismailturret.workers.dev/fanatikmaxyesilcam.m3u8
 https://catcast.ismailturret.workers.dev/fanatikprimebizimkiler.m3u8
 #EXTINF:-1 group-title="SİNEMA",BONCUK TV
 https://bstelevision.com/proxy.php?mode=proxy&url=http://nextiptv.pro:8080/alperen01/alperen01/229
+#EXTINF:-1 group-title="SİNEMA",COCUK SMART
+https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/bsfamily/index.m3u8
