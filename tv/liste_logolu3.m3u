@@ -346,7 +346,7 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/disco
 #EXTINF:-1 group-title="BELGESEL",EDSTAFFORD BELGESEL 7/24
 https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="BELGESEL",DMAX
-https://bstelevision.com/proxy.php?mode=proxy&url=http://dygvideo.dygdigital.com/live/hls/dmaxdai?m3u8
+https://dogus.daioncdn.net/dmax/dmax_720p.m3u8?token=RWJtNmsxSEE5YXI5aWVvdVU0NlcyMjhaTFZXRy84cWcxWEZra3ZIV0pnND0=&sid=7u9skhbfndzh&app=5a02c599-d17e-4982-9b04-090934d51af7&ce=3
 #EXTINF:-1 group-title="BELGESEL",TLC
 https://bstelevision.com/proxy.php?mode=proxy&url=http://dygvideo.dygdigital.com/live/hls/tlctvdai?m3u8
 #EXTINF:-1 group-title="BELGESEL",WORLD FISHING NETWORK
