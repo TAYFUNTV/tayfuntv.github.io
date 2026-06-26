@@ -10,32 +10,8 @@ https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/ht-spor/ht-spor.m3u8
 #EXTINF:-1 group-title="SPOR",EKOL SPORTS
 https://ekoltv-live.ercdn.net/ekolsport/ekolsport_1080p.m3u8
-#EXTINF:-1 group-title="SPOR",SPORTSTV
-https://live.sportstv.saatteknoloji.com.tr/hls/low/sportstv_hd/index.m3u8
 #EXTINF:-1 group-title="SPOR",FB TV HD
 https://fbtv.fenerbahce.org/fenerbahcetv.stream/chunklist.m3u8
-#EXTINF:-1 group-title="SPOR",SIFIR TV
-https://ahr7chck.rocketcdn.com/sifirtv.stream/chunklist.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivetb.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 1
-https://iaqzu4szhtzeqd0edpsayinle.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 2
-https://klublsslubcgyiz7zqt5bz8il.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 3
-https://ujnf69op16x2fiiywxcnx41q8.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 4
-https://bfxy3jgeydpbphtk8qfqwm3hr.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 5
-https://z3mmimwz148csv0vaxtphqspf.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 6
-https://vbtob9hyq58eiophct5qctxr2.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",TABI SPOR 7
-https://rxnE77JupTdEYKE3TytvGQWYh.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="SPOR",CBC SPORT
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivecbcs.m3u8
-#EXTINF:-1 group-title="SPOR",NBA TV
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivenba.m3u8
 #EXTINF:-1 group-title="SPOR",TJK TV 1
 https://tjktv-live.tjk.org/tjktv.m3u8
 #EXTINF:-1 group-title="SPOR",TJK TV 2
@@ -44,48 +20,8 @@ https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8
 https://duhnet.hipodrom.com/S2/HLS_LIVE/mislitaynp/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",MTRSPT1
 https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 1 4K
-https://tinyurl.com/Fiat-linea-multijet/yula/ceydub1.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 1
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs1.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 2 4K
-https://tinyurl.com/Fiat-linea-multijet/yula/ceydub2.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 2
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs2.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 3 4K
-https://tinyurl.com/Fiat-linea-multijet/yula/ceydub3.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 3
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs3.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 4 4K
-https://tinyurl.com/Fiat-linea-multijet/yula/ceydub4.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 4
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs4.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 5 4K
-https://tinyurl.com/Fiat-linea-multijet/Emu/androstreamlivebs5.m3u8
-#EXTINF:-1 group-title="SPOR",BEIN SPORT 5
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivebs5.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 
 https://tinyurl.com/Fiat-linea-multijet/Emu/androstreamlivets.m3u8
-#EXTINF:-1 group-title="SPOR",TIVIBUSPOR 1
-https://bstelevision.com/proxy.php?mode=proxy&url=https://trn03.tulix.tv/gt-tivibuspor1/index.m3u8
-#EXTINF:-1 group-title="SPOR",TIVIBUSPOR 2
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets2.m3u8
-#EXTINF:-1 group-title="SPOR",TIVIBUSPOR 3
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets3.m3u8
-#EXTINF:-1 group-title="SPOR",TIVIBUSPOR 4
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivets4.m3u8
-#EXTINF:-1 group-title="SPOR",S SPORT 1
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivess1.m3u8
-#EXTINF:-1 group-title="SPOR",S SPORT 2
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivess2.m3u8
-#EXTINF:-1 group-title="SPOR",SPORSMART 1
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivesm1.m3u8
-#EXTINF:-1 group-title="SPOR",SPORSMART 2
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivesm2.m3u8
-#EXTINF:-1 group-title="SPOR",EUROSPORT 1
-https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivees1.m3u8
-#EXTINF:-1 group-title="SPOR",EUROSPORT 2
-https://bstelevision.com/proxy.php?mode=proxy&url=https://api.codetabs.com/v1/proxy/?quest=https://andro.2385437.xyz/checklist/androstreamlivees2.m3u8
 #EXTINF:-1 group-title="SPOR",FIGHT BOX HD
 https://bstelevision.com/proxy.php?mode=proxy&url=http://iptv.prosto.tv:7000/ch118/video.m3u8
 #EXTINF:-1 group-title="SPOR",DAZN CONBAT
