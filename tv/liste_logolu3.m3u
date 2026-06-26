@@ -134,8 +134,6 @@ https://live.artidijitalmedya.com/artidijital_tivi6/tivi6/playlist.m3u8
 https://live.artidijitalmedya.com/artidijital_tontv/tontv/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",TV 41
 https://live.artidijitalmedya.com/artidijital_tv41/tv41/playlist.m3u8
-#EXTINF:-1 group-title="YEREL",TV 48
-https://ajansplay.com:5443/LiveApp/streams/tv48.m3u8
 #EXTINF:-1 group-title="YEREL",URFA NATIK TV
 https://live.artidijitalmedya.com/artidijital_urfanatiktv/urfanatiktv/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",VUSLAT TV
@@ -150,8 +148,6 @@ https://live.euromediacenter.com/hurtv/tracks-v1a1/mono.m3u8
 https://live.euromediacenter.com/brukselturk/tracks-v1a1/mono.m3u8
 #EXTINF:-1 group-title="YEREL",ALANYA POSTA TV
 https://api-tv3.yayin.com.tr/postatv/postatv/playlist.m3u8
-#EXTINF:-1 group-title="YEREL",TV NET
-https://mn-nl.mncdn.com/tvnet/tvnet/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",BRT 1
 https://edge.kuzeykibrissmart.tv/brt1hd/bant1/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",DENIZ POSTASI TV
@@ -162,8 +158,6 @@ https://live.artidijitalmedya.com/artidijital_etv/etv/playlist.m3u8
 https://turkmedya-live.ercdn.net/tv4/tv4_720p.m3u8
 #EXTINF:-1 group-title="YEREL",TV24
 https://turkmedya-live.ercdn.net/tv24/tv24_720p.m3u8
-#EXTINF:-1 group-title="YEREL",LIDER HABER
-https://liderhaber.han686314.workers.dev/?url=https://lidertv.radyotelekom.com.tr/player/m3u8/9217b6e91d17c38f7d171eb2b3670349/chunklist_w1214941309.m3u8
 #EXTINF:-1 group-title="YEREL",AS TV
 https://live.artidijitalmedya.com/artidijital_astv/astv/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",FINANS TURK
@@ -236,13 +230,8 @@ https://yayin.slowkaradeniztv.com:3390/hybrid/play.m3u8
 https://bstelevision.com/proxy.php?mode=proxy&url=https://raw.githubusercontent.com/UzunMuhalefet/streams/main/myvideo-az/tmb-tv.m3u8
 #EXTINF:-1 group-title="YEREL",TV 1
 https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/tv1/bant1/chunks.m3u8
-#EXTINF:-1 group-title="YEREL",TV DEN
-http://canli.tvden.com.tr/hls/live.m3u8
 #EXTINF:-1 group-title="YEREL",TV 52
 https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/tv52/bant1/playlist.m3u8
-#EXTINF:-1 group-title="YEREL",BIR TV
-https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/birtv/bant1/playlist.m3u8
-
 ############ BELGESEL ############
 #EXTINF:-1 group-title="BELGESEL",NATIONAL GEOGRAPHIC
 https://saran-live.ercdn.net/natgeohd/index.m3u8
