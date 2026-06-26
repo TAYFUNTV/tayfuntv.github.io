@@ -233,22 +233,8 @@ https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/t
 #EXTINF:-1 group-title="YEREL",TV 52
 https://bstelevision.com/proxy.php?mode=proxy&url=https://edge1.socialsmart.tv/tv52/bant1/playlist.m3u8
 ############ BELGESEL ############
-#EXTINF:-1 group-title="BELGESEL",NATIONAL GEOGRAPHIC
-https://saran-live.ercdn.net/natgeohd/index.m3u8
-#EXTINF:-1 group-title="BELGESEL",NATIONAL GEOGRAPHIC WILD
-https://saran-live.ercdn.net/natgeowild/index.m3u8
-#EXTINF:-1 group-title="BELGESEL",BBC EARTH
-https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/bbc/index.m3u8
-#EXTINF:-1 group-title="BELGESEL",VIASAT HISTORY
-https://mss.ayakkabiparti.lol/viasathistory/index.m3u8
 #EXTINF:-1 group-title="BELGESEL",TRT BELGESEL
 https://tv-trtbelgesel.medya.trt.com.tr/master_720.m3u8
-#EXTINF:-1 group-title="BELGESEL",TARIH TV
-https://mss.ayakkabiparti.lol/tarihtv/index.m3u8
-#EXTINF:-1 group-title="BELGESEL",GZT TV
-https://mn-nl.mncdn.com/gzttv/gzttv/playlist.m3u8
-#EXTINF:-1 group-title="BELGESEL",CGTN BELGESEL
-https://mn-nl.mncdn.com/dogusdyg_drone/cgtn/playlist.m3u8
 #EXTINF:-1 group-title="BELGESEL",CIFTCI TV
 https://live.artidijitalmedya.com/artidijital_ciftcitv/ciftcitv/playlist.m3u8
 #EXTINF:-1 group-title="BELGESEL",NATURE TIME
@@ -259,12 +245,8 @@ https://content.tvkur.com/l/c7e1da7mm25p552d9u9g/index-1080p.m3u8
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/docubox/index.m3u8
 #EXTINF:-1 group-title="BELGESEL",DISCOVERY
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/discovery/index.m3u8
-#EXTINF:-1 group-title="BELGESEL",EDSTAFFORD BELGESEL 7/24
-https://catcast.ismailturret.workers.dev/fanatikprimeEdStafford.m3u8
 #EXTINF:-1 group-title="BELGESEL",DMAX
 https://dogus.daioncdn.net/dmax/dmax_720p.m3u8?token=RWJtNmsxSEE5YXI5aWVvdVU0NlcyMjhaTFZXRy84cWcxWEZra3ZIV0pnND0=&sid=7u9skhbfndzh&app=5a02c599-d17e-4982-9b04-090934d51af7&ce=3
-#EXTINF:-1 group-title="BELGESEL",TLC
-https://bstelevision.com/proxy.php?mode=proxy&url=http://dygvideo.dygdigital.com/live/hls/tlctvdai?m3u8
 #EXTINF:-1 group-title="BELGESEL",WORLD FISHING NETWORK
 https://d3b3ldcvgsu291.cloudfront.net/v1/master/9d062541f2ff39b5c0f48b743c6411d25f62fc25/DistroTV-MuxIP-WFN/477.m3u8
 #EXTINF:-1 group-title="BELGESEL",OFFSHORE FISHING
