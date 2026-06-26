@@ -247,8 +247,6 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207/docubox/
 https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/discovery/index.m3u8
 #EXTINF:-1 group-title="BELGESEL",WORLD FISHING NETWORK
 https://d3b3ldcvgsu291.cloudfront.net/v1/master/9d062541f2ff39b5c0f48b743c6411d25f62fc25/DistroTV-MuxIP-WFN/477.m3u8
-#EXTINF:-1 group-title="BELGESEL",OFFSHORE FISHING
-https://30a-tv.com/darcizzle.m3u8?wowzasessionid=inspiration
 #EXTINF:-1 group-title="BELGESEL",H2O TV
 https://linear-738.frequency.stream/mt/sportstribaltv/738/hls/master/playlist.m3u8
 #EXTINF:-1 group-title="BELGESEL",HUNT FISH TV
