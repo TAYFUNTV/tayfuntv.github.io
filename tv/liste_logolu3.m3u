@@ -274,3 +274,5 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://65.108.239.207:80/sinem
 https://bstelevision.com/proxy.php?mode=proxy&url=https://nord.ayakkabiparti.lol/mvturk/index.m3u8
 #EXTINF:-1 group-title="SİNEMA",SIRIUS TV
 https://bstelevision.com/proxy.php?mode=proxy&url=https://raw.githubusercontent.com/Elvin4K/restream/refs/heads/pro4k/1siriustv.m3u8
+#EXTINF:-1 group-title="SİNEMA",MOVIE SMART TURK
+https://bstelevision.com/proxy.php?mode=proxy&url=http://c3921155.edmonst.net/iptv/AVNFCNQBEC9VQU/6811/index.m3u8
