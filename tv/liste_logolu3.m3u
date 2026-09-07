@@ -1,5 +1,7 @@
 #EXTM3U
 ############ SPOR ############
+#EXTINF:-1 group-title="SPOR",SPORT TV
+http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/ZEEDV4QP6HVZU3YXP49H3ECB/31926/index.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR
 https://tv-trtspor1.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR YILDIZ
@@ -18,14 +20,10 @@ https://tjktv-live.tjk.org/tjktv.m3u8
 https://tjktv-live.tjk.org/tjktv2/tjktv2.m3u8
 #EXTINF:-1 group-title="SPOR",TAY TV
 https://duhnet.hipodrom.com/S2/HLS_LIVE/mislitaynp/playlist.m3u8
-#EXTINF:-1 group-title="SPOR",MTRSPT1
-https://amg02873-kravemedia-mtrspt1-distrotv-mnsrl.amagi.tv/playlist/amg02873-kravemedia-mtrspt1-distrotv/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",TIVIBUSPOR 
 https://tinyurl.com/Fiat-linea-multijet/Emu/androstreamlivets.m3u8
 #EXTINF:-1 group-title="SPOR",FIGHT BOX HD
 https://bstelevision.com/proxy.php?mode=proxy&url=http://iptv.prosto.tv:7000/ch118/video.m3u8
-#EXTINF:-1 group-title="SPOR",DAZN CONBAT
-https://dazn-combat-rakuten.amagi.tv/hls/amagi_hls_data_rakutenAA-dazn-combat-rakuten/CDN/master.m3u8
 #EXTINF:-1 group-title="SPOR",KOZOOM TV
 https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01743-sportstribal-kozoom-sportstribal/playlist.m3u8
 #EXTINF:-1 group-title="SPOR",BILLIARDS TV
@@ -73,8 +71,6 @@ https://tele1-live.ercdn.net/tele1/tele1.m3u8
 https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv_1080p.m3u8
 #EXTINF:-1 group-title="ULUSAL",EKOL TV
 https://ekoltv-live.ercdn.net/ekoltv/ekoltv.m3u8
-#EXTINF:-1 group-title="ULUSAL",BENGUTURK
-https://tv.ensonhaber.com/benguturk/benguturk_720p.m3u8
 #EXTINF:-1 group-title="ULUSAL",CNN TURK
 https://sweet-truth-729d.han686314.workers.dev/?url=https://helga.iptv2022.com/cnn_turk/index.m3u8
 #EXTINF:-1 group-title="ULUSAL",TBMM TV
@@ -90,6 +86,8 @@ https://tatatam.trt1sultanfatihss.workers.dev/http://dogus.daioncdn.net/ntv/ntv_
 #EXTINF:-1 group-title="ULUSAL",TABII TV
 https://bstelevision.com/proxy.php?mode=proxy&url=https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8
 ############ YEREL ############
+#EXTINF:-1 group-title="ULUSAL",BENGUTURK
+https://tv.ensonhaber.com/benguturk/benguturk_720p.m3u8
 #EXTINF:-1 group-title="YEREL",KANAL 3
 https://live.artidijitalmedya.com/artidijital_kanal3/kanal3/playlist.m3u8
 #EXTINF:-1 group-title="YEREL",KANAL 12
