@@ -1,5 +1,7 @@
 #EXTM3U
 ############ SPOR ############
+#EXTINF:-1 group-title="SPOR",BEIN SPORTS 1
+https://sharelink.anonimltc.workers.dev/g/k99q4m.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR
 https://tv-trtspor1.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR YILDIZ
