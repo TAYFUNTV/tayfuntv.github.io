@@ -1,7 +1,5 @@
 #EXTM3U
 ############ SPOR ############
-#EXTINF:-1 group-title="SPOR",SPORT TV
-http://sewv654wfcsdwfi87fwvgbngh.siauliairsavlt.pw/iptv/ZEEDV4QP6HVZU3YXP49H3ECB/31926/index.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR
 https://tv-trtspor1.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 group-title="SPOR",TRT SPOR YILDIZ
@@ -31,14 +29,6 @@ https://9a81dd4ee3884d0dbcacafaf0d81327a.mediatailor.us-east-1.amazonaws.com/v1/
 ############ ULUSAL ############
 #EXTINF:-1 group-title="ULUSAL",TRT 1
 https://tv-trt1.medya.trt.com.tr/master_720.m3u8
-#EXTINF:-1 group-title="ULUSAL",TRT 2
-https://tv-trt2.medya.trt.com.tr/master_720.m3u8
-#EXTINF:-1 group-title="ULUSAL",TRT TURK
-https://tv-trtturk.medya.trt.com.tr/master_720.m3u8
-#EXTINF:-1 group-title="ULUSAL",TRT AVAZ
-https://tv-trtavaz.medya.trt.com.tr/master.m3u8
-#EXTINF:-1 group-title="ULUSAL",TRT EBA
-https://tv-e-okul01.medya.trt.com.tr/master.m3u8
 #EXTINF:-1 group-title="ULUSAL",NOW TV
 https://uycyyuuzyh.turknet.ercdn.net/nphindgytw/nowtv/nowtv.m3u8
 #EXTINF:-1 group-title="ULUSAL",HALK TV
@@ -65,20 +55,14 @@ https://tv-trthaber.medya.trt.com.tr/master.m3u8
 https://kanal7-live.daioncdn.net/kanal7/kanal7_1080p.m3u8
 #EXTINF:-1 group-title="ULUSAL",TV360
 https://turkmedya-live.ercdn.net/tv360/tv360_720p.m3u8
-#EXTINF:-1 group-title="ULUSAL",TELE 1
-https://tele1-live.ercdn.net/tele1/tele1.m3u8
 #EXTINF:-1 group-title="ULUSAL",SHOW TV
 https://rmtftbjlne.turknet.ercdn.net/bpeytmnqyp/showtv/showtv_1080p.m3u8
 #EXTINF:-1 group-title="ULUSAL",EKOL TV
 https://ekoltv-live.ercdn.net/ekoltv/ekoltv.m3u8
 #EXTINF:-1 group-title="ULUSAL",CNN TURK
 https://sweet-truth-729d.han686314.workers.dev/?url=https://helga.iptv2022.com/cnn_turk/index.m3u8
-#EXTINF:-1 group-title="ULUSAL",TBMM TV
-https://meclistv-live.ercdn.net/meclistv/meclistv.m3u8
 #EXTINF:-1 group-title="ULUSAL",KANAL D
 https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8
-#EXTINF:-1 group-title="ULUSAL",ULKE TV
-https://livetv.radyotvonline.net/kanal7live/ulketv/playlist.m3u8
 #EXTINF:-1 group-title="ULUSAL",STAR TV
 https://dygvideo.dygdigital.com/live/hls/startv4puhu
 #EXTINF:-1 group-title="ULUSAL",NTV
@@ -86,6 +70,18 @@ https://tatatam.trt1sultanfatihss.workers.dev/http://dogus.daioncdn.net/ntv/ntv_
 #EXTINF:-1 group-title="ULUSAL",TABII TV
 https://bstelevision.com/proxy.php?mode=proxy&url=https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8
 ############ YEREL ############
+#EXTINF:-1 group-title="ULUSAL",ULKE TV
+https://livetv.radyotvonline.net/kanal7live/ulketv/playlist.m3u8
+#EXTINF:-1 group-title="ULUSAL",TRT 2
+https://tv-trt2.medya.trt.com.tr/master_720.m3u8
+#EXTINF:-1 group-title="ULUSAL",TRT TURK
+https://tv-trtturk.medya.trt.com.tr/master_720.m3u8
+#EXTINF:-1 group-title="ULUSAL",TRT AVAZ
+https://tv-trtavaz.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 group-title="ULUSAL",TRT EBA
+https://tv-e-okul01.medya.trt.com.tr/master.m3u8
+#EXTINF:-1 group-title="ULUSAL",TBMM TV
+https://meclistv-live.ercdn.net/meclistv/meclistv.m3u8
 #EXTINF:-1 group-title="ULUSAL",BENGUTURK
 https://tv.ensonhaber.com/benguturk/benguturk_720p.m3u8
 #EXTINF:-1 group-title="YEREL",KANAL 3
