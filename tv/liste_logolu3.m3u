@@ -1,5 +1,7 @@
 #EXTM3U
 ############ SPOR ############
+#EXTINF:-1 group-title="SPOR",S SPORT 1
+https://andro.226503.xyz/checklist/androstreamlivess1.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORTS 4
 https://sharelink.anonimltc.workers.dev/g/gfmgyy.m3u8
 #EXTINF:-1 group-title="SPOR",BEIN SPORTS 3
@@ -272,5 +274,3 @@ https://bstelevision.com/proxy.php?mode=proxy&url=http://162.212.179.32/akamaiss
 https://bstelevision.com/proxy.php?mode=proxy&url=http://162.212.179.32/akamaissh101/ssh101/ymdanstv/chunks.m3u8
 #EXTINF:-1 group-title="SİNEMA",F MAX
 https://bstelevision.com/proxy.php?mode=proxy&url=http://162.212.179.32/akamaissh101/ssh101/kanalfmax/chunks.m3u8
-#EXTINF:-1 group-title="SPOR",S SPORT 1
-https://bstelevision.com/proxy.php?mode=proxy&url=https://andro.226503.xyz/checklist/androstreamlivess1.m3u8
