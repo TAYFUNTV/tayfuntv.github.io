@@ -57,6 +57,8 @@ https://ackaxsqacw.turknet.ercdn.net/ozfkfbbjba/kanald/kanald.m3u8
 https://dygvideo.dygdigital.com/live/hls/startv4puhu
 #EXTINF:-1 group-title="ULUSAL",NTV
 https://tatatam.trt1sultanfatihss.workers.dev/http://dogus.daioncdn.net/ntv/ntv_1080p.m3u8?&sid=80w9wzo5qso1&app=7c4bb802-0c41-409e-8cd2-799984995694&ce=3
+#EXTINF:-1 group-title="ULUSAL",TABII TV
+https://ceokzokgtd.erbvr.com/tabiitv/tabiitv.m3u8
 ############ YEREL ############
 #EXTINF:-1 group-title="ULUSAL",ULKE TV
 https://livetv.radyotvonline.net/kanal7live/ulketv/playlist.m3u8
@@ -205,8 +207,6 @@ https://amg00090-blueantmedia-naturetime-samsungfr-yakbf.amagi.tv/playlist/amg00
 https://content.tvkur.com/l/c7e1da7mm25p552d9u9g/index-1080p.m3u8
 #EXTINF:-1 group-title="BELGESEL",HUNT FISH TV
 https://amg00585-sportstribal-amg00585c3-sportstribal-emea-2177.playouts.now.amagi.tv/playlist/amg00585-sportstribaltvfast-huntfishtv-sportstribalemea/playlist.m3u8
-#EXTINF:-1 group-title="BELGESEL",TLC
-http://176.65.153.66:6001/play/a01v/index.m3u8
 ############ SİNEMA ############
 #EXTINF:-1 group-title="SİNEMA",SDM SINEMA TV
 https://host.onlineradyotv.net:8081/sdmtv/index.m3u8
